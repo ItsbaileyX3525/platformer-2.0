@@ -36,13 +36,6 @@ func _physics_process(delta):
 	
 	if Input.is_action_just_pressed("jump") && is_on_floor():
 		velocity.y = -jumpForce
-
-	if Input.is_action_just_pressed("move_left"):
-		rightChonk.visible=false
-		leftChonk.visible=true
-	if Input.is_action_just_pressed("move_right"):
-		rightChonk.visible=true
-		leftChonk.visible=false
 		
 	var hDirection = Input.get_axis("move_left", "move_right") 
 	
@@ -50,7 +43,7 @@ func _physics_process(delta):
 	
 	move_and_slide()
 
-	if Input.is_key_pressed(KEY_A):
+	if Input.is_action_pressed("move_right"):
 		if !leftChonkAnim.is_playing():
 			idleAnim.stop()
 			leftChonk.visible = true
@@ -58,7 +51,7 @@ func _physics_process(delta):
 			rightChonkAnim.stop()
 			rightChonk.visible = false
 			idleChonk.visible = false
-	elif Input.is_key_pressed(KEY_D):
+	elif Input.is_action_pressed("move_right"):
 		if !rightChonkAnim.is_playing():
 			idleAnim.stop()
 			leftChonk.visible = false
