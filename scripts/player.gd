@@ -11,10 +11,22 @@ extends CharacterBody2D
 @onready var rightChonkAnim = $ChonkyRight/AnimationPlayer
 @onready var rightChonk = $ChonkyRight
 @onready var deathCounter = $RichTextLabel
+@onready var transition = $ColorRect
+@onready var transitionText = $RichTextLabel2
 
 var deaths = 0
 var fixedTimestep = 1/60
 var timer = 0.0
+
+func show_transition():
+	transition.visible=true
+	transitionText.visible=true
+	gravity=0
+
+func hide_transition():
+	transition.visible=false
+	transitionText.visible=false
+	gravity=30
 
 func  step() -> void:
 	if !is_on_floor():
@@ -42,8 +54,16 @@ func _physics_process(delta):
 	velocity.x = speed * hDirection
 	
 	move_and_slide()
-
-	if Input.is_action_pressed("move_right"):
+	
+	if Input.is_action_pressed("move_right") && Input.is_action_pressed("move_left"):
+		if !idleAnim.is_playing():
+			idleAnim.play("idle")
+			leftChonkAnim.stop()
+			rightChonkAnim.stop()
+			idleChonk.visible = true
+			rightChonk.visible=false
+			leftChonk.visible=false
+	elif Input.is_action_pressed("move_left"):
 		if !leftChonkAnim.is_playing():
 			idleAnim.stop()
 			leftChonk.visible = true
