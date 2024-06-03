@@ -6,6 +6,8 @@ const Level1Scene = preload("res://scenes/level_1.tscn")
 
 @onready var levelTimer = $NextLevel
 @onready var levelCompleteSFX = $LevelComplete
+@onready var PlayerLayer = $Player
+@onready var background = $Background
 
 var Player: Node2D
 var Tutorial: Node2D
@@ -40,15 +42,29 @@ func loadLevel(whichLevel: int) -> void:
 func _ready() -> void:
 	Player = PlayerNode.instantiate()
 	Tutorial = TutorialScene.instantiate()
-	add_child(Player)
+	PlayerLayer.add_child(Player)
 	Player.position = Vector2(26, 516)
-	Tutorial.init(Player) # Allows the player to be passed into the tutorial script to be modified 
+	Tutorial.init(Player)
 	add_child(Tutorial)
 	Tutorial.position = Vector2(0,0)
 
 	finishedLoading = true
-
+	
+	#DiscordRPC.app_id = 1247248712359739444 # Application ID
+	#DiscordRPC.details = "Jumping from platform to platform"
+	#DiscordRPC.large_image = "https://cdn.discordapp.com/app-assets/1247248712359739444/1247251657406943333.png"
+	#DiscordRPC.large_image_text = "Chonky - Platformer"
+	#DiscordRPC.small_image = "https://cdn.discordapp.com/app-assets/1247248712359739444/1247261773778911252.png"
+#
+	#DiscordRPC.start_timestamp = int(Time.get_unix_time_from_system())
+#
+#
+	#DiscordRPC.refresh()
 func _process(delta: float) -> void:
+	#DiscordRPC.run_callbacks()
+	if Player:
+		background.position.x = Player.position.x
+		background.position.y = Player.position.y - 310
 	if finishedLoading:
 		if is_instance_valid(Tutorial):
 			if !FinishedTutorial and Tutorial.NextLevel  and not loadedLevel1:
