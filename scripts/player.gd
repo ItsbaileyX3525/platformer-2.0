@@ -3,6 +3,7 @@ extends CharacterBody2D
 @export var speed = 300
 @export var gravity = 30
 @export var jumpForce = 600
+@export var deathBarrier: Node2D
 
 @onready var idleChonk = $IdleChonky
 @onready var idleAnim = $IdleChonky/AnimationPlayer
@@ -13,6 +14,7 @@ extends CharacterBody2D
 @onready var deathCounter = $RichTextLabel
 @onready var transition = $ColorRect
 @onready var transitionText = $RichTextLabel2
+@onready var deathSFX = $Death
 
 var deaths = 0
 var fixedTimestep = 1/60
@@ -33,10 +35,11 @@ func  step() -> void:
 		velocity.y += gravity
 		if velocity.y > 750:
 			velocity.y = 750
-			
-	if position.y > 1250:
-		position.y = -350
+	print(position.y)
+	if position.y > 1900:
+		position.y = -250
 		deaths+=1
+		deathSFX.play()
 		deathCounter.text = "Deaths: %s" % deaths
 		position.x = 0
 

@@ -44,6 +44,8 @@ func _ready() -> void:
 	Player.position = Vector2(26, 516)
 	Tutorial.init(Player) # Allows the player to be passed into the tutorial script to be modified 
 	add_child(Tutorial)
+	Tutorial.position = Vector2(0,0)
+
 	finishedLoading = true
 
 func _process(delta: float) -> void:

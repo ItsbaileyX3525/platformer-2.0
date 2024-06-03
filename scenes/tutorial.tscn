@@ -150,18 +150,18 @@ scale = Vector2(4.62954, 2.29973)
 [node name="Sprite2D" type="Sprite2D" parent="Floor1"]
 texture_repeat = 2
 position = Vector2(-99.7549, -12)
-scale = Vector2(0.2, 0.815)
+scale = Vector2(0.373385, 0.815)
 texture = ExtResource("1_p0q82")
 centered = false
 region_enabled = true
-region_rect = Rect2(-303.438, 0, 999.618, 30)
+region_rect = Rect2(-0.666664, 0, 536.044, 30)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Floor1"]
 position = Vector2(0, 0.25)
 shape = SubResource("RectangleShape2D_ixbxt")
 
 [node name="Floor2" type="StaticBody2D" parent="."]
-position = Vector2(2067.52, 623.266)
+position = Vector2(2065.16, 576.639)
 scale = Vector2(7.80605, 2.3)
 
 [node name="Sprite2D" type="Sprite2D" parent="Floor2"]
@@ -175,7 +175,6 @@ region_rect = Rect2(-303.438, 0, 999.618, 30)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Floor2"]
 position = Vector2(0, 0.250031)
-scale = Vector2(1, 1)
 shape = SubResource("RectangleShape2D_ixbxt")
 
 [node name="RichTextLabel" type="RichTextLabel" parent="."]
@@ -212,14 +211,14 @@ libraries = {
 autoplay = "move_loop"
 
 [node name="Trigger" type="Area2D" parent="."]
-position = Vector2(1293, 407)
+position = Vector2(1305.55, 360.621)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Trigger"]
 position = Vector2(-1.5, 60)
 shape = SubResource("RectangleShape2D_d7ndh")
 
 [node name="FinishFlag" parent="." instance=ExtResource("5_65eei")]
-position = Vector2(1965.41, 576.049)
+position = Vector2(1971.32, 528.832)
 
 [connection signal="body_entered" from="Trigger" to="RichTextLabel" method="_on_trigger_body_entered"]
 [connection signal="body_entered" from="FinishFlag" to="RichTextLabel" method="_on_finish_flag_body_entered"]
