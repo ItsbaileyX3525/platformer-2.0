@@ -3,11 +3,14 @@
 [ext_resource type="Texture2D" uid="uid://bu045o3410bfi" path="res://assets/blocks/Flag.png" id="1_s3lft"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_4oc0b"]
+size = Vector2(20, 20.6553)
 
 [node name="FinishFlag" type="Area2D"]
 scale = Vector2(1.877, 1.877)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(0, 0.32765)
+scale = Vector2(1, 1)
 shape = SubResource("RectangleShape2D_4oc0b")
 
 [node name="Sprite2D" type="Sprite2D" parent="."]

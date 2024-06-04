@@ -1,4 +1,4 @@
-[gd_scene load_steps=26 format=3 uid="uid://dqy88vwfqyhr0"]
+[gd_scene load_steps=28 format=3 uid="uid://dqy88vwfqyhr0"]
 
 [ext_resource type="PackedScene" uid="uid://bxyoisbqmd8r8" path="res://scenes/MovingPlatform.tscn" id="1_8m30w"]
 [ext_resource type="Texture2D" uid="uid://cshf2fo6eg1mk" path="res://assets/blocks/grass_dirt.png" id="1_gg5tq"]
@@ -7,6 +7,24 @@
 [ext_resource type="Texture2D" uid="uid://do33at3qja57i" path="res://assets/blocks/levers/InactiveLever.png" id="5_exk0t"]
 [ext_resource type="Texture2D" uid="uid://c3vg56nocjuvq" path="res://assets/graphics/PointDown.png" id="6_5wcfb"]
 [ext_resource type="Texture2D" uid="uid://dnd4hm520cijq" path="res://assets/graphics/MouseAndXButton.png" id="7_q757h"]
+[ext_resource type="PackedScene" uid="uid://buv6650ugxxq5" path="res://scenes/finish_flag.tscn" id="8_s7lp5"]
+
+[sub_resource type="GDScript" id="GDScript_ifgnb"]
+script/source = "extends Node2D
+
+@export var Player = CharacterBody2D
+@export var NextLevel = false
+
+func init(body: CharacterBody2D) -> void:
+	Player = body
+
+func nextScene() -> void:
+	NextLevel = true
+
+
+func _on_finish_flag_body_shape_entered(body_rid, body, body_shape_index, local_shape_index):
+	nextScene()
+"
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_cyw15"]
 size = Vector2(175.872, 24.4259)
@@ -221,6 +239,7 @@ _data = {
 
 [node name="Level1" type="Node2D"]
 scale = Vector2(1.6556, 1.6556)
+script = SubResource("GDScript_ifgnb")
 
 [node name="Floor1" type="StaticBody2D" parent="."]
 position = Vector2(197.511, 625.151)
@@ -374,11 +393,25 @@ position = Vector2(2410.61, 414.351)
 scale = Vector2(4.24359, 7.9203)
 texture = ExtResource("6_5wcfb")
 
+[node name="LevelName" type="RichTextLabel" parent="."]
+offset_left = 49.5289
+offset_top = 254.893
+offset_right = 3131.53
+offset_bottom = 1014.89
+scale = Vector2(0.05, 0.05)
+theme_override_colors/default_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/normal_font_size = 600
+text = "Level 1"
+scroll_active = false
+
 [node name="RichTextLabel" type="RichTextLabel" parent="."]
-offset_left = 2261.42
+offset_left = 2240.88
 offset_top = 521.261
-offset_right = 2279.42
-offset_bottom = 553.261
+offset_right = 2695.88
+offset_bottom = 937.261
+scale = Vector2(0.05, 0.05)
+theme_override_colors/default_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/normal_font_size = 300
 text = ":P"
 scroll_active = false
 
@@ -387,4 +420,8 @@ position = Vector2(2847.91, 483.813)
 scale = Vector2(1.43489, 1.43489)
 texture = ExtResource("7_q757h")
 
+[node name="FinishFlag" parent="." instance=ExtResource("8_s7lp5")]
+position = Vector2(3345.01, 559.918)
+
 [connection signal="body_shape_entered" from="Lever" to="." method="_on_lever_body_shape_entered"]
+[connection signal="body_shape_entered" from="FinishFlag" to="." method="_on_finish_flag_body_shape_entered"]

@@ -36,7 +36,21 @@ func show_transition():
 func hide_transition():
 	transition.visible=false
 	transitionText.visible=false
+	position.y = -350
+	position.x = 0
 	gravity=30
+
+func Death(newPos: Vector2) -> void:
+	position = newPos
+	deaths+=1
+	deathSFX.play()
+	deathCounter.text = "Deaths: %s" % deaths
+	#if deaths == 1:
+		#DiscordRPC.state = "Died 1 time."
+	#else:
+		#DiscordRPC.state = "Died %s times." % deaths
+	#DiscordRPC.refresh()
+	
 
 func  step() -> void:
 	if !is_on_floor():
@@ -44,16 +58,7 @@ func  step() -> void:
 		if velocity.y > 750:
 			velocity.y = 750
 	if position.y > 1900:
-		position.y = -250
-		deaths+=1
-		deathSFX.play()
-		deathCounter.text = "Deaths: %s" % deaths
-		position.x = 0
-		#if deaths == 1:
-			#DiscordRPC.state = "Died 1 time."
-		#else:
-			#DiscordRPC.state = "Died %s times." % deaths
-		#DiscordRPC.refresh()
+		Death(Vector2(0,250))
 
 func _physics_process(delta):
 	timer += delta
@@ -129,3 +134,12 @@ func _on_interact_pressed() -> void:
 
 func _on_interact_released() -> void:
 	Input.action_release("click")
+
+func _on_menu_pressed():
+	Input.action_press("pause")
+
+func _on_menu_released():
+	Input.action_release("pause")
+
+func _on_touch_screen_button_pressed():
+	get_tree().quit()

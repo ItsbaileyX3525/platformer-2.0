@@ -1,4 +1,4 @@
-[gd_scene load_steps=19 format=3 uid="uid://h3i5gc0ryenh"]
+[gd_scene load_steps=20 format=3 uid="uid://h3i5gc0ryenh"]
 
 [ext_resource type="Script" path="res://scripts/player.gd" id="1_8bgxb"]
 [ext_resource type="Texture2D" uid="uid://da2ohsntu2lc6" path="res://assets/player/idle.png" id="2_nw4x5"]
@@ -9,6 +9,7 @@
 [ext_resource type="Texture2D" uid="uid://cxftyuvnmuvcc" path="res://assets/graphics/AButton.png" id="8_cdale"]
 [ext_resource type="Texture2D" uid="uid://c2arlclb0kqa6" path="res://assets/controls/RightArrow.png" id="8_xlcoa"]
 [ext_resource type="Texture2D" uid="uid://drltavv2gvjwh" path="res://assets/graphics/XButton.png" id="9_i276c"]
+[ext_resource type="Texture2D" uid="uid://bac88jqg1upis" path="res://assets/Menu.png" id="10_02dc5"]
 
 [sub_resource type="Animation" id="Animation_c4pcb"]
 length = 0.001
@@ -118,8 +119,10 @@ script = ExtResource("1_8bgxb")
 [node name="RichTextLabel" type="RichTextLabel" parent="."]
 offset_left = -573.0
 offset_top = -513.0
-offset_right = 575.0
-offset_bottom = -473.0
+offset_right = 22033.0
+offset_bottom = 649.0
+scale = Vector2(0.05, 0.05)
+theme_override_font_sizes/normal_font_size = 500
 text = "Deaths: 0"
 
 [node name="ChonkyLeft" type="Sprite2D" parent="."]
@@ -175,12 +178,13 @@ color = Color(0, 0, 0, 1)
 
 [node name="RichTextLabel2" type="RichTextLabel" parent="."]
 visible = false
-offset_left = -155.488
-offset_top = -222.561
-offset_right = 133.512
-offset_bottom = -173.561
+offset_left = -134.146
+offset_top = -269.512
+offset_right = 6072.85
+offset_bottom = 2176.49
+scale = Vector2(0.05, 0.05)
 theme_override_colors/default_color = Color(1, 1, 1, 1)
-theme_override_font_sizes/normal_font_size = 35
+theme_override_font_sizes/normal_font_size = 1000
 text = "Level Complete!"
 fit_content = true
 
@@ -210,6 +214,40 @@ position = Vector2(22.2222, -30.9259)
 scale = Vector2(0.518519, 0.518519)
 texture_normal = ExtResource("9_i276c")
 
+[node name="Menu" type="TouchScreenButton" parent="MobileControls"]
+position = Vector2(-2.77789, -150.555)
+scale = Vector2(6.3111, 4.2814)
+texture_normal = ExtResource("10_02dc5")
+
+[node name="Menu2" type="CanvasGroup" parent="."]
+position = Vector2(-215.854, -454.878)
+scale = Vector2(3.58537, 4.41463)
+
+[node name="ColorRect" type="ColorRect" parent="Menu2"]
+offset_right = 40.0
+offset_bottom = 40.0
+scale = Vector2(3, 3)
+color = Color(0.0588235, 0.0588235, 0.0588235, 0.227451)
+
+[node name="RichTextLabel" type="RichTextLabel" parent="Menu2"]
+offset_left = 31.0
+offset_right = 1286.0
+offset_bottom = 431.0
+scale = Vector2(0.05, 0.05)
+theme_override_font_sizes/normal_font_size = 300
+text = "Paused"
+
+[node name="TouchScreenButton" type="TouchScreenButton" parent="Menu2"]
+position = Vector2(47.2789, 95.0276)
+scale = Vector2(1.35912, 1.35912)
+
+[node name="RichTextLabel" type="RichTextLabel" parent="Menu2/TouchScreenButton"]
+offset_right = 415.0
+offset_bottom = 193.0
+scale = Vector2(0.05, 0.05)
+theme_override_font_sizes/normal_font_size = 150
+text = "Quit"
+
 [connection signal="pressed" from="MobileControls/Left" to="." method="_on_left_pressed"]
 [connection signal="released" from="MobileControls/Left" to="." method="_on_left_released"]
 [connection signal="pressed" from="MobileControls/Right" to="." method="_on_right_pressed"]
@@ -218,3 +256,6 @@ texture_normal = ExtResource("9_i276c")
 [connection signal="released" from="MobileControls/Jump" to="." method="_on_jump_released"]
 [connection signal="pressed" from="MobileControls/Interact" to="." method="_on_interact_pressed"]
 [connection signal="released" from="MobileControls/Interact" to="." method="_on_interact_released"]
+[connection signal="pressed" from="MobileControls/Menu" to="." method="_on_menu_pressed"]
+[connection signal="released" from="MobileControls/Menu" to="." method="_on_menu_released"]
+[connection signal="pressed" from="Menu2/TouchScreenButton" to="." method="_on_touch_screen_button_pressed"]

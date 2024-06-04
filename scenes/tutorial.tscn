@@ -74,10 +74,10 @@ func _process(delta):
 				state+=1
 				spaceClick.visible=false
 				mouseClick.visible=false
-				position = Vector2(512,394)
+				position = Vector2(512,320)
 				text=\"Here is a moving platform. It is what it is, it's a platform that moves.\"
 				tween = create_tween()
-				tween.tween_property(self, \"visible_ratio\", 1.0, 1.8).from(0.0)
+				tween.tween_property(self, \"visible_ratio\", 1.0, 2.8).from(0.0)
 				movingPlatform.collisionEnabled = true
 				movingPlatform.spriteVisible = true
 
@@ -178,12 +178,12 @@ position = Vector2(0, 0.250031)
 shape = SubResource("RectangleShape2D_ixbxt")
 
 [node name="RichTextLabel" type="RichTextLabel" parent="."]
-offset_left = 42.0
-offset_top = 394.0
-offset_right = 370.0
-offset_bottom = 544.0
+offset_top = 328.159
+offset_right = 9644.0
+offset_bottom = 4353.16
+scale = Vector2(0.05, 0.05)
 theme_override_colors/default_color = Color(0, 0, 0, 1)
-theme_override_font_sizes/normal_font_size = 22
+theme_override_font_sizes/normal_font_size = 700
 bbcode_enabled = true
 text = "Welcome to the game!"
 script = SubResource("GDScript_djako")

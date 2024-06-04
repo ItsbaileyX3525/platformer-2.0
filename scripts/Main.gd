@@ -3,6 +3,7 @@ extends Node2D
 const PlayerNode = preload("res://scenes/player.tscn")
 const TutorialScene = preload("res://scenes/tutorial.tscn")
 const Level1Scene = preload("res://scenes/level_1.tscn")
+const Level2Scene = preload("res://scenes/level_2.tscn")
 
 @onready var levelTimer = $NextLevel
 @onready var levelCompleteSFX = $LevelComplete
@@ -12,11 +13,14 @@ const Level1Scene = preload("res://scenes/level_1.tscn")
 var Player: Node2D
 var Tutorial: Node2D
 var Level1: Node2D
+var Level2: Node2D
 var goingTo = 1
 
 var finishedLoading = false
 var FinishedTutorial = false
+var FinishedLevel1 = false
 var loadedLevel1 = false
+var loadedLevel2 = false
 
 func _on_next_level_timeout() -> void:
 	levelTimer.stop()
@@ -30,13 +34,26 @@ func _on_next_level_timeout() -> void:
 			Level1 = Level1Scene.instantiate()
 			add_child(Level1)
 			Player.hide_transition()
-
+		2:
+			if is_instance_valid(Level1):
+				Level1.queue_free() 
+				print("Freed")
+			else:
+				print("Tried freeing Tutorial")
+			Level2 = Level2Scene.instantiate()
+			add_child(Level2)
+			Player.hide_transition()
 func loadLevel(whichLevel: int) -> void:
 	match whichLevel:
 		1:
 			Player.show_transition()
 			levelCompleteSFX.play()
 			goingTo = 1
+			levelTimer.start()
+		2:
+			Player.show_transition()
+			levelCompleteSFX.play()
+			goingTo = 2
 			levelTimer.start()
 
 func _ready() -> void:
@@ -70,3 +87,7 @@ func _process(delta: float) -> void:
 			if !FinishedTutorial and Tutorial.NextLevel  and not loadedLevel1:
 				loadLevel(1)
 				loadedLevel1 = true
+		if is_instance_valid(Level1):
+			if !FinishedLevel1 and Level1.NextLevel and not loadedLevel2:
+				loadLevel(2)
+				loadedLevel2 = true
