@@ -11,22 +11,38 @@ extends CharacterBody2D
 @onready var leftChonkAnim = $ChonkyLeft/AnimationPlayer
 @onready var rightChonkAnim = $ChonkyRight/AnimationPlayer
 @onready var rightChonk = $ChonkyRight
+@onready var danceChonk = $DanceChonky
+@onready var backgroundSFX = $BackgroundMusic
+@onready var danceChonkAnim = $DanceChonky/AnimationPlayer
 @onready var deathCounter = $RichTextLabel
 @onready var transition = $ColorRect
 @onready var transitionText = $RichTextLabel2
 @onready var deathSFX = $Death
+@onready var danceSFX = $Dance
+@onready var controlsNode = $MobileControls
 @onready var LeftButton = $MobileControls/Left
 @onready var RightButton = $MobileControls/Right
 @onready var UpButton = $MobileControls/Jump
+@onready var MenuNode = $Menu2
 
 var deaths = 0
-var fixedTimestep = 1/60
+var fixedTimestep = 1.0/60.0
 var timer = 0.0
+var jumpTimer = 0.0
+var isDancing = false
+var backgroundTime = 0.0
 
 #Mobile controls
 var movingLeft = false
 var jumping = false
 var movingRight = false
+
+func _ready() -> void:
+	match OS.get_name():
+		"Windows":
+			controlsNode.visible=false
+		"Web":
+			$Menu2/Quit.visible=false
 
 func show_transition():
 	transition.visible=true
@@ -59,6 +75,8 @@ func  step() -> void:
 			velocity.y = 750
 	if position.y > 1900:
 		Death(Vector2(0,250))
+	if Input.is_action_just_pressed("pause"):
+		MenuNode.visible= not MenuNode.visible
 
 func _physics_process(delta):
 	timer += delta
@@ -66,50 +84,80 @@ func _physics_process(delta):
 		timer=0
 		step()
 	
-	if Input.is_action_just_pressed("jump") && is_on_floor():
-		velocity.y = -jumpForce
-		
+	if Input.is_action_just_pressed("jump"):
+		jumpTimer = 0.1
+	jumpTimer-=delta
+	if jumpTimer > 0 and is_on_floor()	:
+		jumpTimer = 0.0
+		velocity.y = -jumpForce	
 	var hDirection = Input.get_axis("move_left", "move_right") 
 	
 	velocity.x = speed * hDirection
 	
 	move_and_slide()
 	
+
 	if Input.is_action_pressed("move_right") && Input.is_action_pressed("move_left"):
-		if !idleAnim.is_playing():
+		if not idleAnim.is_playing() and not isDancing:
 			idleAnim.play("idle")
 			leftChonkAnim.stop()
 			rightChonkAnim.stop()
 			idleChonk.visible = true
 			rightChonk.visible=false
 			leftChonk.visible=false
+			danceChonk.visible=false
 	elif Input.is_action_pressed("move_left"):
-		if !leftChonkAnim.is_playing():
+		print(leftChonkAnim.is_playing())
+		if not leftChonkAnim.is_playing():
+			print("Starting playing")
 			idleAnim.stop()
 			leftChonk.visible = true
 			leftChonkAnim.play("move_left")
 			rightChonkAnim.stop()
 			rightChonk.visible = false
 			idleChonk.visible = false
+			danceChonk.visible=false
+			danceSFX.stop()
+			danceChonkAnim.stop()
+			if not backgroundSFX.playing:
+				backgroundSFX.play()
+				backgroundSFX.seek(backgroundTime)
 	elif Input.is_action_pressed("move_right"):
-		if !rightChonkAnim.is_playing():
+		if not rightChonkAnim.is_playing():
 			idleAnim.stop()
 			leftChonk.visible = false
 			leftChonkAnim.stop()
 			rightChonkAnim.play("move_right")
 			rightChonk.visible = true
+			danceSFX.stop()
 			idleChonk.visible = false
+			danceChonk.visible=false
+			danceChonkAnim.stop()
+			if not backgroundSFX.playing:
+				backgroundSFX.play()
+				backgroundSFX.seek(backgroundTime)
 	else:
-		if !idleAnim.is_playing():
+		if not idleAnim.is_playing() and not isDancing:
 			idleAnim.play("idle")
 			leftChonkAnim.stop()
 			rightChonkAnim.stop()
 			idleChonk.visible = true
 			rightChonk.visible=false
 			leftChonk.visible=false
-	
+			danceChonk.visible=false
 
-
+	if Input.is_action_just_pressed("dance"):
+		if not Input.is_action_pressed("move_right") and not Input.is_action_pressed("move_left"):
+			if not danceChonkAnim.is_playing():
+				danceChonk.visible=true
+				danceChonkAnim.play("dance")
+				backgroundTime = backgroundSFX.get_playback_position()
+				backgroundSFX.stop()
+				danceSFX.play()
+				
+				idleChonk.visible=false
+				rightChonk.visible=false
+				leftChonk.visible=false
 
 func _on_jump_pressed() -> void:
 	Input.action_press("jump")
@@ -143,3 +191,12 @@ func _on_menu_released():
 
 func _on_touch_screen_button_pressed():
 	get_tree().quit()
+
+func _on_resume_pressed() -> void:
+	MenuNode.visible=false
+
+func _on_dance_pressed() -> void:
+	Input.action_press("dance")
+
+func _on_dance_released() -> void:
+	Input.action_release("dance")
