@@ -1,13 +1,13 @@
 [gd_scene load_steps=29 format=3 uid="uid://dqy88vwfqyhr0"]
 
 [ext_resource type="PackedScene" uid="uid://bxyoisbqmd8r8" path="res://scenes/MovingPlatform.tscn" id="1_8m30w"]
-[ext_resource type="Texture2D" uid="uid://cshf2fo6eg1mk" path="res://assets/blocks/grass_dirt.png" id="1_gg5tq"]
+[ext_resource type="Texture2D" uid="uid://cshf2fo6eg1mk" path="res://assets/blocks/grass_dirt.png" id="1_di205"]
 [ext_resource type="PackedScene" uid="uid://ctmlu238spt3j" path="res://scenes/lever.tscn" id="3_l0aws"]
-[ext_resource type="Texture2D" uid="uid://56m1cuy4vomm" path="res://assets/blocks/levers/ActiveLever.png" id="4_3g1hu"]
-[ext_resource type="Texture2D" uid="uid://do33at3qja57i" path="res://assets/blocks/levers/InactiveLever.png" id="5_exk0t"]
-[ext_resource type="Texture2D" uid="uid://c3vg56nocjuvq" path="res://assets/graphics/PointDown.png" id="6_5wcfb"]
-[ext_resource type="AudioStream" uid="uid://bb6tk4bk2wjg6" path="res://assets/music/LeverSwitch.ogg" id="6_ouaia"]
-[ext_resource type="Texture2D" uid="uid://dnd4hm520cijq" path="res://assets/graphics/MouseAndXButton.png" id="7_q757h"]
+[ext_resource type="Texture2D" uid="uid://do33at3qja57i" path="res://assets/blocks/levers/InactiveLever.png" id="4_s7x14"]
+[ext_resource type="Texture2D" uid="uid://56m1cuy4vomm" path="res://assets/blocks/levers/ActiveLever.png" id="5_cjth0"]
+[ext_resource type="AudioStream" uid="uid://bb6tk4bk2wjg6" path="res://assets/music/LeverSwitch.ogg" id="6_si3jb"]
+[ext_resource type="Texture2D" uid="uid://c3vg56nocjuvq" path="res://assets/graphics/PointDown.png" id="7_2uc5h"]
+[ext_resource type="Texture2D" uid="uid://dnd4hm520cijq" path="res://assets/graphics/MouseAndXButton.png" id="8_mbxru"]
 [ext_resource type="PackedScene" uid="uid://buv6650ugxxq5" path="res://scenes/finish_flag.tscn" id="8_s7lp5"]
 
 [sub_resource type="GDScript" id="GDScript_ifgnb"]
@@ -254,7 +254,7 @@ scale = Vector2(4.62954, 2.29973)
 texture_repeat = 2
 position = Vector2(-42.4024, -12.0816)
 scale = Vector2(0.351344, 0.815)
-texture = ExtResource("1_gg5tq")
+texture = ExtResource("1_di205")
 centered = false
 region_enabled = true
 region_rect = Rect2(0.085022, 0, 500.457, 30)
@@ -281,7 +281,7 @@ scale = Vector2(0.691851, 2.3)
 texture_repeat = 2
 position = Vector2(-41.9056, -12.3428)
 scale = Vector2(2.80135, 0.815)
-texture = ExtResource("1_gg5tq")
+texture = ExtResource("1_di205")
 centered = false
 region_enabled = true
 region_rect = Rect2(0, 0, 30, 30)
@@ -318,7 +318,7 @@ scale = Vector2(0.691851, 2.3)
 texture_repeat = 2
 position = Vector2(-41.9056, -12.3428)
 scale = Vector2(2.80135, 0.815)
-texture = ExtResource("1_gg5tq")
+texture = ExtResource("1_di205")
 centered = false
 region_enabled = true
 region_rect = Rect2(0, 0, 30, 30)
@@ -335,7 +335,7 @@ scale = Vector2(2.23766, 2.29973)
 texture_repeat = 2
 position = Vector2(-43.1885, -12.0816)
 scale = Vector2(0.858806, 0.815)
-texture = ExtResource("1_gg5tq")
+texture = ExtResource("1_di205")
 centered = false
 region_enabled = true
 region_rect = Rect2(0.0258293, 0, 134.13, 30)
@@ -349,13 +349,13 @@ position = Vector2(2846.1, 552.066)
 script = SubResource("GDScript_ekft5")
 
 [node name="Disabled" type="Sprite2D" parent="Lever"]
-texture = ExtResource("4_3g1hu")
+texture = ExtResource("4_s7x14")
 
 [node name="Enabled" type="Sprite2D" parent="Lever"]
-texture = ExtResource("5_exk0t")
+texture = ExtResource("5_cjth0")
 
 [node name="AudioStreamPlayer2D" type="AudioStreamPlayer2D" parent="Lever"]
-stream = ExtResource("6_ouaia")
+stream = ExtResource("6_si3jb")
 max_distance = 1000.0
 
 [node name="Floor5" type="StaticBody2D" parent="."]
@@ -366,7 +366,7 @@ scale = Vector2(2.23766, 2.29973)
 texture_repeat = 2
 position = Vector2(-43.1885, -12.0816)
 scale = Vector2(0.858806, 0.815)
-texture = ExtResource("1_gg5tq")
+texture = ExtResource("1_di205")
 centered = false
 region_enabled = true
 region_rect = Rect2(0.0258293, 0, 134.13, 30)
@@ -400,7 +400,7 @@ libraries = {
 [node name="Sprite2D" type="Sprite2D" parent="."]
 position = Vector2(2410.61, 414.351)
 scale = Vector2(4.24359, 7.9203)
-texture = ExtResource("6_5wcfb")
+texture = ExtResource("7_2uc5h")
 
 [node name="LevelName" type="RichTextLabel" parent="."]
 offset_left = 49.5289
@@ -427,7 +427,7 @@ scroll_active = false
 [node name="Sprite2D2" type="Sprite2D" parent="."]
 position = Vector2(2847.91, 483.813)
 scale = Vector2(1.43489, 1.43489)
-texture = ExtResource("7_q757h")
+texture = ExtResource("8_mbxru")
 
 [node name="FinishFlag" parent="." instance=ExtResource("8_s7lp5")]
 position = Vector2(3345.01, 559.918)

@@ -1,19 +1,19 @@
 [gd_scene load_steps=28 format=3 uid="uid://h3i5gc0ryenh"]
 
 [ext_resource type="Script" path="res://scripts/player.gd" id="1_8bgxb"]
-[ext_resource type="Texture2D" uid="uid://da2ohsntu2lc6" path="res://assets/player/idle.png" id="2_nw4x5"]
-[ext_resource type="Texture2D" uid="uid://ds24jidhoytug" path="res://assets/player/chonky-left.png" id="2_o1g6u"]
-[ext_resource type="Texture2D" uid="uid://5jbxda6i1gr1" path="res://assets/player/chonky-right.png" id="3_5dnfu"]
-[ext_resource type="Texture2D" uid="uid://dhc2f2a0ivlq5" path="res://assets/player/chonky-dance.png" id="5_nsyk5"]
-[ext_resource type="AudioStream" uid="uid://24b2uys66btn" path="res://assets/music/EpikMoosic.ogg" id="6_g5d7x"]
-[ext_resource type="AudioStream" uid="uid://b0dr3ih0pmx0v" path="res://assets/music/Death.ogg" id="6_y26wh"]
-[ext_resource type="Texture2D" uid="uid://baekfp3igmnse" path="res://assets/controls/LeftArrow.png" id="7_jrmlq"]
-[ext_resource type="AudioStream" uid="uid://d1lkh8r6tom57" path="res://assets/music/background/Elevator.ogg" id="7_w4lhf"]
-[ext_resource type="Texture2D" uid="uid://cxftyuvnmuvcc" path="res://assets/graphics/AButton.png" id="8_cdale"]
-[ext_resource type="Texture2D" uid="uid://c2arlclb0kqa6" path="res://assets/controls/RightArrow.png" id="8_xlcoa"]
-[ext_resource type="Texture2D" uid="uid://drltavv2gvjwh" path="res://assets/graphics/XButton.png" id="9_i276c"]
-[ext_resource type="Texture2D" uid="uid://bac88jqg1upis" path="res://assets/Menu.png" id="10_pob1d"]
-[ext_resource type="Texture2D" uid="uid://cw10b0hgrl8yx" path="res://assets/graphics/YButton.png" id="14_h6omr"]
+[ext_resource type="Texture2D" uid="uid://ds24jidhoytug" path="res://assets/player/chonky-left.png" id="2_uva7f"]
+[ext_resource type="Texture2D" uid="uid://5jbxda6i1gr1" path="res://assets/player/chonky-right.png" id="3_badim"]
+[ext_resource type="Texture2D" uid="uid://da2ohsntu2lc6" path="res://assets/player/idle.png" id="4_bnms7"]
+[ext_resource type="Texture2D" uid="uid://dhc2f2a0ivlq5" path="res://assets/player/chonky-dance.png" id="5_kd4lg"]
+[ext_resource type="AudioStream" uid="uid://24b2uys66btn" path="res://assets/music/EpikMoosic.ogg" id="6_koa74"]
+[ext_resource type="AudioStream" uid="uid://d1lkh8r6tom57" path="res://assets/music/background/Elevator.ogg" id="7_c7jgs"]
+[ext_resource type="AudioStream" uid="uid://b0dr3ih0pmx0v" path="res://assets/music/Death.ogg" id="8_u8wyb"]
+[ext_resource type="Texture2D" uid="uid://baekfp3igmnse" path="res://assets/controls/LeftArrow.png" id="9_j76um"]
+[ext_resource type="Texture2D" uid="uid://c2arlclb0kqa6" path="res://assets/controls/RightArrow.png" id="10_2ugt7"]
+[ext_resource type="Texture2D" uid="uid://cxftyuvnmuvcc" path="res://assets/graphics/AButton.png" id="11_y41yq"]
+[ext_resource type="Texture2D" uid="uid://drltavv2gvjwh" path="res://assets/graphics/XButton.png" id="12_fqutd"]
+[ext_resource type="Texture2D" uid="uid://bac88jqg1upis" path="res://assets/Menu.png" id="13_n4pk7"]
+[ext_resource type="Texture2D" uid="uid://cw10b0hgrl8yx" path="res://assets/graphics/YButton.png" id="14_lkvpf"]
 
 [sub_resource type="Animation" id="Animation_c4pcb"]
 length = 0.001
@@ -172,7 +172,7 @@ text = "Deaths: 0"
 [node name="ChonkyLeft" type="Sprite2D" parent="."]
 position = Vector2(1, -63)
 scale = Vector2(1.998, 4.263)
-texture = ExtResource("2_o1g6u")
+texture = ExtResource("2_uva7f")
 hframes = 13
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="ChonkyLeft"]
@@ -184,7 +184,7 @@ libraries = {
 [node name="ChonkyRight" type="Sprite2D" parent="."]
 position = Vector2(1, -63)
 scale = Vector2(1.998, 4.263)
-texture = ExtResource("3_5dnfu")
+texture = ExtResource("3_badim")
 hframes = 14
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="ChonkyRight"]
@@ -195,7 +195,7 @@ libraries = {
 [node name="IdleChonky" type="Sprite2D" parent="."]
 position = Vector2(0.999996, -63)
 scale = Vector2(1.99829, 4.26302)
-texture = ExtResource("2_nw4x5")
+texture = ExtResource("4_bnms7")
 hframes = 3
 vframes = 2
 
@@ -207,7 +207,7 @@ libraries = {
 [node name="DanceChonky" type="Sprite2D" parent="."]
 position = Vector2(1, -63)
 scale = Vector2(1.998, 4.263)
-texture = ExtResource("5_nsyk5")
+texture = ExtResource("5_kd4lg")
 hframes = 7
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="DanceChonky"]
@@ -244,15 +244,15 @@ text = "Level Complete!"
 fit_content = true
 
 [node name="Dance" type="AudioStreamPlayer" parent="."]
-stream = ExtResource("6_g5d7x")
+stream = ExtResource("6_koa74")
 
 [node name="BackgroundMusic" type="AudioStreamPlayer" parent="."]
-stream = ExtResource("7_w4lhf")
+stream = ExtResource("7_c7jgs")
 volume_db = -15.0
 autoplay = true
 
 [node name="Death" type="AudioStreamPlayer" parent="."]
-stream = ExtResource("6_y26wh")
+stream = ExtResource("8_u8wyb")
 
 [node name="MobileControls" type="Node2D" parent="."]
 position = Vector2(-564.024, 40.8537)
@@ -261,32 +261,32 @@ scale = Vector2(3.29269, 3.29269)
 [node name="Left" type="TouchScreenButton" parent="MobileControls"]
 position = Vector2(0.55543, -13.7037)
 scale = Vector2(2.62222, 2.62222)
-texture_normal = ExtResource("7_jrmlq")
+texture_normal = ExtResource("9_j76um")
 
 [node name="Right" type="TouchScreenButton" parent="MobileControls"]
 position = Vector2(46.4813, -13.7037)
 scale = Vector2(2.62248, 2.62248)
-texture_normal = ExtResource("8_xlcoa")
+texture_normal = ExtResource("10_2ugt7")
 
 [node name="Jump" type="TouchScreenButton" parent="MobileControls"]
 position = Vector2(290.925, -7.62939e-06)
 scale = Vector2(0.859522, 0.859522)
-texture_normal = ExtResource("8_cdale")
+texture_normal = ExtResource("11_y41yq")
 
 [node name="Interact" type="TouchScreenButton" parent="MobileControls"]
 position = Vector2(269.073, -30.7407)
 scale = Vector2(0.518519, 0.518519)
-texture_normal = ExtResource("9_i276c")
+texture_normal = ExtResource("12_fqutd")
 
 [node name="Menu" type="TouchScreenButton" parent="MobileControls"]
 position = Vector2(-2.77789, -150.555)
 scale = Vector2(6.3111, 4.2814)
-texture_normal = ExtResource("10_pob1d")
+texture_normal = ExtResource("13_n4pk7")
 
 [node name="Dance" type="TouchScreenButton" parent="MobileControls"]
 position = Vector2(310.74, -30.9259)
 scale = Vector2(0.407411, 0.407411)
-texture_normal = ExtResource("14_h6omr")
+texture_normal = ExtResource("14_lkvpf")
 
 [node name="Menu2" type="Node2D" parent="."]
 visible = false

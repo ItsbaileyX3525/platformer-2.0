@@ -1,8 +1,8 @@
 [gd_scene load_steps=13 format=3 uid="uid://naq0iw5ucju8"]
 
-[ext_resource type="Texture2D" uid="uid://cshf2fo6eg1mk" path="res://assets/blocks/grass_dirt.png" id="1_p0q82"]
-[ext_resource type="Texture2D" uid="uid://dnd4hm520cijq" path="res://assets/graphics/MouseAndXButton.png" id="2_qdn2l"]
-[ext_resource type="Texture2D" uid="uid://cbh6loblpx8ux" path="res://assets/graphics/SpaceAndAButton.png" id="3_apiu4"]
+[ext_resource type="Texture2D" uid="uid://cshf2fo6eg1mk" path="res://assets/blocks/grass_dirt.png" id="1_elb11"]
+[ext_resource type="Texture2D" uid="uid://dnd4hm520cijq" path="res://assets/graphics/MouseAndXButton.png" id="2_2pkgo"]
+[ext_resource type="Texture2D" uid="uid://cbh6loblpx8ux" path="res://assets/graphics/SpaceAndAButton.png" id="3_v1o40"]
 [ext_resource type="PackedScene" uid="uid://bxyoisbqmd8r8" path="res://scenes/MovingPlatform.tscn" id="4_3oj1u"]
 [ext_resource type="PackedScene" uid="uid://buv6650ugxxq5" path="res://scenes/finish_flag.tscn" id="5_65eei"]
 
@@ -151,7 +151,7 @@ scale = Vector2(4.62954, 2.29973)
 texture_repeat = 2
 position = Vector2(-99.7549, -12)
 scale = Vector2(0.373385, 0.815)
-texture = ExtResource("1_p0q82")
+texture = ExtResource("1_elb11")
 centered = false
 region_enabled = true
 region_rect = Rect2(-0.666664, 0, 536.044, 30)
@@ -168,7 +168,7 @@ scale = Vector2(7.80605, 2.3)
 texture_repeat = 2
 position = Vector2(-99.7549, -12)
 scale = Vector2(0.2, 0.815)
-texture = ExtResource("1_p0q82")
+texture = ExtResource("1_elb11")
 centered = false
 region_enabled = true
 region_rect = Rect2(-303.438, 0, 999.618, 30)
@@ -191,13 +191,13 @@ script = SubResource("GDScript_djako")
 [node name="Mouse" type="Sprite2D" parent="."]
 position = Vector2(358, 485)
 scale = Vector2(3.35071, 4.76918)
-texture = ExtResource("2_qdn2l")
+texture = ExtResource("2_2pkgo")
 
 [node name="Space" type="Sprite2D" parent="."]
 visible = false
 position = Vector2(496, 466)
 scale = Vector2(4.24399, 4.24399)
-texture = ExtResource("3_apiu4")
+texture = ExtResource("3_v1o40")
 
 [node name="MovingPlatform" parent="." instance=ExtResource("4_3oj1u")]
 position = Vector2(1186, 620)

@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=3 uid="uid://bybxtflsdktqu"]
 
-[ext_resource type="Texture2D" uid="uid://cshf2fo6eg1mk" path="res://assets/blocks/grass_dirt.png" id="1_lw3tt"]
+[ext_resource type="Texture2D" uid="uid://cshf2fo6eg1mk" path="res://assets/blocks/grass_dirt.png" id="1_fpix0"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_3gjr7"]
 size = Vector2(175.872, 24.4259)
@@ -16,7 +16,7 @@ scale = Vector2(4.62954, 2.29973)
 texture_repeat = 2
 position = Vector2(-42.4024, -12.0816)
 scale = Vector2(0.351344, 0.815)
-texture = ExtResource("1_lw3tt")
+texture = ExtResource("1_fpix0")
 centered = false
 region_enabled = true
 region_rect = Rect2(0.085022, 0, 500.457, 30)

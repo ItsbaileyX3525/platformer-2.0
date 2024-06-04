@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=3 uid="uid://buv6650ugxxq5"]
 
-[ext_resource type="Texture2D" uid="uid://bu045o3410bfi" path="res://assets/blocks/Flag.png" id="1_s3lft"]
+[ext_resource type="Texture2D" uid="uid://bu045o3410bfi" path="res://assets/blocks/Flag.png" id="1_knvc3"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_4oc0b"]
 size = Vector2(20, 20.6553)
@@ -14,4 +14,4 @@ shape = SubResource("RectangleShape2D_4oc0b")
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
 scale = Vector2(2.02486, 2.16483)
-texture = ExtResource("1_s3lft")
+texture = ExtResource("1_knvc3")

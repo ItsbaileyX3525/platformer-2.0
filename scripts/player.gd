@@ -31,6 +31,7 @@ var timer = 0.0
 var jumpTimer = 0.0
 var isDancing = false
 var backgroundTime = 0.0
+var onMobile = false
 
 #Mobile controls
 var movingLeft = false
@@ -43,6 +44,10 @@ func _ready() -> void:
 			controlsNode.visible=false
 		"Web":
 			$Menu2/Quit.visible=false
+			controlsNode.visible=false
+			onMobile = JavaScriptBridge.eval("/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)", true)
+			if onMobile:
+				controlsNode.visible=true
 
 func show_transition():
 	transition.visible=true
