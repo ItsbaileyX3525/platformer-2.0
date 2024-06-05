@@ -1,0 +1,224 @@
+[gd_scene load_steps=13 format=3 uid="uid://naq0iw5ucju8"]
+
+[ext_resource type="Texture2D" uid="uid://cshf2fo6eg1mk" path="res://assets/blocks/grass_dirt.png" id="1_elb11"]
+[ext_resource type="Texture2D" uid="uid://dnd4hm520cijq" path="res://assets/graphics/MouseAndXButton.png" id="2_2pkgo"]
+[ext_resource type="Texture2D" uid="uid://cbh6loblpx8ux" path="res://assets/graphics/SpaceAndAButton.png" id="3_v1o40"]
+[ext_resource type="PackedScene" uid="uid://bxyoisbqmd8r8" path="res://scenes/MovingPlatform.tscn" id="4_3oj1u"]
+[ext_resource type="PackedScene" uid="uid://buv6650ugxxq5" path="res://scenes/finish_flag.tscn" id="5_65eei"]
+
+[sub_resource type="GDScript" id="GDScript_hiol0"]
+script/source = "extends Node2D
+
+@export var Player = CharacterBody2D
+@export var NextLevel = false
+
+func init(body: CharacterBody2D) -> void:
+	Player = body
+
+func nextScene() -> void:
+	NextLevel = true
+"
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_ixbxt"]
+size = Vector2(200, 24.5)
+
+[sub_resource type="GDScript" id="GDScript_djako"]
+resource_name = "TweenText"
+script/source = "extends RichTextLabel
+
+var state = -1
+var tween: Tween
+var clickTimer = 0
+var doneJump = false
+var enteredOnce=false
+
+@onready var movingPlatform = $\"../MovingPlatform\"
+@onready var mouseClick = $\"../Mouse\"
+@onready var spaceClick = $\"../Space\"
+
+@onready var player = $\"..\".Player
+@onready var ParentNode = $\"..\"
+
+func _ready():
+	tween = create_tween()
+	tween.tween_property(self, \"visible_ratio\", 1.0, 1.0).from(0.0)
+	await tween.finished
+	state = 0
+
+func _process(delta):
+	if clickTimer < 20:
+		clickTimer += delta
+	if Input.is_action_just_pressed(\"click\") and clickTimer >=1:
+		clickTimer = 0
+		match state:
+			0:	
+				text = \"This game is a continuation of platformer!\"
+				tween = create_tween()
+				tween.tween_property(self, \"visible_ratio\", 1.0, 2.0).from(0.0)
+				state+=1
+			1:
+				text = \"The game is pretty simple, just jump\"
+				tween = create_tween()
+				tween.tween_property(self, \"visible_ratio\", 1.0, 1.8).from(0.0)
+				state+=1
+				mouseClick.visible=false
+				spaceClick.visible=true
+	if Input.is_action_just_pressed(\"jump\") && !doneJump:
+		match state:
+			2:
+				doneJump=true
+				text = \"Boom! You're a natural at this!\"
+				tween = create_tween()
+				tween.tween_property(self, \"visible_ratio\", 1.0, 1.8).from(0.0)
+				await tween.finished
+				state+=1
+				spaceClick.visible=false
+				mouseClick.visible=false
+				position = Vector2(512,320)
+				text=\"Here is a moving platform. It is what it is, it's a platform that moves.\"
+				tween = create_tween()
+				tween.tween_property(self, \"visible_ratio\", 1.0, 2.8).from(0.0)
+				movingPlatform.collisionEnabled = true
+				movingPlatform.spriteVisible = true
+
+
+func _on_trigger_body_entered(body: Node2D) -> void:
+	if !enteredOnce:
+		enteredOnce = true
+		text = \"Jolly good! You've learnt the basics of the game.\"
+		tween = create_tween()
+		tween.tween_property(self, \"visible_ratio\", 1.0, 1.8).from(0.0)
+		position = Vector2(1310,394)
+
+
+func _on_finish_flag_body_entered(body: Node2D) -> void:
+	player.position = Vector2(0, -350)
+	ParentNode.nextScene()
+	
+"
+
+[sub_resource type="Animation" id="Animation_c1tuw"]
+length = 0.001
+loop_mode = 2
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector2(1186, 620)]
+}
+
+[sub_resource type="Animation" id="Animation_wqsfs"]
+resource_name = "move_loop"
+length = 2.0
+loop_mode = 1
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 1, 2),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 0,
+"values": [Vector2(1023, 620), Vector2(1186, 620), Vector2(1023, 620)]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_rcej1"]
+_data = {
+"RESET": SubResource("Animation_c1tuw"),
+"move_loop": SubResource("Animation_wqsfs")
+}
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_d7ndh"]
+size = Vector2(11, 254)
+
+[node name="Tutorial" type="Node2D"]
+scale = Vector2(1.6943, 1.6943)
+script = SubResource("GDScript_hiol0")
+
+[node name="Floor1" type="StaticBody2D" parent="."]
+position = Vector2(463, 622)
+scale = Vector2(4.62954, 2.29973)
+
+[node name="Sprite2D" type="Sprite2D" parent="Floor1"]
+texture_repeat = 2
+position = Vector2(-99.7549, -12)
+scale = Vector2(0.373385, 0.815)
+texture = ExtResource("1_elb11")
+centered = false
+region_enabled = true
+region_rect = Rect2(-0.666664, 0, 536.044, 30)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Floor1"]
+position = Vector2(0, 0.25)
+shape = SubResource("RectangleShape2D_ixbxt")
+
+[node name="Floor2" type="StaticBody2D" parent="."]
+position = Vector2(2065.16, 576.639)
+scale = Vector2(7.80605, 2.3)
+
+[node name="Sprite2D" type="Sprite2D" parent="Floor2"]
+texture_repeat = 2
+position = Vector2(-99.7549, -12)
+scale = Vector2(0.2, 0.815)
+texture = ExtResource("1_elb11")
+centered = false
+region_enabled = true
+region_rect = Rect2(-303.438, 0, 999.618, 30)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Floor2"]
+position = Vector2(0, 0.250031)
+shape = SubResource("RectangleShape2D_ixbxt")
+
+[node name="RichTextLabel" type="RichTextLabel" parent="."]
+offset_top = 328.159
+offset_right = 9644.0
+offset_bottom = 4353.16
+scale = Vector2(0.05, 0.05)
+theme_override_colors/default_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/normal_font_size = 700
+bbcode_enabled = true
+text = "Welcome to the game!"
+script = SubResource("GDScript_djako")
+
+[node name="Mouse" type="Sprite2D" parent="."]
+position = Vector2(358, 485)
+scale = Vector2(3.35071, 4.76918)
+texture = ExtResource("2_2pkgo")
+
+[node name="Space" type="Sprite2D" parent="."]
+visible = false
+position = Vector2(496, 466)
+scale = Vector2(4.24399, 4.24399)
+texture = ExtResource("3_v1o40")
+
+[node name="MovingPlatform" parent="." instance=ExtResource("4_3oj1u")]
+position = Vector2(1186, 620)
+collisionEnabled = false
+spriteVisible = false
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="MovingPlatform"]
+libraries = {
+"": SubResource("AnimationLibrary_rcej1")
+}
+autoplay = "move_loop"
+
+[node name="Trigger" type="Area2D" parent="."]
+position = Vector2(1305.55, 360.621)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Trigger"]
+position = Vector2(-1.5, 60)
+shape = SubResource("RectangleShape2D_d7ndh")
+
+[node name="FinishFlag" parent="." instance=ExtResource("5_65eei")]
+position = Vector2(1971.32, 528.832)
+
+[connection signal="body_entered" from="Trigger" to="RichTextLabel" method="_on_trigger_body_entered"]
+[connection signal="body_entered" from="FinishFlag" to="RichTextLabel" method="_on_finish_flag_body_entered"]

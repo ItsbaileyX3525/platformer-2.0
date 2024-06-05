@@ -1,0 +1,27 @@
+[gd_scene load_steps=4 format=3 uid="uid://dl4stiafram03"]
+
+[ext_resource type="Script" path="res://scripts/Main.gd" id="1_hfcv2"]
+[ext_resource type="Texture2D" uid="uid://d0ok5hvk07s6w" path="res://assets/sky.jpg" id="2_py6u2"]
+[ext_resource type="AudioStream" uid="uid://661qjyjklrvq" path="res://assets/music/Victory.mp3" id="3_musoy"]
+
+[node name="World" type="Node2D"]
+script = ExtResource("1_hfcv2")
+levelToLoad = 2
+
+[node name="Player" type="CanvasGroup" parent="."]
+z_index = 10
+
+[node name="Background" type="CanvasGroup" parent="."]
+z_index = -1
+scale = Vector2(0.4, 0.35)
+
+[node name="Sprite2D" type="Sprite2D" parent="Background"]
+texture = ExtResource("2_py6u2")
+
+[node name="LevelComplete" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("3_musoy")
+
+[node name="NextLevel" type="Timer" parent="."]
+wait_time = 2.1
+
+[connection signal="timeout" from="NextLevel" to="." method="_on_next_level_timeout"]
