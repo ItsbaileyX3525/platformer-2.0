@@ -10,6 +10,8 @@ const Level2Scene = preload("res://scenes/level_2.tscn")
 @onready var PlayerLayer = $Player
 @onready var background = $Background
 
+@export var levelToLoad: int = 0
+
 var Player: Node2D
 var Tutorial: Node2D
 var Level1: Node2D
@@ -58,13 +60,20 @@ func loadLevel(whichLevel: int) -> void:
 
 func _ready() -> void:
 	Player = PlayerNode.instantiate()
-	Tutorial = TutorialScene.instantiate()
 	PlayerLayer.add_child(Player)
 	Player.position = Vector2(26, 516)
-	Tutorial.init(Player)
-	add_child(Tutorial)
-	Tutorial.position = Vector2(0,0)
-
+	match levelToLoad:
+		0:
+			Tutorial = TutorialScene.instantiate()
+			Tutorial.init(Player)
+			add_child(Tutorial)
+			Tutorial.position = Vector2(0,0)
+		1:
+			Level1 = Level1Scene.instantiate()
+			add_child(Level1)
+		2:
+			Level2 = Level2Scene.instantiate()
+			add_child(Level2)
 	finishedLoading = true
 	
 	#DiscordRPC.app_id = 1247248712359739444 # Application ID

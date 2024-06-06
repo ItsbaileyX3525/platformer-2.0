@@ -349,10 +349,10 @@ position = Vector2(2846.1, 552.066)
 script = SubResource("GDScript_ekft5")
 
 [node name="Disabled" type="Sprite2D" parent="Lever"]
-texture = ExtResource("4_s7x14")
+texture = ExtResource("5_cjth0")
 
 [node name="Enabled" type="Sprite2D" parent="Lever"]
-texture = ExtResource("5_cjth0")
+texture = ExtResource("4_s7x14")
 
 [node name="AudioStreamPlayer2D" type="AudioStreamPlayer2D" parent="Lever"]
 stream = ExtResource("6_si3jb")
