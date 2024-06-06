@@ -1,0 +1,72 @@
+[gd_scene load_steps=4 format=3 uid="uid://r48oqkn6cdpd"]
+
+[ext_resource type="Texture2D" uid="uid://k5mwdtjjm4vu" path="res://assets/blocks/powerups/SpeedBoost.png" id="1_7ongv"]
+
+[sub_resource type="GDScript" id="GDScript_rutqy"]
+script/source = "extends Area2D
+
+@export var regenTimer = 6
+@export var speedLast: float = 5
+@export var speedMutliplier: float = 1.5
+
+var canCollect = true
+var regenActive = false
+var tweenUp: Tween
+var tweenDown: Tween
+var defaultPositionX = 0.0
+var defaultPositionY = 0.0
+var moveUpTween = false
+var timer = 0
+
+func upTween():
+	print(\"Tween began\")
+	tweenUp = create_tween()
+	tweenUp.tween_property(self, \"position\", Vector2(defaultPositionX,defaultPositionY-20), 1.0)
+	await tweenUp.finished
+	downTween()
+	
+func downTween():
+	tweenDown = create_tween()
+	tweenDown.tween_property(self, \"position\", Vector2(defaultPositionX,defaultPositionY), 1.0)
+	await tweenDown.finished
+	upTween()
+
+func _ready() -> void:
+	defaultPositionX = position.x
+	defaultPositionY = position.y
+	upTween()
+
+func _process(delta):
+	if regenActive:
+		timer+=delta
+	if timer >= regenTimer:
+		visible=true
+		timer=0
+		regenActive=false
+		canCollect = true
+		
+	
+
+func _on_body_entered(body):
+	if body.name == \"Player\":
+		if canCollect:
+			body.addSpeed(speedLast, speedMutliplier)
+			visible=false
+			regenActive = true
+			canCollect = false
+"
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_2b8hs"]
+
+[node name="SpeedBoost" type="Area2D"]
+scale = Vector2(2.32, 2.32)
+script = SubResource("GDScript_rutqy")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+texture = ExtResource("1_7ongv")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+scale = Vector2(1.01724, 1.05172)
+shape = SubResource("CircleShape2D_2b8hs")
+
+[connection signal="body_entered" from="." to="." method="_on_body_entered"]

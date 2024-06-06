@@ -32,6 +32,10 @@ var jumpTimer = 0.0
 var isDancing = false
 var backgroundTime = 0.0
 var onMobile = false
+var speedyBoi = false
+var speedTimer = 0.0
+var speedCanLast = 5.0
+var speedMultiplier = 1.5
 var canDoubleJump = false
 
 #Mobile controls
@@ -76,6 +80,12 @@ func Death(newPos: Vector2) -> void:
 func addJump():
 	canDoubleJump = true
 
+func addSpeed(length: float = 5, speedAmount: float = 1.5):
+	speedTimer = 0
+	speedCanLast = length
+	speedMultiplier = speedAmount
+	speedyBoi = true
+
 func  step() -> void:
 	if !is_on_floor():
 		velocity.y += gravity
@@ -92,6 +102,12 @@ func _physics_process(delta):
 		timer=0
 		step()
 	
+	if speedyBoi:
+		speedTimer+=delta
+	if speedTimer >= speedCanLast:
+		speedyBoi=false
+		speedTimer=0
+	
 	if Input.is_action_just_pressed("jump"):
 		jumpTimer = 0.1
 	jumpTimer-=delta
@@ -104,7 +120,10 @@ func _physics_process(delta):
 		canDoubleJump=false
 	var hDirection = Input.get_axis("move_left", "move_right") 
 	
-	velocity.x = speed * hDirection
+	if not speedyBoi:
+		velocity.x = speed * hDirection
+	else:
+		velocity.x = speed * hDirection * speedMultiplier
 	
 	move_and_slide()
 	
@@ -121,7 +140,6 @@ func _physics_process(delta):
 	elif Input.is_action_pressed("move_left"):
 		print(leftChonkAnim.is_playing())
 		if not leftChonkAnim.is_playing():
-			print("Starting playing")
 			idleAnim.stop()
 			leftChonk.visible = true
 			leftChonkAnim.play("move_left")

@@ -440,6 +440,6 @@ position = Vector2(33.3919, -0.131439)
 shape = SubResource("RectangleShape2D_8h0qh")
 
 [node name="FinishFlag" parent="." instance=ExtResource("8_h0mpo")]
-position = Vector2(2335.75, 578.502)
+position = Vector2(2335.75, 577.899)
 
 [connection signal="body_entered" from="FinishFlag" to="." method="_on_finish_flag_body_entered"]

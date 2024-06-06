@@ -1,3 +1,56 @@
-[gd_scene format=3 uid="uid://d2bxknqwankoc"]
+[gd_scene load_steps=5 format=3 uid="uid://d2bxknqwankoc"]
+
+[ext_resource type="Texture2D" uid="uid://cshf2fo6eg1mk" path="res://assets/blocks/grass_dirt.png" id="1_t5px7"]
+[ext_resource type="PackedScene" uid="uid://bmxa5jr8r3jma" path="res://scenes/double_jump.tscn" id="2_r68c1"]
+[ext_resource type="PackedScene" uid="uid://r48oqkn6cdpd" path="res://scenes/speed_boost.tscn" id="3_sci1r"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_gvgkc"]
+size = Vector2(175.699, 24.4259)
 
 [node name="Level3" type="Node2D"]
+scale = Vector2(1.656, 1.656)
+
+[node name="Floor1" type="StaticBody2D" parent="."]
+position = Vector2(198, 1051)
+scale = Vector2(4.62954, 2.29973)
+
+[node name="Sprite2D" type="Sprite2D" parent="Floor1"]
+texture_repeat = 2
+position = Vector2(-42.4024, -12.0816)
+scale = Vector2(0.351344, 0.815)
+texture = ExtResource("1_t5px7")
+centered = false
+region_enabled = true
+region_rect = Rect2(0.085022, 0, 500.457, 30)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Floor1"]
+position = Vector2(45.3416, 0.131317)
+shape = SubResource("RectangleShape2D_gvgkc")
+
+[node name="DoubleJump" parent="." instance=ExtResource("2_r68c1")]
+position = Vector2(386, 976)
+regenTimer = 3
+
+[node name="SpeedBoost" parent="." instance=ExtResource("3_sci1r")]
+position = Vector2(615, 976)
+regenTimer = 3
+
+[node name="RichTextLabel" type="RichTextLabel" parent="."]
+offset_left = 238.0
+offset_top = 806.0
+offset_right = 4898.0
+offset_bottom = 2946.0
+scale = Vector2(0.05, 0.05)
+theme_override_colors/default_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/normal_font_size = 400
+text = "This is a jump boost, it allows you to jump twice!"
+
+[node name="RichTextLabel2" type="RichTextLabel" parent="."]
+offset_left = 506.0
+offset_top = 806.0
+offset_right = 5166.0
+offset_bottom = 2946.0
+scale = Vector2(0.05, 0.05)
+theme_override_colors/default_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/normal_font_size = 400
+text = "This is a speed boost, it makes you go faster!"
