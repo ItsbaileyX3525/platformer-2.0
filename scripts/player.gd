@@ -32,6 +32,7 @@ var jumpTimer = 0.0
 var isDancing = false
 var backgroundTime = 0.0
 var onMobile = false
+var canDoubleJump = false
 
 #Mobile controls
 var movingLeft = false
@@ -72,6 +73,8 @@ func Death(newPos: Vector2) -> void:
 		#DiscordRPC.state = "Died %s times." % deaths
 	#DiscordRPC.refresh()
 	
+func addJump():
+	canDoubleJump = true
 
 func  step() -> void:
 	if !is_on_floor():
@@ -92,9 +95,13 @@ func _physics_process(delta):
 	if Input.is_action_just_pressed("jump"):
 		jumpTimer = 0.1
 	jumpTimer-=delta
-	if jumpTimer > 0 and is_on_floor()	:
+	if jumpTimer > 0 and is_on_floor():
 		jumpTimer = 0.0
-		velocity.y = -jumpForce	
+		velocity.y = -jumpForce
+	elif jumpTimer > 0 and canDoubleJump:
+		jumpTimer = 0.0
+		velocity.y = -jumpForce
+		canDoubleJump=false
 	var hDirection = Input.get_axis("move_left", "move_right") 
 	
 	velocity.x = speed * hDirection

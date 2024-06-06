@@ -4,6 +4,7 @@ const PlayerNode = preload("res://scenes/player.tscn")
 const TutorialScene = preload("res://scenes/tutorial.tscn")
 const Level1Scene = preload("res://scenes/level_1.tscn")
 const Level2Scene = preload("res://scenes/level_2.tscn")
+const Level3Scene = preload("res://scenes/level_3.tscn")
 
 @onready var levelTimer = $NextLevel
 @onready var levelCompleteSFX = $LevelComplete
@@ -16,13 +17,16 @@ var Player: Node2D
 var Tutorial: Node2D
 var Level1: Node2D
 var Level2: Node2D
+var Level3: Node2D
 var goingTo = 1
 
 var finishedLoading = false
 var FinishedTutorial = false
 var FinishedLevel1 = false
+var FinishedLevel2 = false
 var loadedLevel1 = false
 var loadedLevel2 = false
+var loadedLevel3 = false
 
 func _on_next_level_timeout() -> void:
 	levelTimer.stop()
@@ -45,18 +49,18 @@ func _on_next_level_timeout() -> void:
 			Level2 = Level2Scene.instantiate()
 			add_child(Level2)
 			Player.hide_transition()
+
 func loadLevel(whichLevel: int) -> void:
+	Player.show_transition()
+	levelCompleteSFX.play()
 	match whichLevel:
 		1:
-			Player.show_transition()
-			levelCompleteSFX.play()
 			goingTo = 1
-			levelTimer.start()
 		2:
-			Player.show_transition()
-			levelCompleteSFX.play()
 			goingTo = 2
-			levelTimer.start()
+		3:
+			goingTo = 3
+	levelTimer.start()
 
 func _ready() -> void:
 	Player = PlayerNode.instantiate()
@@ -74,6 +78,9 @@ func _ready() -> void:
 		2:
 			Level2 = Level2Scene.instantiate()
 			add_child(Level2)
+		3:
+			Level3 = Level3Scene.instantiate()
+			add_child(Level3)
 	finishedLoading = true
 	
 	#DiscordRPC.app_id = 1247248712359739444 # Application ID
@@ -100,3 +107,7 @@ func _process(delta: float) -> void:
 			if !FinishedLevel1 and Level1.NextLevel and not loadedLevel2:
 				loadLevel(2)
 				loadedLevel2 = true
+		if is_instance_valid(Level2):
+			if !FinishedLevel2 and Level2.NextLevel and not loadedLevel3:
+				loadLevel(3)
+				loadedLevel3 = true
