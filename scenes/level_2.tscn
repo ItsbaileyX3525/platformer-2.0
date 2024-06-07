@@ -12,28 +12,24 @@
 [sub_resource type="GDScript" id="GDScript_yp2nr"]
 script/source = "extends Node2D
 
-@export var NextLevel = false
+signal nextLevel(level)
+
+func nextScene() -> void:
+	nextLevel.emit(3)
 
 #Vertical = ^
 #Horizontal = <>
 @onready var movingPlatHori1Anim = $Right1/AnimationPlayer
 @onready var movingPlatVert1Anim = $Up1/AnimationPlayer
 
-# Called when the node enters the scene tree for the first time.
 func _ready():
 	movingPlatVert1Anim.play(\"move_up\")
 	movingPlatHori1Anim.play(\"move_right\")
 	movingPlatHori1Anim.speed_scale = 0
-
-func nextScene() -> void:
-	NextLevel = true
-
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta):
-	pass
-
+ 
 func _on_finish_flag_body_entered(body):
-	nextScene()
+	if body.name == \"Player\":
+		nextScene()
 "
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_3gjr7"]

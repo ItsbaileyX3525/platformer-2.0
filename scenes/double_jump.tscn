@@ -17,7 +17,6 @@ var moveUpTween = false
 var timer = 0
 
 func upTween():
-	print(\"Tween began\")
 	tweenUp = create_tween()
 	tweenUp.tween_property(self, \"position\", Vector2(defaultPositionX,defaultPositionY-20), 1.0)
 	await tweenUp.finished

@@ -1,13 +1,23 @@
-[gd_scene load_steps=4 format=3 uid="uid://p68kt5qg1wov"]
+[gd_scene load_steps=5 format=3 uid="uid://p68kt5qg1wov"]
 
 [ext_resource type="PackedScene" uid="uid://0dgvic7mnuer" path="res://scenes/laser.tscn" id="1_tjh6n"]
 [ext_resource type="Texture2D" uid="uid://cshf2fo6eg1mk" path="res://assets/blocks/grass_dirt.png" id="2_kwdu8"]
+
+[sub_resource type="GDScript" id="GDScript_tv3cl"]
+script/source = "extends Node2D
+
+signal nextLevel(level)
+
+func nextScene() -> void:
+	nextLevel.emit(5)
+"
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_wfui7"]
 size = Vector2(175.699, 24.4259)
 
 [node name="Level4" type="Node2D"]
 scale = Vector2(1.656, 1.656)
+script = SubResource("GDScript_tv3cl")
 
 [node name="Laser3" parent="." instance=ExtResource("1_tjh6n")]
 position = Vector2(670.29, 306.763)

@@ -13,18 +13,14 @@
 [sub_resource type="GDScript" id="GDScript_ifgnb"]
 script/source = "extends Node2D
 
-@export var Player = CharacterBody2D
-@export var NextLevel = false
-
-func init(body: CharacterBody2D) -> void:
-	Player = body
+signal nextLevel(level)
 
 func nextScene() -> void:
-	NextLevel = true
-
+	nextLevel.emit(2)
 
 func _on_finish_flag_body_shape_entered(body_rid, body, body_shape_index, local_shape_index):
-	nextScene()
+	if body.name == \"Player\":
+		nextScene()
 "
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_cyw15"]

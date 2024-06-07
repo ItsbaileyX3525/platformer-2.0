@@ -37,6 +37,7 @@ var speedTimer = 0.0
 var speedCanLast = 5.0
 var speedMultiplier = 1.5
 var canDoubleJump = false
+var canShowDiscord = false
 
 #Mobile controls
 var movingLeft = false
@@ -47,6 +48,7 @@ func _ready() -> void:
 	match OS.get_name():
 		"Windows":
 			controlsNode.visible=false
+			canShowDiscord = true
 		"Web":
 			$Menu2/Quit.visible=false
 			controlsNode.visible=false
@@ -71,11 +73,12 @@ func Death(newPos: Vector2) -> void:
 	deaths+=1
 	deathSFX.play()
 	deathCounter.text = "Deaths: %s" % deaths
-	#if deaths == 1:
-		#DiscordRPC.state = "Died 1 time."
-	#else:
-		#DiscordRPC.state = "Died %s times." % deaths
-	#DiscordRPC.refresh()
+	if canShowDiscord:
+		if deaths == 1:
+			DiscordRPC.state = "Died 1 time."
+		else:
+			DiscordRPC.state = "Died %s times." % deaths
+		DiscordRPC.refresh()
 	
 func addJump():
 	canDoubleJump = true
@@ -138,7 +141,6 @@ func _physics_process(delta):
 			leftChonk.visible=false
 			danceChonk.visible=false
 	elif Input.is_action_pressed("move_left"):
-		print(leftChonkAnim.is_playing())
 		if not leftChonkAnim.is_playing():
 			idleAnim.stop()
 			leftChonk.visible = true
