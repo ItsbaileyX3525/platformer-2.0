@@ -1,0 +1,58 @@
+[gd_scene load_steps=4 format=3 uid="uid://p68kt5qg1wov"]
+
+[ext_resource type="PackedScene" uid="uid://0dgvic7mnuer" path="res://scenes/laser.tscn" id="1_tjh6n"]
+[ext_resource type="Texture2D" uid="uid://cshf2fo6eg1mk" path="res://assets/blocks/grass_dirt.png" id="2_kwdu8"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_wfui7"]
+size = Vector2(175.699, 24.4259)
+
+[node name="Level4" type="Node2D"]
+scale = Vector2(1.656, 1.656)
+
+[node name="Laser3" parent="." instance=ExtResource("1_tjh6n")]
+position = Vector2(670.29, 306.763)
+beamShootTime = 0.4
+beamLast = 0.4
+
+[node name="Laser2" parent="." instance=ExtResource("1_tjh6n")]
+position = Vector2(519.927, 604.469)
+rotation = 3.13851
+beamShootTime = 0.4
+
+[node name="Laser" parent="." instance=ExtResource("1_tjh6n")]
+position = Vector2(389.493, 310.386)
+beamShootTime = 0.5
+
+[node name="Floor1" type="StaticBody2D" parent="."]
+position = Vector2(211.957, 625.604)
+scale = Vector2(4.62954, 2.29973)
+
+[node name="Sprite2D" type="Sprite2D" parent="Floor1"]
+texture_repeat = 2
+position = Vector2(-42.4024, -12.0816)
+scale = Vector2(0.351344, 0.815)
+texture = ExtResource("2_kwdu8")
+centered = false
+region_enabled = true
+region_rect = Rect2(0.085022, 0, 500.457, 30)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Floor1"]
+position = Vector2(45.3416, 0.131317)
+shape = SubResource("RectangleShape2D_wfui7")
+
+[node name="Floor2" type="StaticBody2D" parent="."]
+position = Vector2(545.29, 290.459)
+scale = Vector2(4.62954, 2.29973)
+
+[node name="Sprite2D" type="Sprite2D" parent="Floor2"]
+texture_repeat = 2
+position = Vector2(-42.4024, -12.0816)
+scale = Vector2(0.351344, 0.815)
+texture = ExtResource("2_kwdu8")
+centered = false
+region_enabled = true
+region_rect = Rect2(0.085022, 0, 500.457, 30)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Floor2"]
+position = Vector2(45.3416, 0.131317)
+shape = SubResource("RectangleShape2D_wfui7")

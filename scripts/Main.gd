@@ -5,6 +5,7 @@ const TutorialScene = preload("res://scenes/tutorial.tscn")
 const Level1Scene = preload("res://scenes/level_1.tscn")
 const Level2Scene = preload("res://scenes/level_2.tscn")
 const Level3Scene = preload("res://scenes/level_3.tscn")
+const Level4Scene = preload("res://scenes/level_4.tscn")
 
 @onready var levelTimer = $NextLevel
 @onready var levelCompleteSFX = $LevelComplete
@@ -18,15 +19,19 @@ var Tutorial: Node2D
 var Level1: Node2D
 var Level2: Node2D
 var Level3: Node2D
+var Level4: Node2D
 var goingTo = 1
 
 var finishedLoading = false
 var FinishedTutorial = false
 var FinishedLevel1 = false
 var FinishedLevel2 = false
+var FinishedLevel3 = false
+var FinishedLevel4 = false
 var loadedLevel1 = false
 var loadedLevel2 = false
 var loadedLevel3 = false
+var loadedLevel4 = false
 
 func _on_next_level_timeout() -> void:
 	levelTimer.stop()
@@ -39,7 +44,6 @@ func _on_next_level_timeout() -> void:
 				print("Tried freeing Tutorial")
 			Level1 = Level1Scene.instantiate()
 			add_child(Level1)
-			Player.hide_transition()
 		2:
 			if is_instance_valid(Level1):
 				Level1.queue_free() 
@@ -48,7 +52,23 @@ func _on_next_level_timeout() -> void:
 				print("Tried freeing Tutorial")
 			Level2 = Level2Scene.instantiate()
 			add_child(Level2)
-			Player.hide_transition()
+		3:
+			if is_instance_valid(Level2):
+				Level2.queue_free() 
+				print("Freed")
+			else:
+				print("Tried to free")
+			Level3 = Level3Scene.instantiate()
+			add_child(Level3)
+		4:
+			if is_instance_valid(Level3):
+				Level3.queue_free() 
+				print("Freed")
+			else:
+				print("Tried to free")
+			Level4 = Level4Scene.instantiate()
+			add_child(Level4)			
+	Player.hide_transition()
 
 func loadLevel(whichLevel: int) -> void:
 	Player.show_transition()
@@ -60,6 +80,8 @@ func loadLevel(whichLevel: int) -> void:
 			goingTo = 2
 		3:
 			goingTo = 3
+		4:
+			goingTo = 4
 	levelTimer.start()
 
 func _ready() -> void:
@@ -81,6 +103,9 @@ func _ready() -> void:
 		3:
 			Level3 = Level3Scene.instantiate()
 			add_child(Level3)
+		4:
+			Level4 = Level4Scene.instantiate()
+			add_child(Level4)
 	finishedLoading = true
 	
 	#DiscordRPC.app_id = 1247248712359739444 # Application ID
@@ -111,3 +136,7 @@ func _process(delta: float) -> void:
 			if !FinishedLevel2 and Level2.NextLevel and not loadedLevel3:
 				loadLevel(3)
 				loadedLevel3 = true
+		if is_instance_valid(Level3):
+			if !FinishedLevel4 and Level4.NextLevel and not loadedLevel4:
+				loadLevel(4)
+				loadedLevel4 = true

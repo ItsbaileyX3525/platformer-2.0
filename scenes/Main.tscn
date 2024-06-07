@@ -8,6 +8,7 @@
 [node name="World" type="Node2D"]
 position = Vector2(-4, 1)
 script = ExtResource("1_hfcv2")
+levelToLoad = 4
 
 [node name="Player" type="CanvasGroup" parent="."]
 z_index = 10

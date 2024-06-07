@@ -11,7 +11,7 @@ size = Vector2(175.699, 24.4259)
 scale = Vector2(1.656, 1.656)
 
 [node name="Floor1" type="StaticBody2D" parent="."]
-position = Vector2(198, 1051)
+position = Vector2(199.879, 623.623)
 scale = Vector2(4.62954, 2.29973)
 
 [node name="Sprite2D" type="Sprite2D" parent="Floor1"]
@@ -28,28 +28,28 @@ position = Vector2(45.3416, 0.131317)
 shape = SubResource("RectangleShape2D_gvgkc")
 
 [node name="DoubleJump" parent="." instance=ExtResource("2_r68c1")]
-position = Vector2(386, 976)
+position = Vector2(387.879, 548.623)
 regenTimer = 3
 
 [node name="SpeedBoost" parent="." instance=ExtResource("3_sci1r")]
-position = Vector2(615, 976)
+position = Vector2(616.879, 548.623)
 regenTimer = 3
 
 [node name="RichTextLabel" type="RichTextLabel" parent="."]
-offset_left = 238.0
-offset_top = 806.0
-offset_right = 4898.0
-offset_bottom = 2946.0
+offset_left = 239.879
+offset_top = 378.623
+offset_right = 4899.88
+offset_bottom = 2518.62
 scale = Vector2(0.05, 0.05)
 theme_override_colors/default_color = Color(0, 0, 0, 1)
 theme_override_font_sizes/normal_font_size = 400
 text = "This is a jump boost, it allows you to jump twice!"
 
 [node name="RichTextLabel2" type="RichTextLabel" parent="."]
-offset_left = 506.0
-offset_top = 806.0
-offset_right = 5166.0
-offset_bottom = 2946.0
+offset_left = 507.879
+offset_top = 378.623
+offset_right = 5167.88
+offset_bottom = 2518.62
 scale = Vector2(0.05, 0.05)
 theme_override_colors/default_color = Color(0, 0, 0, 1)
 theme_override_font_sizes/normal_font_size = 400
