@@ -23,6 +23,23 @@
                     }
                 },
                 {
+                    "source": "G:\\Godot\\platformer-2.0\\android\\build\\res\\values\\godot_project_name_string.xml",
+                    "from": {
+                        "startLines": "3",
+                        "startColumns": "1",
+                        "startOffsets": "112",
+                        "endColumns": "61",
+                        "endOffsets": "172"
+                    },
+                    "to": {
+                        "startLines": "95",
+                        "startColumns": "4",
+                        "startOffsets": "5802",
+                        "endColumns": "64",
+                        "endOffsets": "5862"
+                    }
+                },
+                {
                     "source": "C:\\Users\\baile\\.gradle\\caches\\transforms-3\\17217bd060487ee6e9dd0a6d5894ffa1\\transformed\\jetified-activity-1.7.2\\res\\values\\values.xml",
                     "from": {
                         "startLines": "2,3",
@@ -54,23 +71,6 @@
                         "startOffsets": "5137",
                         "endColumns": "42",
                         "endOffsets": "5175"
-                    }
-                },
-                {
-                    "source": "G:\\Godot\\Platformer\\android\\build\\res\\values\\godot_project_name_string.xml",
-                    "from": {
-                        "startLines": "3",
-                        "startColumns": "1",
-                        "startOffsets": "112",
-                        "endColumns": "61",
-                        "endOffsets": "172"
-                    },
-                    "to": {
-                        "startLines": "95",
-                        "startColumns": "4",
-                        "startOffsets": "5802",
-                        "endColumns": "64",
-                        "endOffsets": "5862"
                     }
                 },
                 {
@@ -107,6 +107,25 @@
                         "startOffsets": "5294",
                         "endColumns": "49",
                         "endOffsets": "5339"
+                    }
+                },
+                {
+                    "source": "G:\\Godot\\platformer-2.0\\android\\build\\res\\values\\themes.xml",
+                    "from": {
+                        "startLines": "3,5",
+                        "startColumns": "1,1",
+                        "startOffsets": "53,136",
+                        "endLines": "3,8",
+                        "endColumns": "81,9",
+                        "endOffsets": "133,384"
+                    },
+                    "to": {
+                        "startLines": "135,136",
+                        "startColumns": "4,4",
+                        "startOffsets": "9014,9099",
+                        "endLines": "135,139",
+                        "endColumns": "84,9",
+                        "endOffsets": "9094,9347"
                     }
                 },
                 {
@@ -160,25 +179,6 @@
                         "startOffsets": "5478",
                         "endColumns": "82",
                         "endOffsets": "5556"
-                    }
-                },
-                {
-                    "source": "G:\\Godot\\Platformer\\android\\build\\res\\values\\themes.xml",
-                    "from": {
-                        "startLines": "3,5",
-                        "startColumns": "1,1",
-                        "startOffsets": "53,136",
-                        "endLines": "3,8",
-                        "endColumns": "81,9",
-                        "endOffsets": "133,384"
-                    },
-                    "to": {
-                        "startLines": "135,136",
-                        "startColumns": "4,4",
-                        "startOffsets": "9014,9099",
-                        "endLines": "135,139",
-                        "endColumns": "84,9",
-                        "endOffsets": "9094,9347"
                     }
                 }
             ]

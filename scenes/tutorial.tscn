@@ -10,6 +10,7 @@
 script/source = "extends Node2D
 
 signal nextLevel(level)
+var pressedOnce = false
 
 func nextScene() -> void:
 	nextLevel.emit(1)
@@ -17,6 +18,12 @@ func nextScene() -> void:
 func _on_finish_flag_body_entered(body: Node2D) -> void:
 	if body.name == \"Player\":
 		nextScene()
+
+
+func _on_button_button_down() -> void:
+	if not pressedOnce:
+		pressedOnce = true
+		nextLevel.emit(99999)
 "
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_ixbxt"]
@@ -211,5 +218,25 @@ shape = SubResource("RectangleShape2D_d7ndh")
 [node name="FinishFlag" parent="." instance=ExtResource("5_65eei")]
 position = Vector2(1971.32, 528.832)
 
+[node name="Button" type="Button" parent="."]
+modulate = Color(1, 1, 1, 0.133333)
+offset_left = 131.028
+offset_top = 292.746
+offset_right = 139.028
+offset_bottom = 300.746
+
+[node name="RichTextLabel2" type="RichTextLabel" parent="."]
+offset_left = 781.0
+offset_top = 243.0
+offset_right = 1595.0
+offset_bottom = 1270.0
+scale = Vector2(0.05, 0.05)
+theme_override_colors/default_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/normal_font_size = 700
+bbcode_enabled = true
+text = "1"
+script = SubResource("GDScript_djako")
+
 [connection signal="body_entered" from="Trigger" to="RichTextLabel" method="_on_trigger_body_entered"]
 [connection signal="body_entered" from="FinishFlag" to="." method="_on_finish_flag_body_entered"]
+[connection signal="button_down" from="Button" to="." method="_on_button_button_down"]

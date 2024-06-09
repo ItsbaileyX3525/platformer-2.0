@@ -21,7 +21,7 @@
                     }
                 },
                 {
-                    "source": "G:\\Godot\\Platformer\\android\\build\\res\\values-ru\\godot_project_name_string.xml",
+                    "source": "G:\\Godot\\platformer-2.0\\android\\build\\res\\values-ru\\godot_project_name_string.xml",
                     "from": {
                         "startLines": "3",
                         "startColumns": "1",

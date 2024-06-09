@@ -4,7 +4,7 @@
             "outputFile": "com.godot.game-mergeReleaseResources-16:/values-es/values-es.xml",
             "map": [
                 {
-                    "source": "G:\\Godot\\Platformer\\android\\build\\res\\values-es\\godot_project_name_string.xml",
+                    "source": "G:\\Godot\\platformer-2.0\\android\\build\\res\\values-es\\godot_project_name_string.xml",
                     "from": {
                         "startLines": "3",
                         "startColumns": "1",

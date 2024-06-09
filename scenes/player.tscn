@@ -1,15 +1,17 @@
-[gd_scene load_steps=28 format=3 uid="uid://h3i5gc0ryenh"]
+[gd_scene load_steps=30 format=3 uid="uid://h3i5gc0ryenh"]
 
 [ext_resource type="Script" path="res://scripts/player.gd" id="1_8bgxb"]
 [ext_resource type="Texture2D" uid="uid://ds24jidhoytug" path="res://assets/player/chonky-left.png" id="2_uva7f"]
 [ext_resource type="Texture2D" uid="uid://5jbxda6i1gr1" path="res://assets/player/chonky-right.png" id="3_badim"]
 [ext_resource type="Texture2D" uid="uid://da2ohsntu2lc6" path="res://assets/player/idle.png" id="4_bnms7"]
 [ext_resource type="Texture2D" uid="uid://dhc2f2a0ivlq5" path="res://assets/player/chonky-dance.png" id="5_kd4lg"]
-[ext_resource type="AudioStream" uid="uid://24b2uys66btn" path="res://assets/music/EpikMoosic.ogg" id="6_koa74"]
-[ext_resource type="AudioStream" uid="uid://d1lkh8r6tom57" path="res://assets/music/background/Elevator.ogg" id="7_c7jgs"]
-[ext_resource type="AudioStream" uid="uid://b0dr3ih0pmx0v" path="res://assets/music/Death.ogg" id="8_u8wyb"]
+[ext_resource type="AudioStream" uid="uid://24b2uys66btn" path="res://assets/audio/EpikMoosic.ogg" id="6_32d6w"]
+[ext_resource type="AudioStream" uid="uid://b3k3yi6ynb8ge" path="res://assets/audio/DanceDanceRevloution.ogg" id="7_071do"]
+[ext_resource type="AudioStream" uid="uid://d1lkh8r6tom57" path="res://assets/audio/background/Elevator.ogg" id="8_1wv2j"]
 [ext_resource type="Texture2D" uid="uid://baekfp3igmnse" path="res://assets/controls/LeftArrow.png" id="9_j76um"]
+[ext_resource type="AudioStream" uid="uid://bvenwqyt3u2sb" path="res://assets/audio/background/NormalBG.ogg" id="9_s5naw"]
 [ext_resource type="Texture2D" uid="uid://c2arlclb0kqa6" path="res://assets/controls/RightArrow.png" id="10_2ugt7"]
+[ext_resource type="AudioStream" uid="uid://b0dr3ih0pmx0v" path="res://assets/audio/Death.ogg" id="10_aor2r"]
 [ext_resource type="Texture2D" uid="uid://cxftyuvnmuvcc" path="res://assets/graphics/AButton.png" id="11_y41yq"]
 [ext_resource type="Texture2D" uid="uid://drltavv2gvjwh" path="res://assets/graphics/XButton.png" id="12_fqutd"]
 [ext_resource type="Texture2D" uid="uid://bac88jqg1upis" path="res://assets/Menu.png" id="13_n4pk7"]
@@ -244,15 +246,23 @@ text = "Level Complete!"
 fit_content = true
 
 [node name="Dance" type="AudioStreamPlayer" parent="."]
-stream = ExtResource("6_koa74")
+stream = ExtResource("6_32d6w")
+
+[node name="Dance2" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("7_071do")
+volume_db = -23.85
 
 [node name="BackgroundMusic" type="AudioStreamPlayer" parent="."]
-stream = ExtResource("7_c7jgs")
+stream = ExtResource("8_1wv2j")
 volume_db = -15.0
 autoplay = true
 
+[node name="BackgroundMusic2" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("9_s5naw")
+volume_db = -24.361
+
 [node name="Death" type="AudioStreamPlayer" parent="."]
-stream = ExtResource("8_u8wyb")
+stream = ExtResource("10_aor2r")
 
 [node name="MobileControls" type="Node2D" parent="."]
 position = Vector2(-564.024, 40.8537)
@@ -337,6 +347,9 @@ offset_bottom = 398.566
 scale = Vector2(0.05, 0.12547)
 theme_override_font_sizes/normal_font_size = 97
 text = "Resume"
+
+[node name="Timer" type="Timer" parent="."]
+wait_time = 2.5
 
 [connection signal="pressed" from="MobileControls/Left" to="." method="_on_left_pressed"]
 [connection signal="released" from="MobileControls/Left" to="." method="_on_left_released"]

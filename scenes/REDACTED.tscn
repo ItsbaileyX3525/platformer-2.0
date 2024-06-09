@@ -1,0 +1,27 @@
+[gd_scene load_steps=3 format=3 uid="uid://c5w0yqtvc67fh"]
+
+[ext_resource type="Texture2D" uid="uid://cshf2fo6eg1mk" path="res://assets/blocks/grass_dirt.png" id="1_n3vm0"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_5ypd4"]
+size = Vector2(1245.55, 24.6826)
+
+[node name="???" type="Node2D"]
+scale = Vector2(1.656, 1.656)
+
+[node name="Floor1" type="StaticBody2D" parent="."]
+position = Vector2(196.86, 625.604)
+scale = Vector2(4.62954, 2.29973)
+
+[node name="Sprite2D" type="Sprite2D" parent="Floor1"]
+modulate = Color(0.355314, 0.355314, 0.355314, 1)
+texture_repeat = 2
+position = Vector2(-42.4024, -12.0816)
+scale = Vector2(0.351344, 0.815)
+texture = ExtResource("1_n3vm0")
+centered = false
+region_enabled = true
+region_rect = Rect2(-0.186554, -0.299866, 3545.19, 30.5448)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Floor1"]
+position = Vector2(580.381, 0.262573)
+shape = SubResource("RectangleShape2D_5ypd4")

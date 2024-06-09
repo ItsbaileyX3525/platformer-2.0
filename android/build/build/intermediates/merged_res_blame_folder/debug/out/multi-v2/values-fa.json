@@ -4,6 +4,23 @@
             "outputFile": "com.godot.game-mergeDebugResources-16:/values-fa/values-fa.xml",
             "map": [
                 {
+                    "source": "G:\\Godot\\platformer-2.0\\android\\build\\res\\values-fa\\godot_project_name_string.xml",
+                    "from": {
+                        "startLines": "3",
+                        "startColumns": "1",
+                        "startOffsets": "112",
+                        "endColumns": "61",
+                        "endOffsets": "172"
+                    },
+                    "to": {
+                        "startLines": "2",
+                        "startColumns": "4",
+                        "startOffsets": "55",
+                        "endColumns": "64",
+                        "endOffsets": "115"
+                    }
+                },
+                {
                     "source": "C:\\Users\\baile\\.gradle\\caches\\transforms-3\\1d2f4d75c034fbcf1699ed1528521307\\transformed\\jetified-godot-lib.template_debug\\res\\values-fa\\values-fa.xml",
                     "from": {
                         "startLines": "2,3,4,5,6,7,8,9,10,11,12",
@@ -35,23 +52,6 @@
                         "startOffsets": "120",
                         "endColumns": "100",
                         "endOffsets": "216"
-                    }
-                },
-                {
-                    "source": "G:\\Godot\\Platformer\\android\\build\\res\\values-fa\\godot_project_name_string.xml",
-                    "from": {
-                        "startLines": "3",
-                        "startColumns": "1",
-                        "startOffsets": "112",
-                        "endColumns": "61",
-                        "endOffsets": "172"
-                    },
-                    "to": {
-                        "startLines": "2",
-                        "startColumns": "4",
-                        "startOffsets": "55",
-                        "endColumns": "64",
-                        "endOffsets": "115"
                     }
                 }
             ]

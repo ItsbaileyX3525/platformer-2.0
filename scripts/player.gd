@@ -5,6 +5,7 @@ extends CharacterBody2D
 @export var jumpForce = 600
 @export var deathBarrier: Node2D
 
+@onready var realTimer = $Timer
 @onready var idleChonk = $IdleChonky
 @onready var idleAnim = $IdleChonky/AnimationPlayer
 @onready var leftChonk = $ChonkyLeft
@@ -13,17 +14,21 @@ extends CharacterBody2D
 @onready var rightChonk = $ChonkyRight
 @onready var danceChonk = $DanceChonky
 @onready var backgroundSFX = $BackgroundMusic
+@onready var backgroundSFX2 = $BackgroundMusic2
 @onready var danceChonkAnim = $DanceChonky/AnimationPlayer
 @onready var deathCounter = $RichTextLabel
 @onready var transition = $ColorRect
 @onready var transitionText = $RichTextLabel2
 @onready var deathSFX = $Death
 @onready var danceSFX = $Dance
+@onready var danceSFX2 = $Dance2
 @onready var controlsNode = $MobileControls
 @onready var LeftButton = $MobileControls/Left
 @onready var RightButton = $MobileControls/Right
 @onready var UpButton = $MobileControls/Jump
 @onready var MenuNode = $Menu2
+
+signal yoParentNode()
 
 var deaths = 0
 var fixedTimestep = 1.0/60.0
@@ -37,7 +42,8 @@ var speedTimer = 0.0
 var speedCanLast = 5.0
 var speedMultiplier = 1.5
 var canDoubleJump = false
-var canShowDiscord = false
+var secretsClicked = 0
+var doneSecret = false
 
 #Mobile controls
 var movingLeft = false
@@ -48,7 +54,6 @@ func _ready() -> void:
 	match OS.get_name():
 		"Windows":
 			controlsNode.visible=false
-			canShowDiscord = true
 		"Web":
 			$Menu2/Quit.visible=false
 			controlsNode.visible=false
@@ -73,13 +78,10 @@ func Death(newPos: Vector2) -> void:
 	deaths+=1
 	deathSFX.play()
 	deathCounter.text = "Deaths: %s" % deaths
-	if canShowDiscord:
-		if deaths == 1:
-			DiscordRPC.state = "Died 1 time."
-		else:
-			DiscordRPC.state = "Died %s times." % deaths
-		DiscordRPC.refresh()
 	
+func addPoint():
+	secretsClicked+=1
+
 func addJump():
 	canDoubleJump = true
 
@@ -87,6 +89,10 @@ func addSpeed(length: float = 5, speedAmount: float = 1.5):
 	speedTimer = 0
 	speedCanLast = length
 	speedMultiplier = speedAmount
+	rightChonkAnim.speed_scale = speedAmount
+	leftChonkAnim.speed_scale = speedAmount
+	danceChonkAnim.speed_scale = speedAmount
+	idleAnim.speed_scale = speedAmount
 	speedyBoi = true
 
 func  step() -> void:
@@ -105,11 +111,23 @@ func _physics_process(delta):
 		timer=0
 		step()
 	
+	if secretsClicked == 4 and not doneSecret:
+		doneSecret=true
+		backgroundSFX.stop()
+		yoParentNode.emit()
+		realTimer.start()
+		await realTimer.timeout
+		backgroundSFX2.play()
+	
 	if speedyBoi:
 		speedTimer+=delta
 	if speedTimer >= speedCanLast:
 		speedyBoi=false
 		speedTimer=0
+		rightChonkAnim.speed_scale = 1
+		leftChonkAnim.speed_scale = 1
+		danceChonkAnim.speed_scale = 1
+		idleAnim.speed_scale = 1
 	
 	if Input.is_action_just_pressed("jump"):
 		jumpTimer = 0.1
@@ -151,7 +169,7 @@ func _physics_process(delta):
 			danceChonk.visible=false
 			danceSFX.stop()
 			danceChonkAnim.stop()
-			if not backgroundSFX.playing:
+			if not backgroundSFX.playing and not doneSecret:
 				backgroundSFX.play()
 				backgroundSFX.seek(backgroundTime)
 	elif Input.is_action_pressed("move_right"):
@@ -165,7 +183,7 @@ func _physics_process(delta):
 			idleChonk.visible = false
 			danceChonk.visible=false
 			danceChonkAnim.stop()
-			if not backgroundSFX.playing:
+			if not backgroundSFX.playing and not doneSecret:
 				backgroundSFX.play()
 				backgroundSFX.seek(backgroundTime)
 	else:
@@ -183,9 +201,14 @@ func _physics_process(delta):
 			if not danceChonkAnim.is_playing():
 				danceChonk.visible=true
 				danceChonkAnim.play("dance")
-				backgroundTime = backgroundSFX.get_playback_position()
-				backgroundSFX.stop()
-				danceSFX.play()
+				if doneSecret:
+					danceSFX2.play()
+					backgroundTime = backgroundSFX2.get_playback_position()
+					backgroundSFX2.stop()
+				else:
+					danceSFX.play()
+					backgroundTime = backgroundSFX.get_playback_position()
+					backgroundSFX.stop()
 				
 				idleChonk.visible=false
 				rightChonk.visible=false

@@ -1,4 +1,0 @@
-#Mon Jun 03 21:59:45 BST 2024
-base.0=G\:\\Godot\\Platformer\\android\\build\\build\\intermediates\\dex\\release\\mergeDexRelease\\classes.dex
-renamed.0=classes.dex
-path.0=classes.dex

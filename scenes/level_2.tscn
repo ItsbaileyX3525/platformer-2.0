@@ -3,9 +3,9 @@
 [ext_resource type="Texture2D" uid="uid://cshf2fo6eg1mk" path="res://assets/blocks/grass_dirt.png" id="1_fpix0"]
 [ext_resource type="PackedScene" uid="uid://bxyoisbqmd8r8" path="res://scenes/MovingPlatform.tscn" id="2_ayage"]
 [ext_resource type="PackedScene" uid="uid://ctmlu238spt3j" path="res://scenes/lever.tscn" id="3_nvmuh"]
-[ext_resource type="AudioStream" uid="uid://bb6tk4bk2wjg6" path="res://assets/music/LeverSwitch.ogg" id="4_10q4k"]
 [ext_resource type="Texture2D" uid="uid://do33at3qja57i" path="res://assets/blocks/levers/InactiveLever.png" id="4_ck3d0"]
 [ext_resource type="Texture2D" uid="uid://56m1cuy4vomm" path="res://assets/blocks/levers/ActiveLever.png" id="5_jvxrd"]
+[ext_resource type="AudioStream" uid="uid://bb6tk4bk2wjg6" path="res://assets/audio/LeverSwitch.ogg" id="6_ergbr"]
 [ext_resource type="PackedScene" uid="uid://0dgvic7mnuer" path="res://scenes/laser.tscn" id="7_wyfmu"]
 [ext_resource type="PackedScene" uid="uid://buv6650ugxxq5" path="res://scenes/finish_flag.tscn" id="8_h0mpo"]
 
@@ -359,7 +359,7 @@ texture = ExtResource("4_ck3d0")
 texture = ExtResource("5_jvxrd")
 
 [node name="AudioStreamPlayer2D" type="AudioStreamPlayer2D" parent="Lever"]
-stream = ExtResource("4_10q4k")
+stream = ExtResource("6_ergbr")
 max_distance = 1000.0
 
 [node name="Laser" parent="." instance=ExtResource("7_wyfmu")]
@@ -393,7 +393,7 @@ texture = ExtResource("4_ck3d0")
 texture = ExtResource("5_jvxrd")
 
 [node name="AudioStreamPlayer2D" type="AudioStreamPlayer2D" parent="Lever2"]
-stream = ExtResource("4_10q4k")
+stream = ExtResource("6_ergbr")
 max_distance = 1000.0
 
 [node name="Floor5" type="StaticBody2D" parent="."]
@@ -437,5 +437,16 @@ shape = SubResource("RectangleShape2D_8h0qh")
 
 [node name="FinishFlag" parent="." instance=ExtResource("8_h0mpo")]
 position = Vector2(2335.75, 577.899)
+
+[node name="Warning2" type="RichTextLabel" parent="."]
+offset_left = 565.217
+offset_top = 251.208
+offset_right = 3903.22
+offset_bottom = 1141.21
+scale = Vector2(0.05, 0.05)
+theme_override_colors/default_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/normal_font_size = 600
+text = "7"
+scroll_active = false
 
 [connection signal="body_entered" from="FinishFlag" to="." method="_on_finish_flag_body_entered"]

@@ -1,0 +1,386 @@
+[gd_scene load_steps=15 format=3 uid="uid://bih6wwy54x413"]
+
+[ext_resource type="Texture2D" uid="uid://cwkb1uuhhiqlq" path="res://assets/sky.jpg" id="1_6q4mn"]
+[ext_resource type="AudioStream" uid="uid://dulqgsoolth50" path="res://assets/audio/background/Menu.ogg" id="1_byiwn"]
+[ext_resource type="AudioStream" uid="uid://dueagfnl8d8qn" path="res://assets/audio/MenuButtonClick.ogg" id="2_ykn15"]
+[ext_resource type="Texture2D" uid="uid://b4qlnvleplddl" path="res://assets/levels/Level1.png" id="4_gopnw"]
+[ext_resource type="Texture2D" uid="uid://djw4olanyk7m5" path="res://assets/levels/Level2.png" id="5_8u03a"]
+[ext_resource type="Texture2D" uid="uid://c2arlclb0kqa6" path="res://assets/controls/RightArrow.png" id="6_gt04h"]
+[ext_resource type="Texture2D" uid="uid://baekfp3igmnse" path="res://assets/controls/LeftArrow.png" id="7_7dege"]
+
+[sub_resource type="GDScript" id="GDScript_q7wxx"]
+script/source = "extends Node2D
+
+signal events(event)
+
+@onready var mainScene = $Main
+@onready var levelScene = $Levels
+@onready var creditsScene = $Credits
+@onready var background = $Normal
+@onready var quit = $Main/Quit
+
+func _ready() -> void:
+	var onWeb = OS.get_name()
+	if onWeb == \"Web\":
+		quit.visible=false
+
+func loadGame() -> Dictionary:
+	var data
+	if not FileAccess.file_exists(\"user://save.json\"): 
+		var save_dict = {
+			\"levelsCompleted\": 1
+		}
+		return save_dict
+	else:
+		var saveGame = FileAccess.get_file_as_string(\"user://save.json\")
+
+		data = JSON.parse_string(saveGame)
+
+	
+	return data
+
+var gameData = loadGame()
+var levelsCompleted = gameData[\"levelsCompleted\"]
+
+func _on_start_pressed() -> void:
+	events.emit(int(levelsCompleted))
+
+
+func _on_select_pressed() -> void:
+	mainScene.visible=false
+	background.visible=false
+	levelScene.visible=true
+
+
+func _on_credits_pressed() -> void:
+	var underDev = true
+	if not underDev:
+		mainScene.visible=false
+		creditsScene.visible=true
+
+
+func _on_quit_pressed() -> void:
+	get_tree().quit()
+
+
+func _on_levels_send_this_to_granddad(event: int) -> void:
+	print(\"Event recieved\")
+	events.emit(event)
+
+
+func _on_return_pressed() -> void:
+	mainScene.visible=true
+	background.visible=true
+	levelScene.visible=false
+"
+
+[sub_resource type="Animation" id="Animation_2we87"]
+resource_name = "move"
+loop_mode = 1
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.5),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Vector2(492, -20), Vector2(492, 15)]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_w6t6q"]
+_data = {
+"move": SubResource("Animation_2we87")
+}
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_d1llw"]
+
+[sub_resource type="GDScript" id="GDScript_wjcbh"]
+script/source = "extends Node2D
+
+func loadGame() -> Dictionary:
+	var data
+	if not FileAccess.file_exists(\"user://save.json\"): 
+		var save_dict = {
+			\"levelsCompleted\": 1
+		}
+		return save_dict
+	else:
+		var saveGame = FileAccess.get_file_as_string(\"user://save.json\")
+
+		data = JSON.parse_string(saveGame)
+
+	
+	return data
+
+var gameData = loadGame()
+var levelsCompleted = gameData[\"levelsCompleted\"]
+
+signal sendThisToGranddad(event)
+
+@onready var levelText = $RichTextLabel2
+
+@onready var levelImages = {
+	1: $LevelImages/level1,
+	2: $LevelImages/level2
+}
+
+var currentLevel = 1
+var minLevel = 1
+@export var maxLevel = 2
+
+func _on_previous_pressed() -> void:
+	if currentLevel != minLevel:
+		currentLevel-=1
+	else:
+		currentLevel = int(levelsCompleted)
+	levelText.text = \" LEVEL: %s\" % currentLevel
+	for e in levelImages.values():
+		e.visible=false
+	levelImages[currentLevel].visible=true
+
+func _on_next_pressed() -> void:
+	if currentLevel != int(levelsCompleted):
+		currentLevel+=1
+	else:
+		currentLevel = minLevel
+	levelText.text = \" LEVEL: %s\" % currentLevel
+	for e in levelImages.values():
+		e.visible=false
+	levelImages[currentLevel].visible=true
+	
+
+
+func _on_start_game_pressed() -> void:
+	sendThisToGranddad.emit(currentLevel)
+"
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_u1o68"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_174e6"]
+
+[node name="Intro" type="Node2D"]
+position = Vector2(1, 0)
+script = SubResource("GDScript_q7wxx")
+
+[node name="Normal" type="Sprite2D" parent="."]
+position = Vector2(961, 525)
+scale = Vector2(0.99999, 0.99999)
+texture = ExtResource("1_6q4mn")
+
+[node name="Main" type="Node2D" parent="."]
+
+[node name="RichTextLabel" type="RichTextLabel" parent="Main"]
+offset_left = 492.0
+offset_top = -1.79629
+offset_right = 19932.0
+offset_bottom = 2118.2
+scale = Vector2(0.05, 0.12547)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 1)
+theme_override_constants/shadow_outline_size = 200
+theme_override_font_sizes/normal_font_size = 1500
+text = "   Platformer 2.0"
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="Main/RichTextLabel"]
+libraries = {
+"": SubResource("AnimationLibrary_w6t6q")
+}
+autoplay = "move"
+speed_scale = 0.6
+
+[node name="MenuMusic" type="AudioStreamPlayer" parent="Main"]
+stream = ExtResource("1_byiwn")
+autoplay = true
+
+[node name="MenuClick" type="AudioStreamPlayer" parent="Main"]
+stream = ExtResource("2_ykn15")
+
+[node name="Start" type="Node2D" parent="Main"]
+
+[node name="Start" type="TouchScreenButton" parent="Main/Start"]
+position = Vector2(968, 369)
+scale = Vector2(25.08, 3.16)
+shape = SubResource("RectangleShape2D_d1llw")
+shape_centered = false
+
+[node name="RichTextLabel2" type="RichTextLabel" parent="Main/Start"]
+offset_left = 668.0
+offset_top = 324.0
+offset_right = 12408.0
+offset_bottom = 2224.0
+scale = Vector2(0.05, 0.05)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 1)
+theme_override_constants/shadow_outline_size = 150
+theme_override_font_sizes/normal_font_size = 1500
+text = " START GAME"
+
+[node name="LevelSelect" type="Node2D" parent="Main"]
+
+[node name="Select" type="TouchScreenButton" parent="Main/LevelSelect"]
+position = Vector2(968, 577)
+scale = Vector2(30.12, 3.16)
+shape = SubResource("RectangleShape2D_d1llw")
+shape_centered = false
+
+[node name="RichTextLabel2" type="RichTextLabel" parent="Main/LevelSelect"]
+offset_left = 629.0
+offset_top = 532.0
+offset_right = 14229.0
+offset_bottom = 2432.0
+scale = Vector2(0.05, 0.05)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 1)
+theme_override_constants/shadow_outline_size = 150
+theme_override_font_sizes/normal_font_size = 1500
+text = " LEVEL SELECT"
+
+[node name="Credits" type="Node2D" parent="Main"]
+position = Vector2(73, 49)
+
+[node name="Credits" type="TouchScreenButton" parent="Main/Credits"]
+position = Vector2(886, 721)
+scale = Vector2(17.88, 3.16)
+shape = SubResource("RectangleShape2D_d1llw")
+shape_centered = false
+
+[node name="RichTextLabel2" type="RichTextLabel" parent="Main/Credits"]
+offset_left = 668.0
+offset_top = 676.0
+offset_right = 12408.0
+offset_bottom = 2576.0
+scale = Vector2(0.05, 0.05)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 1)
+theme_override_constants/shadow_outline_size = 150
+theme_override_font_sizes/normal_font_size = 1500
+text = " CREDITS"
+
+[node name="Quit" type="Node2D" parent="Main"]
+position = Vector2(0, 577)
+scale = Vector2(1.17821, 0.956156)
+
+[node name="Quit" type="TouchScreenButton" parent="Main/Quit"]
+position = Vector2(811, 369)
+scale = Vector2(10.44, 3.16)
+shape = SubResource("RectangleShape2D_d1llw")
+shape_centered = false
+
+[node name="RichTextLabel2" type="RichTextLabel" parent="Main/Quit"]
+offset_left = 668.0
+offset_top = 324.0
+offset_right = 12408.0
+offset_bottom = 2224.0
+scale = Vector2(0.05, 0.05)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 1)
+theme_override_constants/shadow_outline_size = 150
+theme_override_font_sizes/normal_font_size = 1500
+text = " QUIT"
+
+[node name="Levels" type="Node2D" parent="."]
+visible = false
+script = SubResource("GDScript_wjcbh")
+
+[node name="LevelImages" type="Node2D" parent="Levels"]
+
+[node name="level1" type="Sprite2D" parent="Levels/LevelImages"]
+position = Vector2(961, 525)
+scale = Vector2(1.19999, 1.19999)
+texture = ExtResource("4_gopnw")
+
+[node name="level2" type="Sprite2D" parent="Levels/LevelImages"]
+visible = false
+position = Vector2(926, 532)
+scale = Vector2(1.19999, 1.19999)
+texture = ExtResource("5_8u03a")
+
+[node name="RichTextLabel2" type="RichTextLabel" parent="Levels"]
+offset_left = 741.0
+offset_top = 459.0
+offset_right = 25801.0
+offset_bottom = 2359.0
+scale = Vector2(0.05, 0.05)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 1)
+theme_override_constants/shadow_outline_size = 200
+theme_override_font_sizes/normal_font_size = 1500
+text = " LEVEL: 1"
+
+[node name="ColorRect" type="ColorRect" parent="Levels"]
+offset_left = 178.0
+offset_top = 440.0
+offset_right = 218.0
+offset_bottom = 480.0
+scale = Vector2(7.16179, 3.16179)
+color = Color(0.133196, 0.133196, 0.133196, 0.521569)
+
+[node name="ColorRect2" type="ColorRect" parent="Levels"]
+offset_left = 1382.0
+offset_top = 440.0
+offset_right = 1422.0
+offset_bottom = 480.0
+scale = Vector2(7.16179, 3.16179)
+color = Color(0.133196, 0.133196, 0.133196, 0.521569)
+
+[node name="Next" type="TouchScreenButton" parent="Levels"]
+position = Vector2(1382, 440)
+scale = Vector2(31.7594, 15.7418)
+texture_normal = ExtResource("6_gt04h")
+
+[node name="Previous" type="TouchScreenButton" parent="Levels"]
+position = Vector2(178, 440)
+scale = Vector2(31.759, 15.742)
+texture_normal = ExtResource("7_7dege")
+
+[node name="RichTextLabel3" type="RichTextLabel" parent="Levels"]
+offset_left = 689.0
+offset_top = 770.0
+offset_right = 25749.0
+offset_bottom = 2670.0
+scale = Vector2(0.05, 0.05)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 1)
+theme_override_constants/shadow_outline_size = 200
+theme_override_font_sizes/normal_font_size = 1500
+text = " START GAME!"
+
+[node name="StartGame" type="TouchScreenButton" parent="Levels"]
+position = Vector2(1006, 816)
+scale = Vector2(26.8, 3.4)
+shape = SubResource("RectangleShape2D_u1o68")
+
+[node name="RichTextLabel4" type="RichTextLabel" parent="Levels"]
+offset_left = -27.0
+offset_right = 25033.0
+offset_bottom = 1900.0
+scale = Vector2(0.05, 0.05)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 1)
+theme_override_constants/shadow_outline_size = 200
+theme_override_font_sizes/normal_font_size = 1500
+text = " RETURN"
+
+[node name="Return" type="TouchScreenButton" parent="Levels"]
+position = Vector2(168, 45)
+scale = Vector2(14.92, 3.44256)
+shape = SubResource("RectangleShape2D_174e6")
+
+[node name="Credits" type="Node2D" parent="."]
+visible = false
+
+[node name="Version" type="RichTextLabel" parent="."]
+offset_left = -54.0
+offset_top = 991.0
+offset_right = 8546.0
+offset_bottom = 2019.0
+scale = Vector2(0.05, 0.12547)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 1)
+theme_override_constants/shadow_outline_size = 100
+theme_override_font_sizes/normal_font_size = 600
+text = "   Version: Beta"
+
+[connection signal="pressed" from="Main/Start/Start" to="." method="_on_start_pressed"]
+[connection signal="pressed" from="Main/LevelSelect/Select" to="." method="_on_select_pressed"]
+[connection signal="pressed" from="Main/Credits/Credits" to="." method="_on_credits_pressed"]
+[connection signal="pressed" from="Main/Quit/Quit" to="." method="_on_quit_pressed"]
+[connection signal="sendThisToGranddad" from="Levels" to="." method="_on_levels_send_this_to_granddad"]
+[connection signal="pressed" from="Levels/Next" to="Levels" method="_on_next_pressed"]
+[connection signal="pressed" from="Levels/Previous" to="Levels" method="_on_previous_pressed"]
+[connection signal="pressed" from="Levels/StartGame" to="Levels" method="_on_start_game_pressed"]
+[connection signal="pressed" from="Levels/Return" to="." method="_on_return_pressed"]

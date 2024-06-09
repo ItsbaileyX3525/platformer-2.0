@@ -1,14 +1,14 @@
-[gd_scene load_steps=5 format=3 uid="uid://dl4stiafram03"]
+[gd_scene load_steps=6 format=3 uid="uid://dl4stiafram03"]
 
 [ext_resource type="Script" path="res://scripts/Main.gd" id="1_hfcv2"]
 [ext_resource type="Texture2D" uid="uid://cwkb1uuhhiqlq" path="res://assets/sky.jpg" id="2_py6u2"]
-[ext_resource type="AudioStream" uid="uid://661qjyjklrvq" path="res://assets/music/Victory.mp3" id="3_musoy"]
+[ext_resource type="AudioStream" uid="uid://661qjyjklrvq" path="res://assets/audio/Victory.mp3" id="3_musoy"]
 [ext_resource type="Texture2D" uid="uid://buvlwgc5b56r2" path="res://assets/Background - dark.png" id="3_rn24r"]
+[ext_resource type="AudioStream" uid="uid://c7ijt5577ogxm" path="res://assets/audio/Crackle.ogg" id="5_qr2rp"]
 
 [node name="World" type="Node2D"]
 position = Vector2(-4, 1)
 script = ExtResource("1_hfcv2")
-levelToLoad = 3
 
 [node name="Player" type="CanvasGroup" parent="."]
 z_index = 10
@@ -18,6 +18,7 @@ z_index = -1
 scale = Vector2(0.4, 0.35)
 
 [node name="YeaNotSoNormal" type="Sprite2D" parent="Background"]
+visible = false
 position = Vector2(-1.2499, -9.99989)
 scale = Vector2(49.925, 31.7429)
 texture = ExtResource("3_rn24r")
@@ -28,6 +29,9 @@ texture = ExtResource("2_py6u2")
 
 [node name="LevelComplete" type="AudioStreamPlayer" parent="."]
 stream = ExtResource("3_musoy")
+
+[node name="LevelComplete?" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("5_qr2rp")
 
 [node name="NextLevel" type="Timer" parent="."]
 wait_time = 2.1
