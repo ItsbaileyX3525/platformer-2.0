@@ -48,6 +48,7 @@ var speedTimer = 0.0
 var speedCanLast = 5.0
 var speedMultiplier = 1.5
 var canDoubleJump = false
+var inMenu = false
 var secretsClicked = 0
 var doneSecret = false
 
@@ -144,6 +145,10 @@ func  step() -> void:
 		Death(Vector2(0,250))
 	if Input.is_action_just_pressed("pause"):
 		MenuNode.visible= not MenuNode.visible
+		inMenu = not inMenu
+		if Input.get_connected_joypads().size() >= 1:
+			$Menu2/Resume.grab_focus()
+		
 
 	var canClimb = false
 	if raycastLeft.is_colliding():
@@ -197,90 +202,92 @@ func _physics_process(delta):
 		danceChonkAnim.speed_scale = 1
 		idleAnim.speed_scale = 1
 	
-	if Input.is_action_just_pressed("jump"):
-		jumpTimer = 0.1
-	jumpTimer-=delta
-	if jumpTimer > 0 and is_on_floor():
-		jumpTimer = 0.0
-		velocity.y = -jumpForce
-	elif jumpTimer > 0 and canDoubleJump:
-		jumpTimer = 0.0
-		velocity.y = -jumpForce
-		canDoubleJump=false
-	var hDirection = Input.get_axis("move_left", "move_right") 
+	if not inMenu:
+		if Input.is_action_just_pressed("jump"):
+			jumpTimer = 0.1
+		jumpTimer-=delta
+		if jumpTimer > 0 and is_on_floor():
+			jumpTimer = 0.0
+			velocity.y = -jumpForce
+		elif jumpTimer > 0 and canDoubleJump:
+			jumpTimer = 0.0
+			velocity.y = -jumpForce
+			canDoubleJump=false
 	
-	if not speedyBoi:
-		velocity.x = speed * hDirection
-	else:
-		velocity.x = speed * hDirection * speedMultiplier
+		var hDirection = Input.get_axis("move_left", "move_right") 
+		
+		if not speedyBoi:
+			velocity.x = speed * hDirection
+		else:
+			velocity.x = speed * hDirection * speedMultiplier
 	
-	move_and_slide()
-	
+		move_and_slide()
+		
 
-	if Input.is_action_pressed("move_right") && Input.is_action_pressed("move_left"):
-		if not idleAnim.is_playing() and not isDancing:
-			idleAnim.play("idle")
-			leftChonkAnim.stop()
-			rightChonkAnim.stop()
-			idleChonk.visible = true
-			rightChonk.visible=false
-			leftChonk.visible=false
-			danceChonk.visible=false
-	elif Input.is_action_pressed("move_left"):
-		if not leftChonkAnim.is_playing():
-			idleAnim.stop()
-			leftChonk.visible = true
-			leftChonkAnim.play("move_left")
-			rightChonkAnim.stop()
-			rightChonk.visible = false
-			idleChonk.visible = false
-			danceChonk.visible=false
-			danceSFX.stop()
-			danceChonkAnim.stop()
-			if not backgroundSFX.playing and not doneSecret:
-				backgroundSFX.play()
-				backgroundSFX.seek(backgroundTime)
-	elif Input.is_action_pressed("move_right"):
-		if not rightChonkAnim.is_playing():
-			idleAnim.stop()
-			leftChonk.visible = false
-			leftChonkAnim.stop()
-			rightChonkAnim.play("move_right")
-			rightChonk.visible = true
-			danceSFX.stop()
-			idleChonk.visible = false
-			danceChonk.visible=false
-			danceChonkAnim.stop()
-			if not backgroundSFX.playing and not doneSecret:
-				backgroundSFX.play()
-				backgroundSFX.seek(backgroundTime)
-	else:
-		if not idleAnim.is_playing() and not isDancing:
-			idleAnim.play("idle")
-			leftChonkAnim.stop()
-			rightChonkAnim.stop()
-			idleChonk.visible = true
-			rightChonk.visible=false
-			leftChonk.visible=false
-			danceChonk.visible=false
-
-	if Input.is_action_just_pressed("dance"):
-		if not Input.is_action_pressed("move_right") and not Input.is_action_pressed("move_left"):
-			if not danceChonkAnim.is_playing():
-				danceChonk.visible=true
-				danceChonkAnim.play("dance")
-				if doneSecret:
-					danceSFX2.play()
-					backgroundTime = backgroundSFX2.get_playback_position()
-					backgroundSFX2.stop()
-				else:
-					danceSFX.play()
-					backgroundTime = backgroundSFX.get_playback_position()
-					backgroundSFX.stop()
-				
-				idleChonk.visible=false
+		if Input.is_action_pressed("move_right") && Input.is_action_pressed("move_left"):
+			if not idleAnim.is_playing() and not isDancing:
+				idleAnim.play("idle")
+				leftChonkAnim.stop()
+				rightChonkAnim.stop()
+				idleChonk.visible = true
 				rightChonk.visible=false
 				leftChonk.visible=false
+				danceChonk.visible=false
+		elif Input.is_action_pressed("move_left"):
+			if not leftChonkAnim.is_playing():
+				idleAnim.stop()
+				leftChonk.visible = true
+				leftChonkAnim.play("move_left")
+				rightChonkAnim.stop()
+				rightChonk.visible = false
+				idleChonk.visible = false
+				danceChonk.visible=false
+				danceSFX.stop()
+				danceChonkAnim.stop()
+				if not backgroundSFX.playing and not doneSecret:
+					backgroundSFX.play()
+					backgroundSFX.seek(backgroundTime)
+		elif Input.is_action_pressed("move_right"):
+			if not rightChonkAnim.is_playing():
+				idleAnim.stop()
+				leftChonk.visible = false
+				leftChonkAnim.stop()
+				rightChonkAnim.play("move_right")
+				rightChonk.visible = true
+				danceSFX.stop()
+				idleChonk.visible = false
+				danceChonk.visible=false
+				danceChonkAnim.stop()
+				if not backgroundSFX.playing and not doneSecret:
+					backgroundSFX.play()
+					backgroundSFX.seek(backgroundTime)
+		else:
+			if not idleAnim.is_playing() and not isDancing:
+				idleAnim.play("idle")
+				leftChonkAnim.stop()
+				rightChonkAnim.stop()
+				idleChonk.visible = true
+				rightChonk.visible=false
+				leftChonk.visible=false
+				danceChonk.visible=false
+
+		if Input.is_action_just_pressed("dance"):
+			if not Input.is_action_pressed("move_right") and not Input.is_action_pressed("move_left"):
+				if not danceChonkAnim.is_playing():
+					danceChonk.visible=true
+					danceChonkAnim.play("dance")
+					if doneSecret:
+						danceSFX2.play()
+						backgroundTime = backgroundSFX2.get_playback_position()
+						backgroundSFX2.stop()
+					else:
+						danceSFX.play()
+						backgroundTime = backgroundSFX.get_playback_position()
+						backgroundSFX.stop()
+					
+					idleChonk.visible=false
+					rightChonk.visible=false
+					leftChonk.visible=false
 
 func _on_jump_pressed() -> void:
 	Input.action_press("jump")
@@ -314,6 +321,7 @@ func _on_menu_released():
 
 func _on_resume_pressed() -> void:
 	MenuNode.visible=false
+	inMenu = false
 
 func _on_dance_pressed() -> void:
 	Input.action_press("dance")

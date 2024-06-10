@@ -19,21 +19,20 @@ var Player: Node2D
 var child_instance
 
 func saveGame(dictToSave: Dictionary) -> void:
-	print("Saved")
-	var gameFile = FileAccess.open("user://save.json", FileAccess.WRITE)
+	var gameFile = FileAccess.open("user://saveLevel.json", FileAccess.WRITE)
 	
 	var jsonString = JSON.stringify(dictToSave)
 	gameFile.store_line(jsonString)
 
 func loadGame() -> Dictionary:
 	var data
-	if not FileAccess.file_exists("user://save.json"): 
+	if not FileAccess.file_exists("user://saveLevel.json"): 
 		var save_dict = {
 			"levelsCompleted": 1
 		}
 		return save_dict
 	else:
-		var saveGame = FileAccess.get_file_as_string("user://save.json")
+		var saveGame = FileAccess.get_file_as_string("user://saveLevel.json")
 
 		data = JSON.parse_string(saveGame)
 
@@ -56,8 +55,8 @@ func loadNextLevel(level):
 		Player.addPoint()
 	else:
 		if level!=0:
-			if not data.has(level-1):
-				data[level-1] = true
+			if not data.has(String(level-1)):
+				data[String(level-1)] = true
 				data["levelsCompleted"] += 1
 				print(data)
 				saveGame(data)

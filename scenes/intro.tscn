@@ -1,12 +1,17 @@
-[gd_scene load_steps=15 format=3 uid="uid://bih6wwy54x413"]
+[gd_scene load_steps=23 format=3 uid="uid://bih6wwy54x413"]
 
 [ext_resource type="Texture2D" uid="uid://cwkb1uuhhiqlq" path="res://assets/sky.jpg" id="1_6q4mn"]
 [ext_resource type="AudioStream" uid="uid://dulqgsoolth50" path="res://assets/audio/background/Menu.ogg" id="1_byiwn"]
 [ext_resource type="AudioStream" uid="uid://dueagfnl8d8qn" path="res://assets/audio/MenuButtonClick.ogg" id="2_ykn15"]
+[ext_resource type="StyleBox" uid="uid://bq3kuqasu1v87" path="res://Styles/focus.tres" id="4_af6qx"]
 [ext_resource type="Texture2D" uid="uid://b4qlnvleplddl" path="res://assets/levels/Level1.png" id="4_gopnw"]
+[ext_resource type="StyleBox" uid="uid://c7doboqhbf41q" path="res://Styles/Normal.tres" id="4_nuuxl"]
 [ext_resource type="Texture2D" uid="uid://djw4olanyk7m5" path="res://assets/levels/Level2.png" id="5_8u03a"]
 [ext_resource type="Texture2D" uid="uid://c2arlclb0kqa6" path="res://assets/controls/RightArrow.png" id="6_gt04h"]
 [ext_resource type="Texture2D" uid="uid://baekfp3igmnse" path="res://assets/controls/LeftArrow.png" id="7_7dege"]
+[ext_resource type="StyleBox" uid="uid://bp4enqk3iqech" path="res://scenes/SelectHover.tres" id="9_2xds1"]
+[ext_resource type="StyleBox" uid="uid://3jcy00gngprl" path="res://scenes/Select.tres" id="9_m1fa6"]
+[ext_resource type="Texture2D" uid="uid://buvlwgc5b56r2" path="res://assets/Background - dark.png" id="12_tvfhk"]
 
 [sub_resource type="GDScript" id="GDScript_q7wxx"]
 script/source = "extends Node2D
@@ -20,19 +25,21 @@ signal events(event)
 @onready var quit = $Main/Quit
 
 func _ready() -> void:
+	if Input.get_connected_joypads().size() >= 1:
+		$Main/MarginContainer/VBoxContainer/Start.grab_focus()
 	var onWeb = OS.get_name()
 	if onWeb == \"Web\":
 		quit.visible=false
 
 func loadGame() -> Dictionary:
 	var data
-	if not FileAccess.file_exists(\"user://save.json\"): 
+	if not FileAccess.file_exists(\"user://saveLevel.json\"): 
 		var save_dict = {
 			\"levelsCompleted\": 1
 		}
 		return save_dict
 	else:
-		var saveGame = FileAccess.get_file_as_string(\"user://save.json\")
+		var saveGame = FileAccess.get_file_as_string(\"user://saveLevel.json\")
 
 		data = JSON.parse_string(saveGame)
 
@@ -50,13 +57,12 @@ func _on_select_pressed() -> void:
 	mainScene.visible=false
 	background.visible=false
 	levelScene.visible=true
-
+	if Input.get_connected_joypads().size() >= 1:
+		$Levels/Previous.grab_focus()
 
 func _on_credits_pressed() -> void:
-	var underDev = true
-	if not underDev:
-		mainScene.visible=false
-		creditsScene.visible=true
+	mainScene.visible=false
+	creditsScene.visible=true
 
 
 func _on_quit_pressed() -> void:
@@ -72,6 +78,8 @@ func _on_return_pressed() -> void:
 	mainScene.visible=true
 	background.visible=true
 	levelScene.visible=false
+	if Input.get_connected_joypads().size() >= 1:
+		$Main/MarginContainer/VBoxContainer/Start.grab_focus()
 "
 
 [sub_resource type="Animation" id="Animation_2we87"]
@@ -95,20 +103,39 @@ _data = {
 "move": SubResource("Animation_2we87")
 }
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_d1llw"]
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ou282"]
+bg_color = Color(0.313726, 0.313726, 0.313726, 0.52549)
+corner_radius_top_left = 200
+corner_radius_top_right = 200
+corner_radius_bottom_right = 200
+corner_radius_bottom_left = 200
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_i1rex"]
+bg_color = Color(0.313726, 0.313726, 0.313726, 0.52549)
+corner_radius_top_left = 200
+corner_radius_top_right = 200
+corner_radius_bottom_right = 200
+corner_radius_bottom_left = 200
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ve633"]
+bg_color = Color(0.313726, 0.313726, 0.313726, 0.52549)
+corner_radius_top_left = 200
+corner_radius_top_right = 200
+corner_radius_bottom_right = 200
+corner_radius_bottom_left = 200
 
 [sub_resource type="GDScript" id="GDScript_wjcbh"]
 script/source = "extends Node2D
 
 func loadGame() -> Dictionary:
 	var data
-	if not FileAccess.file_exists(\"user://save.json\"): 
+	if not FileAccess.file_exists(\"user://saveLevel.json\"): 
 		var save_dict = {
 			\"levelsCompleted\": 1
 		}
 		return save_dict
 	else:
-		var saveGame = FileAccess.get_file_as_string(\"user://save.json\")
+		var saveGame = FileAccess.get_file_as_string(\"user://saveLevel.json\")
 
 		data = JSON.parse_string(saveGame)
 
@@ -157,9 +184,45 @@ func _on_start_game_pressed() -> void:
 	sendThisToGranddad.emit(currentLevel)
 "
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_u1o68"]
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_jhcny"]
+bg_color = Color(0.0588235, 0.0588235, 0.0588235, 0.52549)
+corner_radius_top_left = 1
+corner_radius_top_right = 1
+corner_radius_bottom_right = 1
+corner_radius_bottom_left = 1
+anti_aliasing = false
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_174e6"]
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_5cbrk"]
+bg_color = Color(0.0605304, 0.0605303, 0.0605304, 0.52549)
+corner_radius_top_left = 1
+corner_radius_top_right = 1
+corner_radius_bottom_right = 1
+corner_radius_bottom_left = 1
+anti_aliasing = false
+
+[sub_resource type="GDScript" id="GDScript_v3prl"]
+script/source = "extends Node2D
+
+@onready var credits = $RichTextLabel
+
+var fixedTimestep = 1.0/60.0
+var timer = 0.0
+
+func deltaTime() -> void:
+	if visible:
+		credits.position.y-=.5
+	else:
+		credits.position.y = 1050
+
+func _process(delta) -> void:
+	timer+=delta
+	if timer >= fixedTimestep:
+		deltaTime()
+
+func _on_return_pressed() -> void:
+	visible = false
+	$\"../Main\".visible=true
+"
 
 [node name="Intro" type="Node2D"]
 position = Vector2(1, 0)
@@ -197,84 +260,74 @@ autoplay = true
 [node name="MenuClick" type="AudioStreamPlayer" parent="Main"]
 stream = ExtResource("2_ykn15")
 
-[node name="Start" type="Node2D" parent="Main"]
-
-[node name="Start" type="TouchScreenButton" parent="Main/Start"]
-position = Vector2(968, 369)
-scale = Vector2(25.08, 3.16)
-shape = SubResource("RectangleShape2D_d1llw")
-shape_centered = false
-
-[node name="RichTextLabel2" type="RichTextLabel" parent="Main/Start"]
-offset_left = 668.0
-offset_top = 324.0
-offset_right = 12408.0
-offset_bottom = 2224.0
+[node name="MarginContainer" type="MarginContainer" parent="Main"]
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 741.0
+offset_top = 391.0
+offset_right = 10349.0
+offset_bottom = 11166.0
+grow_horizontal = 0
+grow_vertical = 0
 scale = Vector2(0.05, 0.05)
-theme_override_colors/font_shadow_color = Color(0, 0, 0, 1)
-theme_override_constants/shadow_outline_size = 150
-theme_override_font_sizes/normal_font_size = 1500
-text = " START GAME"
 
-[node name="LevelSelect" type="Node2D" parent="Main"]
+[node name="VBoxContainer" type="VBoxContainer" parent="Main/MarginContainer"]
+clip_contents = true
+layout_mode = 2
+theme_override_constants/separation = 1625
 
-[node name="Select" type="TouchScreenButton" parent="Main/LevelSelect"]
-position = Vector2(968, 577)
-scale = Vector2(30.12, 3.16)
-shape = SubResource("RectangleShape2D_d1llw")
-shape_centered = false
+[node name="Start" type="Button" parent="Main/MarginContainer/VBoxContainer"]
+layout_mode = 2
+focus_neighbor_bottom = NodePath("../Select")
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 180
+theme_override_font_sizes/font_size = 1200
+theme_override_styles/normal = ExtResource("4_nuuxl")
+theme_override_styles/hover = ExtResource("4_af6qx")
+theme_override_styles/pressed = ExtResource("4_af6qx")
+theme_override_styles/focus = ExtResource("4_af6qx")
+text = "START GAME"
 
-[node name="RichTextLabel2" type="RichTextLabel" parent="Main/LevelSelect"]
-offset_left = 629.0
-offset_top = 532.0
-offset_right = 14229.0
-offset_bottom = 2432.0
-scale = Vector2(0.05, 0.05)
-theme_override_colors/font_shadow_color = Color(0, 0, 0, 1)
-theme_override_constants/shadow_outline_size = 150
-theme_override_font_sizes/normal_font_size = 1500
-text = " LEVEL SELECT"
+[node name="Select" type="Button" parent="Main/MarginContainer/VBoxContainer"]
+layout_mode = 2
+focus_neighbor_top = NodePath("../Start")
+focus_neighbor_bottom = NodePath("../Credits")
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 180
+theme_override_font_sizes/font_size = 1200
+theme_override_styles/normal = SubResource("StyleBoxFlat_ou282")
+theme_override_styles/hover = ExtResource("4_af6qx")
+theme_override_styles/pressed = ExtResource("4_af6qx")
+theme_override_styles/focus = ExtResource("4_af6qx")
+text = "SELECT LEVEL"
 
-[node name="Credits" type="Node2D" parent="Main"]
-position = Vector2(73, 49)
+[node name="Credits" type="Button" parent="Main/MarginContainer/VBoxContainer"]
+layout_mode = 2
+focus_neighbor_top = NodePath("../Select")
+focus_neighbor_bottom = NodePath("../Quit")
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 180
+theme_override_font_sizes/font_size = 1200
+theme_override_styles/normal = SubResource("StyleBoxFlat_i1rex")
+theme_override_styles/hover = ExtResource("4_af6qx")
+theme_override_styles/pressed = ExtResource("4_af6qx")
+theme_override_styles/focus = ExtResource("4_af6qx")
+text = "CREDITS"
 
-[node name="Credits" type="TouchScreenButton" parent="Main/Credits"]
-position = Vector2(886, 721)
-scale = Vector2(17.88, 3.16)
-shape = SubResource("RectangleShape2D_d1llw")
-shape_centered = false
-
-[node name="RichTextLabel2" type="RichTextLabel" parent="Main/Credits"]
-offset_left = 668.0
-offset_top = 676.0
-offset_right = 12408.0
-offset_bottom = 2576.0
-scale = Vector2(0.05, 0.05)
-theme_override_colors/font_shadow_color = Color(0, 0, 0, 1)
-theme_override_constants/shadow_outline_size = 150
-theme_override_font_sizes/normal_font_size = 1500
-text = " CREDITS"
-
-[node name="Quit" type="Node2D" parent="Main"]
-position = Vector2(0, 577)
-scale = Vector2(1.17821, 0.956156)
-
-[node name="Quit" type="TouchScreenButton" parent="Main/Quit"]
-position = Vector2(811, 369)
-scale = Vector2(10.44, 3.16)
-shape = SubResource("RectangleShape2D_d1llw")
-shape_centered = false
-
-[node name="RichTextLabel2" type="RichTextLabel" parent="Main/Quit"]
-offset_left = 668.0
-offset_top = 324.0
-offset_right = 12408.0
-offset_bottom = 2224.0
-scale = Vector2(0.05, 0.05)
-theme_override_colors/font_shadow_color = Color(0, 0, 0, 1)
-theme_override_constants/shadow_outline_size = 150
-theme_override_font_sizes/normal_font_size = 1500
-text = " QUIT"
+[node name="Quit" type="Button" parent="Main/MarginContainer/VBoxContainer"]
+layout_mode = 2
+focus_neighbor_top = NodePath("../Credits")
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 180
+theme_override_font_sizes/font_size = 1200
+theme_override_styles/normal = SubResource("StyleBoxFlat_ve633")
+theme_override_styles/hover = ExtResource("4_af6qx")
+theme_override_styles/pressed = ExtResource("4_af6qx")
+theme_override_styles/focus = ExtResource("4_af6qx")
+text = "QUIT"
 
 [node name="Levels" type="Node2D" parent="."]
 visible = false
@@ -293,76 +346,126 @@ position = Vector2(926, 532)
 scale = Vector2(1.19999, 1.19999)
 texture = ExtResource("5_8u03a")
 
+[node name="Return" type="Button" parent="Levels"]
+offset_right = 8.0
+offset_bottom = 8.0
+scale = Vector2(0.05, 0.05)
+focus_neighbor_bottom = NodePath("../Previous")
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 200
+theme_override_font_sizes/font_size = 1500
+theme_override_styles/normal = ExtResource("4_nuuxl")
+theme_override_styles/hover = ExtResource("4_af6qx")
+theme_override_styles/pressed = ExtResource("4_af6qx")
+theme_override_styles/focus = ExtResource("4_af6qx")
+text = "RETURN"
+
 [node name="RichTextLabel2" type="RichTextLabel" parent="Levels"]
 offset_left = 741.0
-offset_top = 459.0
-offset_right = 25801.0
-offset_bottom = 2359.0
+offset_top = 464.0
+offset_right = 11341.0
+offset_bottom = 3004.0
 scale = Vector2(0.05, 0.05)
-theme_override_colors/font_shadow_color = Color(0, 0, 0, 1)
-theme_override_constants/shadow_outline_size = 200
-theme_override_font_sizes/normal_font_size = 1500
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 250
+theme_override_font_sizes/normal_font_size = 1600
 text = " LEVEL: 1"
 
-[node name="ColorRect" type="ColorRect" parent="Levels"]
-offset_left = 178.0
-offset_top = 440.0
-offset_right = 218.0
-offset_bottom = 480.0
-scale = Vector2(7.16179, 3.16179)
-color = Color(0.133196, 0.133196, 0.133196, 0.521569)
+[node name="Next" type="Button" parent="Levels"]
+offset_left = 1530.0
+offset_top = 464.0
+offset_right = 1539.0
+offset_bottom = 472.0
+scale = Vector2(27.5461, 12.4636)
+focus_neighbor_left = NodePath("../Previous")
+focus_neighbor_top = NodePath("../Return")
+focus_neighbor_bottom = NodePath("../StartGame")
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 200
+theme_override_font_sizes/font_size = 1500
+theme_override_styles/normal = ExtResource("9_m1fa6")
+theme_override_styles/hover = ExtResource("9_2xds1")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_jhcny")
+theme_override_styles/focus = ExtResource("9_2xds1")
+icon = ExtResource("6_gt04h")
 
-[node name="ColorRect2" type="ColorRect" parent="Levels"]
-offset_left = 1382.0
-offset_top = 440.0
-offset_right = 1422.0
-offset_bottom = 480.0
-scale = Vector2(7.16179, 3.16179)
-color = Color(0.133196, 0.133196, 0.133196, 0.521569)
+[node name="Previous" type="Button" parent="Levels"]
+offset_left = 124.0
+offset_top = 464.0
+offset_right = 133.0
+offset_bottom = 472.0
+scale = Vector2(27.5461, 12.4636)
+focus_neighbor_top = NodePath("../Return")
+focus_neighbor_right = NodePath("../Next")
+focus_neighbor_bottom = NodePath("../StartGame")
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 200
+theme_override_font_sizes/font_size = 1500
+theme_override_styles/normal = ExtResource("9_m1fa6")
+theme_override_styles/hover = ExtResource("9_2xds1")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_5cbrk")
+theme_override_styles/focus = ExtResource("9_2xds1")
+icon = ExtResource("7_7dege")
 
-[node name="Next" type="TouchScreenButton" parent="Levels"]
-position = Vector2(1382, 440)
-scale = Vector2(31.7594, 15.7418)
-texture_normal = ExtResource("6_gt04h")
-
-[node name="Previous" type="TouchScreenButton" parent="Levels"]
-position = Vector2(178, 440)
-scale = Vector2(31.759, 15.742)
-texture_normal = ExtResource("7_7dege")
-
-[node name="RichTextLabel3" type="RichTextLabel" parent="Levels"]
-offset_left = 689.0
-offset_top = 770.0
-offset_right = 25749.0
-offset_bottom = 2670.0
+[node name="StartGame" type="Button" parent="Levels"]
+offset_left = 741.0
+offset_top = 928.0
+offset_right = 10741.0
+offset_bottom = 2762.0
 scale = Vector2(0.05, 0.05)
-theme_override_colors/font_shadow_color = Color(0, 0, 0, 1)
-theme_override_constants/shadow_outline_size = 200
-theme_override_font_sizes/normal_font_size = 1500
-text = " START GAME!"
-
-[node name="StartGame" type="TouchScreenButton" parent="Levels"]
-position = Vector2(1006, 816)
-scale = Vector2(26.8, 3.4)
-shape = SubResource("RectangleShape2D_u1o68")
-
-[node name="RichTextLabel4" type="RichTextLabel" parent="Levels"]
-offset_left = -27.0
-offset_right = 25033.0
-offset_bottom = 1900.0
-scale = Vector2(0.05, 0.05)
-theme_override_colors/font_shadow_color = Color(0, 0, 0, 1)
-theme_override_constants/shadow_outline_size = 200
-theme_override_font_sizes/normal_font_size = 1500
-text = " RETURN"
-
-[node name="Return" type="TouchScreenButton" parent="Levels"]
-position = Vector2(168, 45)
-scale = Vector2(14.92, 3.44256)
-shape = SubResource("RectangleShape2D_174e6")
+focus_neighbor_left = NodePath("../Previous")
+focus_neighbor_top = NodePath("../Previous")
+focus_neighbor_right = NodePath("../Next")
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 200
+theme_override_font_sizes/font_size = 1500
+theme_override_styles/normal = ExtResource("4_nuuxl")
+theme_override_styles/hover = ExtResource("4_af6qx")
+theme_override_styles/pressed = ExtResource("4_af6qx")
+theme_override_styles/focus = ExtResource("4_af6qx")
+text = "START GAME"
 
 [node name="Credits" type="Node2D" parent="."]
 visible = false
+script = SubResource("GDScript_v3prl")
+
+[node name="Background" type="Sprite2D" parent="Credits"]
+position = Vector2(971, 546)
+scale = Vector2(19.48, 11.6)
+texture = ExtResource("12_tvfhk")
+
+[node name="RichTextLabel" type="RichTextLabel" parent="Credits"]
+offset_top = 1050.0
+offset_right = 38380.0
+offset_bottom = 20230.0
+scale = Vector2(0.05, 0.05)
+theme_override_colors/default_color = Color(1, 0, 0, 1)
+theme_override_font_sizes/normal_font_size = 1500
+bbcode_enabled = true
+text = "[center]
+Main coder - Bailey
+Level Designer - Bailey
+Sound Effects - Pixabay
+Graphic Designer - Bailey
+UI/UX Design - Bailey
+Setting controller input - Ryan
+[/center]"
+
+[node name="Return" type="Button" parent="Credits"]
+scale = Vector2(0.08, 0.08)
+focus_neighbor_bottom = NodePath("../Select")
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 180
+theme_override_font_sizes/font_size = 1200
+theme_override_styles/normal = ExtResource("4_nuuxl")
+theme_override_styles/hover = ExtResource("4_af6qx")
+theme_override_styles/pressed = ExtResource("4_af6qx")
+theme_override_styles/focus = ExtResource("4_af6qx")
+text = "RETURN"
 
 [node name="Version" type="RichTextLabel" parent="."]
 offset_left = -54.0
@@ -375,12 +478,13 @@ theme_override_constants/shadow_outline_size = 100
 theme_override_font_sizes/normal_font_size = 600
 text = "   Version: Beta"
 
-[connection signal="pressed" from="Main/Start/Start" to="." method="_on_start_pressed"]
-[connection signal="pressed" from="Main/LevelSelect/Select" to="." method="_on_select_pressed"]
-[connection signal="pressed" from="Main/Credits/Credits" to="." method="_on_credits_pressed"]
-[connection signal="pressed" from="Main/Quit/Quit" to="." method="_on_quit_pressed"]
+[connection signal="pressed" from="Main/MarginContainer/VBoxContainer/Start" to="." method="_on_start_pressed"]
+[connection signal="pressed" from="Main/MarginContainer/VBoxContainer/Select" to="." method="_on_select_pressed"]
+[connection signal="pressed" from="Main/MarginContainer/VBoxContainer/Credits" to="." method="_on_credits_pressed"]
+[connection signal="pressed" from="Main/MarginContainer/VBoxContainer/Quit" to="." method="_on_quit_pressed"]
 [connection signal="sendThisToGranddad" from="Levels" to="." method="_on_levels_send_this_to_granddad"]
+[connection signal="pressed" from="Levels/Return" to="." method="_on_return_pressed"]
 [connection signal="pressed" from="Levels/Next" to="Levels" method="_on_next_pressed"]
 [connection signal="pressed" from="Levels/Previous" to="Levels" method="_on_previous_pressed"]
 [connection signal="pressed" from="Levels/StartGame" to="Levels" method="_on_start_game_pressed"]
-[connection signal="pressed" from="Levels/Return" to="." method="_on_return_pressed"]
+[connection signal="pressed" from="Credits/Return" to="Credits" method="_on_return_pressed"]

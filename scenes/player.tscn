@@ -1,4 +1,4 @@
-[gd_scene load_steps=34 format=3 uid="uid://h3i5gc0ryenh"]
+[gd_scene load_steps=33 format=3 uid="uid://h3i5gc0ryenh"]
 
 [ext_resource type="Script" path="res://scripts/player.gd" id="1_8bgxb"]
 [ext_resource type="Texture2D" uid="uid://ds24jidhoytug" path="res://assets/player/chonky-left.png" id="2_uva7f"]
@@ -18,6 +18,8 @@
 [ext_resource type="Texture2D" uid="uid://cw10b0hgrl8yx" path="res://assets/graphics/YButton.png" id="14_lkvpf"]
 [ext_resource type="Texture2D" uid="uid://os56x15agqbt" path="res://assets/controls/UpArrow.png" id="17_xyxhs"]
 [ext_resource type="Texture2D" uid="uid://kk23a5ju4qet" path="res://assets/controls/DownArrow.png" id="18_ircvx"]
+[ext_resource type="StyleBox" uid="uid://c7doboqhbf41q" path="res://Styles/Normal.tres" id="19_okrwj"]
+[ext_resource type="StyleBox" uid="uid://bq3kuqasu1v87" path="res://Styles/focus.tres" id="20_8g3gr"]
 
 [sub_resource type="Animation" id="Animation_c4pcb"]
 length = 0.001
@@ -157,12 +159,6 @@ _data = {
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_p1rha"]
 size = Vector2(36, 124)
-
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_kkyi8"]
-
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_tma6e"]
-
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_jrl2f"]
 
 [node name="Player" type="CharacterBody2D"]
 scale = Vector2(1.64, 1.64)
@@ -335,55 +331,56 @@ scale = Vector2(0.05, 0.05)
 theme_override_colors/font_shadow_color = Color(0, 0, 0, 1)
 theme_override_constants/shadow_outline_size = 50
 theme_override_font_sizes/normal_font_size = 300
-text = " Paused"
+text = " PAUSED"
 
-[node name="Return" type="TouchScreenButton" parent="Menu2"]
-position = Vector2(61.7892, 65.6408)
-scale = Vector2(2.31719, 0.525632)
-shape = SubResource("RectangleShape2D_kkyi8")
+[node name="Resume" type="Button" parent="Menu2"]
+offset_left = 20.0681
+offset_top = 28.453
+offset_right = 8020.07
+offset_bottom = 1495.45
+scale = Vector2(0.0100167, 0.0100167)
+focus_neighbor_bottom = NodePath("../Return")
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 180
+theme_override_font_sizes/font_size = 1200
+theme_override_styles/normal = ExtResource("19_okrwj")
+theme_override_styles/hover = ExtResource("20_8g3gr")
+theme_override_styles/pressed = ExtResource("20_8g3gr")
+theme_override_styles/focus = ExtResource("20_8g3gr")
+text = "RESUME"
 
-[node name="RichTextLabel2" type="RichTextLabel" parent="Menu2"]
-offset_left = 39.0
-offset_top = 58.0
-offset_right = 963.0
-offset_bottom = 177.0
-scale = Vector2(0.05, 0.12547)
-theme_override_colors/font_shadow_color = Color(0, 0, 0, 1)
-theme_override_constants/shadow_outline_size = 25
-theme_override_font_sizes/normal_font_size = 97
-text = "Return to menu"
+[node name="Return" type="Button" parent="Menu2"]
+offset_left = 21.4287
+offset_top = 59.3922
+offset_right = 8021.43
+offset_bottom = 1526.39
+scale = Vector2(0.01, 0.01)
+focus_neighbor_top = NodePath("../Resume")
+focus_neighbor_bottom = NodePath("../Quit")
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 180
+theme_override_font_sizes/font_size = 1200
+theme_override_styles/normal = ExtResource("19_okrwj")
+theme_override_styles/hover = ExtResource("20_8g3gr")
+theme_override_styles/pressed = ExtResource("20_8g3gr")
+theme_override_styles/focus = ExtResource("20_8g3gr")
+text = "MAIN MENU"
 
-[node name="Quit" type="TouchScreenButton" parent="Menu2"]
-position = Vector2(58.5034, 99.7238)
-scale = Vector2(0.741497, 0.613259)
-shape = SubResource("RectangleShape2D_tma6e")
-
-[node name="Resume" type="TouchScreenButton" parent="Menu2"]
-position = Vector2(61.3946, 30.6629)
-scale = Vector2(1, 0.640884)
-shape = SubResource("RectangleShape2D_jrl2f")
-
-[node name="RichTextLabel3" type="RichTextLabel" parent="Menu2"]
-offset_left = 48.4694
-offset_top = 22.9281
-offset_right = 1089.47
-offset_bottom = 430.928
-scale = Vector2(0.05, 0.12547)
-theme_override_colors/font_shadow_color = Color(0, 0, 0, 1)
-theme_override_constants/shadow_outline_size = 25
-theme_override_font_sizes/normal_font_size = 97
-text = " Resume"
-
-[node name="RichTextLabel4" type="RichTextLabel" parent="Menu2"]
-offset_left = 49.0
-offset_top = 92.0
-offset_right = 402.0
-offset_bottom = 215.0
-scale = Vector2(0.05, 0.12547)
-theme_override_colors/font_shadow_color = Color(0, 0, 0, 1)
-theme_override_constants/shadow_outline_size = 25
-theme_override_font_sizes/normal_font_size = 97
-text = " Quit"
+[node name="Quit" type="Button" parent="Menu2"]
+offset_left = 21.0
+offset_top = 93.0
+offset_right = 8303.0
+offset_bottom = 1560.0
+scale = Vector2(0.01, 0.01)
+focus_neighbor_top = NodePath("../Return")
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 180
+theme_override_font_sizes/font_size = 1200
+theme_override_styles/normal = ExtResource("19_okrwj")
+theme_override_styles/hover = ExtResource("20_8g3gr")
+theme_override_styles/pressed = ExtResource("20_8g3gr")
+theme_override_styles/focus = ExtResource("20_8g3gr")
+text = "QUIT"
 
 [node name="Timer" type="Timer" parent="."]
 wait_time = 2.5
@@ -412,6 +409,6 @@ target_position = Vector2(-18.2927, 0)
 [connection signal="released" from="MobileControls/Up" to="." method="_on_up_released"]
 [connection signal="pressed" from="MobileControls/Down" to="." method="_on_down_pressed"]
 [connection signal="released" from="MobileControls/Down" to="." method="_on_down_released"]
+[connection signal="pressed" from="Menu2/Resume" to="." method="_on_resume_pressed"]
 [connection signal="pressed" from="Menu2/Return" to="." method="_on_return_pressed"]
 [connection signal="pressed" from="Menu2/Quit" to="." method="_on_quit_pressed"]
-[connection signal="pressed" from="Menu2/Resume" to="." method="_on_resume_pressed"]
