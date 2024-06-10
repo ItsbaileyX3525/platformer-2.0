@@ -1,4 +1,4 @@
-[gd_scene load_steps=30 format=3 uid="uid://h3i5gc0ryenh"]
+[gd_scene load_steps=34 format=3 uid="uid://h3i5gc0ryenh"]
 
 [ext_resource type="Script" path="res://scripts/player.gd" id="1_8bgxb"]
 [ext_resource type="Texture2D" uid="uid://ds24jidhoytug" path="res://assets/player/chonky-left.png" id="2_uva7f"]
@@ -16,6 +16,8 @@
 [ext_resource type="Texture2D" uid="uid://drltavv2gvjwh" path="res://assets/graphics/XButton.png" id="12_fqutd"]
 [ext_resource type="Texture2D" uid="uid://bac88jqg1upis" path="res://assets/Menu.png" id="13_n4pk7"]
 [ext_resource type="Texture2D" uid="uid://cw10b0hgrl8yx" path="res://assets/graphics/YButton.png" id="14_lkvpf"]
+[ext_resource type="Texture2D" uid="uid://os56x15agqbt" path="res://assets/controls/UpArrow.png" id="17_xyxhs"]
+[ext_resource type="Texture2D" uid="uid://kk23a5ju4qet" path="res://assets/controls/DownArrow.png" id="18_ircvx"]
 
 [sub_resource type="Animation" id="Animation_c4pcb"]
 length = 0.001
@@ -156,7 +158,11 @@ _data = {
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_p1rha"]
 size = Vector2(36, 124)
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_k7e62"]
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_kkyi8"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_tma6e"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_jrl2f"]
 
 [node name="Player" type="CharacterBody2D"]
 scale = Vector2(1.64, 1.64)
@@ -269,12 +275,12 @@ position = Vector2(-564.024, 40.8537)
 scale = Vector2(3.29269, 3.29269)
 
 [node name="Left" type="TouchScreenButton" parent="MobileControls"]
-position = Vector2(0.55543, -13.7037)
+position = Vector2(-0.000124395, -13.7037)
 scale = Vector2(2.62222, 2.62222)
 texture_normal = ExtResource("9_j76um")
 
 [node name="Right" type="TouchScreenButton" parent="MobileControls"]
-position = Vector2(46.4813, -13.7037)
+position = Vector2(44.9998, -13.7037)
 scale = Vector2(2.62248, 2.62248)
 texture_normal = ExtResource("10_2ugt7")
 
@@ -298,6 +304,16 @@ position = Vector2(310.74, -30.9259)
 scale = Vector2(0.407411, 0.407411)
 texture_normal = ExtResource("14_lkvpf")
 
+[node name="Up" type="TouchScreenButton" parent="MobileControls"]
+position = Vector2(24.0739, -36.111)
+scale = Vector2(2.62222, 2.62222)
+texture_normal = ExtResource("17_xyxhs")
+
+[node name="Down" type="TouchScreenButton" parent="MobileControls"]
+position = Vector2(24.0739, 4.81479)
+scale = Vector2(2.62248, 2.62248)
+texture_normal = ExtResource("18_ircvx")
+
 [node name="Menu2" type="Node2D" parent="."]
 visible = false
 position = Vector2(-210.976, -461.585)
@@ -312,44 +328,73 @@ scale = Vector2(3, 3)
 color = Color(0.0588235, 0.0588235, 0.0588235, 0.227451)
 
 [node name="RichTextLabel" type="RichTextLabel" parent="Menu2"]
-offset_left = 29.8095
-offset_top = 0.138122
-offset_right = 1284.81
-offset_bottom = 431.138
+offset_left = 21.0
+offset_right = 1489.0
+offset_bottom = 376.0
 scale = Vector2(0.05, 0.05)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 1)
+theme_override_constants/shadow_outline_size = 50
 theme_override_font_sizes/normal_font_size = 300
-text = "Paused"
+text = " Paused"
+
+[node name="Return" type="TouchScreenButton" parent="Menu2"]
+position = Vector2(61.7892, 65.6408)
+scale = Vector2(2.31719, 0.525632)
+shape = SubResource("RectangleShape2D_kkyi8")
+
+[node name="RichTextLabel2" type="RichTextLabel" parent="Menu2"]
+offset_left = 39.0
+offset_top = 58.0
+offset_right = 963.0
+offset_bottom = 177.0
+scale = Vector2(0.05, 0.12547)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 1)
+theme_override_constants/shadow_outline_size = 25
+theme_override_font_sizes/normal_font_size = 97
+text = "Return to menu"
 
 [node name="Quit" type="TouchScreenButton" parent="Menu2"]
-position = Vector2(58.8435, 95.7183)
-scale = Vector2(1.35912, 0.292821)
-shape = SubResource("RectangleShape2D_k7e62")
-
-[node name="RichTextLabel" type="RichTextLabel" parent="Menu2/Quit"]
-offset_left = -8.25864
-offset_top = -14.6225
-offset_right = 394.741
-offset_bottom = 393.378
-scale = Vector2(0.05, 0.12547)
-theme_override_font_sizes/normal_font_size = 150
-text = "Quit"
+position = Vector2(58.5034, 99.7238)
+scale = Vector2(0.741497, 0.613259)
+shape = SubResource("RectangleShape2D_tma6e")
 
 [node name="Resume" type="TouchScreenButton" parent="Menu2"]
-position = Vector2(58.8435, 37.7072)
-scale = Vector2(2.231, 0.480667)
-shape = SubResource("RectangleShape2D_k7e62")
+position = Vector2(61.3946, 30.6629)
+scale = Vector2(1, 0.640884)
+shape = SubResource("RectangleShape2D_jrl2f")
 
-[node name="RichTextLabel" type="RichTextLabel" parent="Menu2/Resume"]
-offset_left = -10.1356
-offset_top = -9.43385
-offset_right = 394.864
-offset_bottom = 398.566
+[node name="RichTextLabel3" type="RichTextLabel" parent="Menu2"]
+offset_left = 48.4694
+offset_top = 22.9281
+offset_right = 1089.47
+offset_bottom = 430.928
 scale = Vector2(0.05, 0.12547)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 1)
+theme_override_constants/shadow_outline_size = 25
 theme_override_font_sizes/normal_font_size = 97
-text = "Resume"
+text = " Resume"
+
+[node name="RichTextLabel4" type="RichTextLabel" parent="Menu2"]
+offset_left = 49.0
+offset_top = 92.0
+offset_right = 402.0
+offset_bottom = 215.0
+scale = Vector2(0.05, 0.12547)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 1)
+theme_override_constants/shadow_outline_size = 25
+theme_override_font_sizes/normal_font_size = 97
+text = " Quit"
 
 [node name="Timer" type="Timer" parent="."]
 wait_time = 2.5
+
+[node name="RayCast2D_Right" type="RayCast2D" parent="."]
+position = Vector2(0, 0.609756)
+target_position = Vector2(20.122, 0)
+
+[node name="RayCast2D_Left" type="RayCast2D" parent="."]
+position = Vector2(0, 0.609756)
+target_position = Vector2(-18.2927, 0)
 
 [connection signal="pressed" from="MobileControls/Left" to="." method="_on_left_pressed"]
 [connection signal="released" from="MobileControls/Left" to="." method="_on_left_released"]
@@ -363,5 +408,10 @@ wait_time = 2.5
 [connection signal="released" from="MobileControls/Menu" to="." method="_on_menu_released"]
 [connection signal="pressed" from="MobileControls/Dance" to="." method="_on_dance_pressed"]
 [connection signal="released" from="MobileControls/Dance" to="." method="_on_dance_released"]
-[connection signal="pressed" from="Menu2/Quit" to="." method="_on_touch_screen_button_pressed"]
+[connection signal="pressed" from="MobileControls/Up" to="." method="_on_up_pressed"]
+[connection signal="released" from="MobileControls/Up" to="." method="_on_up_released"]
+[connection signal="pressed" from="MobileControls/Down" to="." method="_on_down_pressed"]
+[connection signal="released" from="MobileControls/Down" to="." method="_on_down_released"]
+[connection signal="pressed" from="Menu2/Return" to="." method="_on_return_pressed"]
+[connection signal="pressed" from="Menu2/Quit" to="." method="_on_quit_pressed"]
 [connection signal="pressed" from="Menu2/Resume" to="." method="_on_resume_pressed"]

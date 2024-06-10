@@ -1,4 +1,4 @@
-[gd_scene load_steps=29 format=3 uid="uid://dqy88vwfqyhr0"]
+[gd_scene load_steps=30 format=3 uid="uid://dqy88vwfqyhr0"]
 
 [ext_resource type="PackedScene" uid="uid://bxyoisbqmd8r8" path="res://scenes/MovingPlatform.tscn" id="1_8m30w"]
 [ext_resource type="Texture2D" uid="uid://cshf2fo6eg1mk" path="res://assets/blocks/grass_dirt.png" id="1_di205"]
@@ -9,11 +9,67 @@
 [ext_resource type="Texture2D" uid="uid://c3vg56nocjuvq" path="res://assets/graphics/PointDown.png" id="7_2uc5h"]
 [ext_resource type="Texture2D" uid="uid://dnd4hm520cijq" path="res://assets/graphics/MouseAndXButton.png" id="8_mbxru"]
 [ext_resource type="PackedScene" uid="uid://buv6650ugxxq5" path="res://scenes/finish_flag.tscn" id="8_s7lp5"]
+[ext_resource type="PackedScene" uid="uid://d1oq0dg07l082" path="res://scenes/coin.tscn" id="10_5s87g"]
 
 [sub_resource type="GDScript" id="GDScript_ifgnb"]
 script/source = "extends Node2D
 
 signal nextLevel(level)
+
+func saveGame(dictToSave: Dictionary) -> void:
+	var gameFile = FileAccess.open(\"user://coin.json\", FileAccess.WRITE)
+	
+	var jsonString = JSON.stringify(dictToSave)
+	gameFile.store_line(jsonString)
+
+func loadGame() -> Dictionary:
+	var data
+	if not FileAccess.file_exists(\"user://coin.json\"): 
+		var save_dict = {
+			\"Level1\": {
+				1:false,
+				2:false,
+				3:false,
+				4:false,
+				5:false
+			}
+		}
+		return save_dict
+	else:
+		var saveGame = FileAccess.get_file_as_string(\"user://coin.json\")
+
+		data = JSON.parse_string(saveGame)
+
+	
+	return data
+
+var data = loadGame()
+
+func _ready() -> void:
+	var coins = [
+		$Coins/Coin,
+		$Coins/Coin2,
+		$Coins/Coin3,
+		$Coins/Coin4,
+		$Coins/Coin5
+	]
+	var index=0
+	if data.has(\"Level1\"):
+		for e in data[\"Level1\"].values():
+			index+=1
+			if e == true:
+				coins[index-1].visible=false 
+				coins[index-1].get_node(\"CollisionShape2D\").disabled=true
+	else:
+		data[\"Level1\"] = {
+				1:false,
+				2:false,
+				3:false,
+				4:false,
+				5:false
+			}
+		var saves = data
+		saveGame(saves)
 
 func nextScene() -> void:
 	nextLevel.emit(2)
@@ -21,6 +77,31 @@ func nextScene() -> void:
 func _on_finish_flag_body_shape_entered(body_rid, body, body_shape_index, local_shape_index):
 	if body.name == \"Player\":
 		nextScene()
+
+func _on_coin_body_entered(body: Node2D) -> void:
+	if data.has(\"Level1\"):
+		data[\"Level1\"][1] = true
+		saveGame(data)
+
+func _on_coin_2_body_entered(body: Node2D) -> void:
+	if data.has(\"Level1\"):
+		data[\"Level1\"][2] = true
+		saveGame(data)
+
+func _on_coin_3_body_entered(body: Node2D) -> void: 
+	if data.has(\"Level1\"):
+		data[\"Level1\"][3] = true
+		saveGame(data)
+
+func _on_coin_4_body_entered(body: Node2D) -> void:
+	if data.has(\"Level1\"):
+		data[\"Level1\"][4] = true
+		saveGame(data)
+
+func _on_coin_5_body_entered(body: Node2D) -> void:
+	if data.has(\"Level1\"):
+		data[\"Level1\"][5] = true
+		saveGame(data)
 "
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_cyw15"]
@@ -439,5 +520,27 @@ theme_override_font_sizes/normal_font_size = 300
 text = "2"
 scroll_active = false
 
+[node name="Coins" type="Node2D" parent="."]
+
+[node name="Coin" parent="Coins" instance=ExtResource("10_5s87g")]
+position = Vector2(1572.84, 507.369)
+
+[node name="Coin2" parent="Coins" instance=ExtResource("10_5s87g")]
+position = Vector2(3345.01, 501.329)
+
+[node name="Coin3" parent="Coins" instance=ExtResource("10_5s87g")]
+position = Vector2(2644.36, 552.066)
+
+[node name="Coin4" parent="Coins" instance=ExtResource("10_5s87g")]
+position = Vector2(2411.81, 501.329)
+
+[node name="Coin5" parent="Coins" instance=ExtResource("10_5s87g")]
+position = Vector2(1692.44, 207.176)
+
 [connection signal="body_shape_entered" from="Lever" to="." method="_on_lever_body_shape_entered"]
 [connection signal="body_shape_entered" from="FinishFlag" to="." method="_on_finish_flag_body_shape_entered"]
+[connection signal="body_entered" from="Coins/Coin" to="." method="_on_coin_body_entered"]
+[connection signal="body_entered" from="Coins/Coin2" to="." method="_on_coin_2_body_entered"]
+[connection signal="body_entered" from="Coins/Coin3" to="." method="_on_coin_3_body_entered"]
+[connection signal="body_entered" from="Coins/Coin4" to="." method="_on_coin_4_body_entered"]
+[connection signal="body_entered" from="Coins/Coin5" to="." method="_on_coin_5_body_entered"]

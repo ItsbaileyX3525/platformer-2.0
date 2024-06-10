@@ -94,6 +94,23 @@ region_rect = Rect2(0.085022, 0, 500.457, 30)
 position = Vector2(45.3416, 0.131317)
 shape = SubResource("RectangleShape2D_gvgkc")
 
+[node name="Floor2" type="StaticBody2D" parent="."]
+position = Vector2(1343, 625)
+scale = Vector2(4.62954, 2.29973)
+
+[node name="Sprite2D" type="Sprite2D" parent="Floor2"]
+texture_repeat = 2
+position = Vector2(-42.4024, -12.0816)
+scale = Vector2(0.351344, 0.815)
+texture = ExtResource("1_t5px7")
+centered = false
+region_enabled = true
+region_rect = Rect2(0.085022, 0, 192.186, 30)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Floor2"]
+position = Vector2(-8.60892, 0.262634)
+shape = SubResource("RectangleShape2D_ht7jr")
+
 [node name="DoubleJump" parent="." instance=ExtResource("2_r68c1")]
 position = Vector2(387.879, 548.623)
 regenTimer = 3
@@ -121,23 +138,6 @@ scale = Vector2(0.05, 0.05)
 theme_override_colors/default_color = Color(0, 0, 0, 1)
 theme_override_font_sizes/normal_font_size = 400
 text = "This is a speed boost, it makes you go faster!"
-
-[node name="Floor2" type="StaticBody2D" parent="."]
-position = Vector2(1343, 625)
-scale = Vector2(4.62954, 2.29973)
-
-[node name="Sprite2D" type="Sprite2D" parent="Floor2"]
-texture_repeat = 2
-position = Vector2(-42.4024, -12.0816)
-scale = Vector2(0.351344, 0.815)
-texture = ExtResource("1_t5px7")
-centered = false
-region_enabled = true
-region_rect = Rect2(0.085022, 0, 192.186, 30)
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Floor2"]
-position = Vector2(-8.60892, 0.262634)
-shape = SubResource("RectangleShape2D_ht7jr")
 
 [node name="Trigger" type="Area2D" parent="."]
 position = Vector2(1164.85, 409.42)
@@ -182,6 +182,28 @@ scale = Vector2(0.05, 0.05)
 theme_override_colors/default_color = Color(0, 0, 0, 1)
 theme_override_font_sizes/normal_font_size = 400
 text = "3"
+
+[node name="AfterFlag" type="Node2D" parent="."]
+
+[node name="DoubleJump" parent="AfterFlag" instance=ExtResource("2_r68c1")]
+position = Vector2(1417.27, 570.048)
+
+[node name="Floor2" type="StaticBody2D" parent="AfterFlag"]
+position = Vector2(1840.58, 625)
+scale = Vector2(4.62954, 2.29973)
+
+[node name="Sprite2D" type="Sprite2D" parent="AfterFlag/Floor2"]
+texture_repeat = 2
+position = Vector2(-42.4024, -12.0816)
+scale = Vector2(0.351344, 0.815)
+texture = ExtResource("1_t5px7")
+centered = false
+region_enabled = true
+region_rect = Rect2(0.085022, 0, 192.186, 30)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="AfterFlag/Floor2"]
+position = Vector2(-8.60892, 0.262634)
+shape = SubResource("RectangleShape2D_ht7jr")
 
 [connection signal="body_entered" from="Trigger" to="RichTextLabel3" method="_on_trigger_body_entered"]
 [connection signal="body_entered" from="Trigger2" to="." method="_on_trigger_2_body_entered"]

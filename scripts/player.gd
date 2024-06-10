@@ -3,7 +3,12 @@ extends CharacterBody2D
 @export var speed = 300
 @export var gravity = 30
 @export var jumpForce = 600
+@export var climbSpeed = 300
+var isClimbing = false
 @export var deathBarrier: Node2D
+
+@onready var raycastLeft = $RayCast2D_Left
+@onready var raycastRight = $RayCast2D_Right
 
 @onready var realTimer = $Timer
 @onready var idleChonk = $IdleChonky
@@ -37,6 +42,7 @@ var jumpTimer = 0.0
 var isDancing = false
 var backgroundTime = 0.0
 var onMobile = false
+var coins = 0
 var speedyBoi = false
 var speedTimer = 0.0
 var speedCanLast = 5.0
@@ -50,7 +56,40 @@ var movingLeft = false
 var jumping = false
 var movingRight = false
 
+func saveGame(dictToSave: Dictionary) -> void:
+	var gameFile = FileAccess.open("user://savePlayer.json", FileAccess.WRITE)
+	
+	var jsonString = JSON.stringify(dictToSave)
+	gameFile.store_line(jsonString)
+
+func loadGame() -> Dictionary:
+	var data
+	if not FileAccess.file_exists("user://savePlayer.json"): 
+		var save_dict = {
+			"coins": 0
+		}
+		return save_dict
+	else:
+		var saveGame = FileAccess.get_file_as_string("user://savePlayer.json")
+
+		data = JSON.parse_string(saveGame)
+
+	
+	return data
+
+var data = loadGame()
+
+func giveCoin(amount: int) -> void:
+	coins += 1
+	var save = {
+		"coins" : coins
+	}
+	saveGame(save)
+
 func _ready() -> void:
+	coins = data["coins"]
+	raycastLeft.enabled = true
+	raycastRight.enabled = true
 	match OS.get_name():
 		"Windows":
 			controlsNode.visible=false
@@ -97,13 +136,42 @@ func addSpeed(length: float = 5, speedAmount: float = 1.5):
 
 func  step() -> void:
 	if !is_on_floor():
-		velocity.y += gravity
+		if not isClimbing:
+			velocity.y += gravity
 		if velocity.y > 750:
 			velocity.y = 750
 	if position.y > 1900:
 		Death(Vector2(0,250))
 	if Input.is_action_just_pressed("pause"):
 		MenuNode.visible= not MenuNode.visible
+
+	var canClimb = false
+	if raycastLeft.is_colliding():
+		var collider = raycastLeft.get_collider()
+		var colliderName = collider.name.rstrip("0123456789")
+		if collider and colliderName == "Climbable":
+			canClimb = true
+	elif raycastRight.is_colliding():
+		var collider = raycastRight.get_collider()
+		var colliderName = collider.name.rstrip("0123456789")
+		if collider and colliderName  == "Climbable":
+			canClimb = true
+	else:
+		canClimb = false
+		isClimbing = false
+
+	if canClimb:
+		if Input.is_action_pressed("move_up"):
+			isClimbing = true
+			velocity.y = -climbSpeed
+	elif Input.is_action_pressed("move_down"):
+		isClimbing = true
+		velocity.y = climbSpeed
+	else:
+		if isClimbing:
+			velocity.y = 0
+		else:
+			isClimbing = false
 
 func _physics_process(delta):
 	timer += delta
@@ -244,9 +312,6 @@ func _on_menu_pressed():
 func _on_menu_released():
 	Input.action_release("pause")
 
-func _on_touch_screen_button_pressed():
-	get_tree().quit()
-
 func _on_resume_pressed() -> void:
 	MenuNode.visible=false
 
@@ -255,3 +320,21 @@ func _on_dance_pressed() -> void:
 
 func _on_dance_released() -> void:
 	Input.action_release("dance")
+
+func _on_up_pressed() -> void:
+	Input.action_press("move_up")
+
+func _on_up_released() -> void:
+	Input.action_release("move_up")
+
+func _on_down_pressed() -> void:
+	Input.action_press("move_down")
+
+func _on_down_released() -> void:
+	Input.action_release("move_down")
+
+func _on_return_pressed() -> void:
+	yoParentNode.emit("Return")
+
+func _on_quit_pressed() -> void:
+	get_tree().quit()

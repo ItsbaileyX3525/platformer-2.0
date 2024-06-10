@@ -14,6 +14,7 @@ const Intro = preload("res://scenes/intro.tscn")
 @export var levelToLoad: int = 0
 
 var intro
+var playerExists = false
 var Player: Node2D
 var child_instance
 
@@ -71,26 +72,37 @@ func loadNextLevel(level):
 		Player.hide_transition()
 		Player.position = Vector2(0, -350)
 
-func getReadyForIt():
-	Player.show_transition()
-	levelTimer.start()
-	levelCompleteSFX2.play()
-	backgroundSprite1.visible=false
-	backgroundSprite2.visible=true
-	await levelTimer.timeout
-	child_instance.queue_free()
-	child_instance = levels["End"].instantiate()
-	add_child(child_instance)
-	Player.hide_transition()
-	Player.position = Vector2(0, -350)
+func getReadyForIt(event):
+	if event == "Return":
+		intro = Intro.instantiate()
+		child_instance.queue_free()
+		playerExists = false
+		Player.queue_free()
+		intro.events.connect(handleIntroEvents)
+		add_child(intro)
+	else:
+		Player.show_transition()
+		levelTimer.start()
+		levelCompleteSFX2.play()
+		backgroundSprite1.visible=false
+		backgroundSprite2.visible=true
+		await levelTimer.timeout
+		child_instance.queue_free()
+		child_instance = levels["End"].instantiate()
+		add_child(child_instance)
+		Player.hide_transition()
+		Player.position = Vector2(0, -350)
 
 func handleIntroEvents(event: int):
-	print(event)
 	intro.queue_free()
+	if !playerExists:
+		Player = PlayerNode.instantiate()
 	PlayerLayer.add_child(Player)
 	Player.position = Vector2(26, 516)
 
 	Player.yoParentNode.connect(getReadyForIt)
+	
+	playerExists = true
 
 	child_instance = levels[event].instantiate()
 	add_child(child_instance)
@@ -106,6 +118,7 @@ func _ready() -> void:
 		intro.events.connect(handleIntroEvents)
 	else:
 		PlayerLayer.add_child(Player)
+		playerExists = true
 		Player.position = Vector2(26, 516)
 
 		Player.yoParentNode.connect(getReadyForIt)
@@ -116,6 +129,6 @@ func _ready() -> void:
 	
 		
 func _process(_delta: float) -> void:
-	if Player:
+	if Player and playerExists:
 		background.position.x = Player.position.x
 		background.position.y = Player.position.y - 310
