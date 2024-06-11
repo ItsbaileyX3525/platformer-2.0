@@ -51,6 +51,7 @@ var canDoubleJump = false
 var inMenu = false
 var secretsClicked = 0
 var doneSecret = false
+var canClimb = false
 
 #Mobile controls
 var movingLeft = false
@@ -150,7 +151,6 @@ func  step() -> void:
 			$Menu2/Resume.grab_focus()
 		
 
-	var canClimb = false
 	if raycastLeft.is_colliding():
 		var collider = raycastLeft.get_collider()
 		var colliderName = collider.name.rstrip("0123456789")
@@ -167,16 +167,14 @@ func  step() -> void:
 
 	if canClimb:
 		if Input.is_action_pressed("move_up"):
+			print("Climbing up")
 			isClimbing = true
 			velocity.y = -climbSpeed
-	elif Input.is_action_pressed("move_down"):
-		isClimbing = true
-		velocity.y = climbSpeed
-	else:
-		if isClimbing:
-			velocity.y = 0
+		elif Input.is_action_pressed("move_down"):
+			isClimbing = true
+			velocity.y = climbSpeed
 		else:
-			isClimbing = false
+			isClimbing=false
 
 func _physics_process(delta):
 	timer += delta

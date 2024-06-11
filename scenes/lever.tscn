@@ -1,11 +1,55 @@
-[gd_scene load_steps=2 format=3 uid="uid://ctmlu238spt3j"]
+[gd_scene load_steps=6 format=3 uid="uid://ctmlu238spt3j"]
+
+[ext_resource type="Texture2D" uid="uid://do33at3qja57i" path="res://assets/blocks/levers/InactiveLever.png" id="1_rm3hx"]
+[ext_resource type="Texture2D" uid="uid://56m1cuy4vomm" path="res://assets/blocks/levers/ActiveLever.png" id="2_8js0w"]
+[ext_resource type="AudioStream" uid="uid://bb6tk4bk2wjg6" path="res://assets/audio/LeverSwitch.ogg" id="3_jqym1"]
+
+[sub_resource type="GDScript" id="GDScript_i4wyn"]
+script/source = "extends Area2D
+
+@onready var enabledSprite = $Enabled
+@onready var disabledSprite = $Disabled
+@onready var clickAudio = $AudioStreamPlayer2D
+
+signal Activated(type: bool)
+
+@export var state = false
+
+func _process(delta: float) -> void:
+	if state:
+		enabledSprite.visible = true
+		disabledSprite.visible = false
+	else:
+		enabledSprite.visible = false
+		disabledSprite.visible = true
+
+func _physics_process(delta: float) -> void:
+	var bodies = get_overlapping_bodies()
+	for body in bodies:
+		if body.name == \"Player\":
+			if Input.is_action_just_pressed(\"click\"):
+				state = not state
+				clickAudio.play()
+				Activated.emit(state)
+"
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_c0kwq"]
 size = Vector2(13.1356, 20)
 
 [node name="Lever" type="Area2D"]
 scale = Vector2(2.36, 2.36)
+script = SubResource("GDScript_i4wyn")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 position = Vector2(0.211864, 0)
 shape = SubResource("RectangleShape2D_c0kwq")
+
+[node name="Enabled" type="Sprite2D" parent="."]
+texture = ExtResource("1_rm3hx")
+
+[node name="Disabled" type="Sprite2D" parent="."]
+texture = ExtResource("2_8js0w")
+
+[node name="AudioStreamPlayer2D" type="AudioStreamPlayer2D" parent="."]
+stream = ExtResource("3_jqym1")
+max_distance = 1000.0

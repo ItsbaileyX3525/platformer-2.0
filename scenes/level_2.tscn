@@ -1,11 +1,8 @@
-[gd_scene load_steps=27 format=3 uid="uid://bybxtflsdktqu"]
+[gd_scene load_steps=22 format=3 uid="uid://bybxtflsdktqu"]
 
 [ext_resource type="Texture2D" uid="uid://cshf2fo6eg1mk" path="res://assets/blocks/grass_dirt.png" id="1_fpix0"]
 [ext_resource type="PackedScene" uid="uid://bxyoisbqmd8r8" path="res://scenes/MovingPlatform.tscn" id="2_ayage"]
 [ext_resource type="PackedScene" uid="uid://ctmlu238spt3j" path="res://scenes/lever.tscn" id="3_nvmuh"]
-[ext_resource type="Texture2D" uid="uid://do33at3qja57i" path="res://assets/blocks/levers/InactiveLever.png" id="4_ck3d0"]
-[ext_resource type="Texture2D" uid="uid://56m1cuy4vomm" path="res://assets/blocks/levers/ActiveLever.png" id="5_jvxrd"]
-[ext_resource type="AudioStream" uid="uid://bb6tk4bk2wjg6" path="res://assets/audio/LeverSwitch.ogg" id="6_ergbr"]
 [ext_resource type="PackedScene" uid="uid://0dgvic7mnuer" path="res://scenes/laser.tscn" id="7_wyfmu"]
 [ext_resource type="PackedScene" uid="uid://buv6650ugxxq5" path="res://scenes/finish_flag.tscn" id="8_h0mpo"]
 [ext_resource type="PackedScene" uid="uid://d1oq0dg07l082" path="res://scenes/coin.tscn" id="9_7m4wk"]
@@ -20,6 +17,7 @@ func nextScene() -> void:
 
 #Vertical = ^
 #Horizontal = <>
+@onready var Floor6Anim = $Floor6/AnimationPlayer
 @onready var movingPlatHori1Anim = $Right1/AnimationPlayer
 @onready var movingPlatVert1Anim = $Up1/AnimationPlayer
 
@@ -98,6 +96,20 @@ func _on_coin_5_body_entered(body: Node2D) -> void:
 	if data.has(\"Level2\"):
 		data[\"Level2\"][5] = true
 		saveGame(data)
+
+
+func _on_lever_2_activated(type):
+	if type:
+		Floor6Anim.play(\"move_place\")
+	else:
+		Floor6Anim.stop()
+
+
+func _on_lever_activated(type):
+	if type:
+		movingPlatHori1Anim.speed_scale = .75
+	else:
+		movingPlatHori1Anim.speed_scale = 0.0
 "
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_3gjr7"]
@@ -187,95 +199,6 @@ _data = {
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_j6ejw"]
 size = Vector2(19.4351, 24.42)
-
-[sub_resource type="GDScript" id="GDScript_f6hjg"]
-script/source = "extends Area2D
-
-@onready var enabledSprite = $Enabled
-@onready var disabledSprite = $Disabled
-@onready var clickAudio = $AudioStreamPlayer2D
-@onready var rightPlatformHoriAnim = $\"../Right1/AnimationPlayer\"
-
-@export var state = false
-
-# Called when the node enters the scene tree for the first time.
-func _ready():
-	pass # Replace with function body.
-
-
-func _process(delta: float) -> void:
-	if state:
-		enabledSprite.visible = true
-		disabledSprite.visible = false
-		if rightPlatformHoriAnim.speed_scale == 0.0:
-			rightPlatformHoriAnim.speed_scale = .75
-	else:
-		enabledSprite.visible = false
-		disabledSprite.visible = true
-		if rightPlatformHoriAnim.speed_scale != 0.0:
-			rightPlatformHoriAnim.speed_scale = 0.0
-
-func _physics_process(delta: float) -> void:
-	var bodies = get_overlapping_bodies()
-	for body in bodies:
-		if body.name == \"Player\":
-			if Input.is_action_just_pressed(\"click\"):
-				state = not state
-				clickAudio.play()
-"
-
-[sub_resource type="GDScript" id="GDScript_iqcev"]
-script/source = "extends Area2D
-
-@onready var enabledSprite = $Enabled
-@onready var disabledSprite = $Disabled
-@onready var clickAudio = $AudioStreamPlayer2D
-@onready var platformToMove = $\"../Floor6/AnimationPlayer\"
-
-@export var state = false
-
-var doneComplete=true
-var doneRevert=false
-
-# Called when the node enters the scene tree for the first time.
-func _ready():
-	pass # Replace with function body.
-
-func playAnim():
-	doneComplete=true
-	doneRevert=false
-	platformToMove.speed_scale = 1
-	if not platformToMove.is_playing():
-		platformToMove.play(\"move_place\")
-	
-func reverseAnim():
-	doneRevert=true
-	doneComplete=false
-	platformToMove.speed_scale = -1
-	if not platformToMove.is_playing():
-		platformToMove.seek(.999)
-		platformToMove.play(\"move_place\")
-
-func _process(delta: float) -> void:
-	if state:
-		enabledSprite.visible = true
-		disabledSprite.visible = false
-		if not doneComplete:
-			playAnim()
-	else:
-		enabledSprite.visible = false
-		disabledSprite.visible = true
-		if not doneRevert:
-			reverseAnim()
-
-func _physics_process(delta: float) -> void:
-	var bodies = get_overlapping_bodies()
-	for body in bodies:
-		if body.name == \"Player\":
-			if Input.is_action_just_pressed(\"click\"):
-				state = not state
-				clickAudio.play()
-"
 
 [sub_resource type="Animation" id="Animation_hjd3u"]
 length = 0.001
@@ -417,18 +340,10 @@ position = Vector2(-0.0652161, -0.131287)
 shape = SubResource("RectangleShape2D_j6ejw")
 
 [node name="Lever" parent="." instance=ExtResource("3_nvmuh")]
-position = Vector2(689.614, 136.473)
-script = SubResource("GDScript_f6hjg")
+position = Vector2(689.614, 120.169)
 
-[node name="Enabled" type="Sprite2D" parent="Lever"]
-texture = ExtResource("4_ck3d0")
-
-[node name="Disabled" type="Sprite2D" parent="Lever"]
-texture = ExtResource("5_jvxrd")
-
-[node name="AudioStreamPlayer2D" type="AudioStreamPlayer2D" parent="Lever"]
-stream = ExtResource("6_ergbr")
-max_distance = 1000.0
+[node name="Lever2" parent="." instance=ExtResource("3_nvmuh")]
+position = Vector2(1531.4, 557.367)
 
 [node name="Laser" parent="." instance=ExtResource("7_wyfmu")]
 position = Vector2(788.647, -75.4831)
@@ -449,20 +364,6 @@ position = Vector2(1532, 737.923)
 rotation = 3.14159
 beamShootTime = 2.3
 beamLast = 0.3
-
-[node name="Lever2" parent="." instance=ExtResource("3_nvmuh")]
-position = Vector2(1530.8, 557.367)
-script = SubResource("GDScript_iqcev")
-
-[node name="Enabled" type="Sprite2D" parent="Lever2"]
-texture = ExtResource("4_ck3d0")
-
-[node name="Disabled" type="Sprite2D" parent="Lever2"]
-texture = ExtResource("5_jvxrd")
-
-[node name="AudioStreamPlayer2D" type="AudioStreamPlayer2D" parent="Lever2"]
-stream = ExtResource("6_ergbr")
-max_distance = 1000.0
 
 [node name="Floor5" type="StaticBody2D" parent="."]
 position = Vector2(2309.78, 626.812)
@@ -534,6 +435,8 @@ position = Vector2(530.797, 254.831)
 [node name="Coin5" parent="Coins" instance=ExtResource("9_7m4wk")]
 position = Vector2(2335.75, 521.135)
 
+[connection signal="Activated" from="Lever" to="." method="_on_lever_activated"]
+[connection signal="Activated" from="Lever2" to="." method="_on_lever_2_activated"]
 [connection signal="body_entered" from="FinishFlag" to="." method="_on_finish_flag_body_entered"]
 [connection signal="body_entered" from="Coins/Coin" to="." method="_on_coin_body_entered"]
 [connection signal="body_entered" from="Coins/Coin2" to="." method="_on_coin_2_body_entered"]
