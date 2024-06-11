@@ -1,0 +1,90 @@
+[gd_scene load_steps=3 format=3 uid="uid://cgntqku4tx218"]
+
+[ext_resource type="Texture2D" uid="uid://djfgpkicthsxn" path="res://assets/Speech.png" id="1_a4dxl"]
+
+[sub_resource type="GDScript" id="GDScript_v1ssk"]
+script/source = "extends MarginContainer
+
+@onready var label = $MarginContainer/Label
+@onready var timer = $LetterDisplayTimer
+
+const MAX_WIDTH = 256
+
+var text = \"\"
+var letterIndex = 0
+
+var letterTime = 0.03
+var spaceTime = 0.06
+var puncTime = 0.2
+
+
+signal finishedDisplaying()
+
+func displayText(textToShow: String):
+	text = textToShow
+	label.text = textToShow
+	
+	await resized
+	custom_minimum_size.x = min(size.x, MAX_WIDTH)
+	
+	if size.x > MAX_WIDTH:
+		label.autowrap_mode = TextServer.AUTOWRAP_WORD
+		await resized
+		await resized
+		custom_minimum_size.y = size.y
+		
+	global_position.x -= size.x / 2
+	global_position.y -= size.y + 24
+
+	label.text = \"\"
+	_displayLetter()
+		
+func _displayLetter():
+	label.text += text[letterIndex]
+	
+	letterIndex += 1
+	if letterIndex >= text.length():
+		finishedDisplaying.emit()
+		return
+	
+	match text[letterIndex]:
+		\"!\", \".\", \",\", \"?\":
+			timer.start(puncTime)
+		\" \":
+			timer.start(spaceTime)
+		_:
+			timer.start(letterTime)
+
+func _on_letter_display_timer_timeout() -> void:
+	_displayLetter()
+"
+
+[node name="TextBox" type="MarginContainer"]
+offset_right = 32.0
+offset_bottom = 32.0
+script = SubResource("GDScript_v1ssk")
+
+[node name="NinePatchRect" type="NinePatchRect" parent="."]
+layout_mode = 2
+texture = ExtResource("1_a4dxl")
+patch_margin_left = 16
+patch_margin_top = 16
+patch_margin_right = 16
+patch_margin_bottom = 16
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+layout_mode = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 8
+
+[node name="Label" type="Label" parent="MarginContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+vertical_alignment = 1
+
+[node name="LetterDisplayTimer" type="Timer" parent="."]
+one_shot = true
+
+[connection signal="timeout" from="LetterDisplayTimer" to="." method="_on_letter_display_timer_timeout"]

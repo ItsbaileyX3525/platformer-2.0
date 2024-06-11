@@ -88,6 +88,7 @@ func giveCoin(amount: int) -> void:
 	}
 	saveGame(save)
 
+
 func _ready() -> void:
 	coins = data["coins"]
 	raycastLeft.enabled = true
@@ -136,6 +137,13 @@ func addSpeed(length: float = 5, speedAmount: float = 1.5):
 	idleAnim.speed_scale = speedAmount
 	speedyBoi = true
 
+var lines:  Array[String] = [
+	"Egg!"
+]
+
+func hideSpeech():
+	inMenu = false
+
 func  step() -> void:
 	if !is_on_floor():
 		if not isClimbing:
@@ -149,8 +157,12 @@ func  step() -> void:
 		inMenu = not inMenu
 		if Input.get_connected_joypads().size() >= 1:
 			$Menu2/Resume.grab_focus()
-		
-
+	if Input.is_action_just_released("start_dialogue"):
+		inMenu = true
+		var realPos = global_position
+		realPos.y -= 190
+		var dialog1 = DialougeManager.startDialogue(realPos,lines)
+		dialog1._onTextBoxFinishedDisplaying.connect(hideSpeech)
 	if raycastLeft.is_colliding():
 		var collider = raycastLeft.get_collider()
 		var colliderName = collider.name.rstrip("0123456789")
