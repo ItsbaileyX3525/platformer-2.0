@@ -225,18 +225,6 @@ offset_top = 292.746
 offset_right = 139.028
 offset_bottom = 300.746
 
-[node name="RichTextLabel2" type="RichTextLabel" parent="."]
-offset_left = 781.0
-offset_top = 243.0
-offset_right = 1595.0
-offset_bottom = 1270.0
-scale = Vector2(0.05, 0.05)
-theme_override_colors/default_color = Color(0, 0, 0, 1)
-theme_override_font_sizes/normal_font_size = 700
-bbcode_enabled = true
-text = "1"
-script = SubResource("GDScript_djako")
-
 [connection signal="body_entered" from="Trigger" to="RichTextLabel" method="_on_trigger_body_entered"]
 [connection signal="body_entered" from="FinishFlag" to="." method="_on_finish_flag_body_entered"]
 [connection signal="button_down" from="Button" to="." method="_on_button_button_down"]

@@ -33,25 +33,25 @@ func saveGame(dictToSave: Dictionary) -> void:
 	gameFile.store_line(jsonString)
 
 func loadGame() -> Dictionary:
-	var data
+	var loadedData
 	if not FileAccess.file_exists(\"user://coin.json\"): 
 		var save_dict = {
 			\"Level1\": {
-				1:false,
-				2:false,
-				3:false,
-				4:false,
-				5:false
+				\"1\":false,
+				\"2\":false,
+				\"3\":false,
+				\"4\":false,
+				\"5\":false
 			}
 		}
 		return save_dict
 	else:
-		var saveGame = FileAccess.get_file_as_string(\"user://coin.json\")
+		var gameSave = FileAccess.get_file_as_string(\"user://coin.json\")
 
-		data = JSON.parse_string(saveGame)
+		loadedData = JSON.parse_string(gameSave)
 
 	
-	return data
+	return loadedData
 
 var data = loadGame()
 
@@ -73,11 +73,11 @@ func _ready() -> void:
 				coins[index-1].get_node(\"CollisionShape2D\").disabled=true
 	else:
 		data[\"Level1\"] = {
-				1:false,
-				2:false,
-				3:false,
-				4:false,
-				5:false
+				\"1\":false,
+				\"2\":false,
+				\"3\":false,
+				\"4\":false,
+				\"5\":false
 			}
 		var saves = data
 		saveGame(saves)
@@ -91,27 +91,27 @@ func _on_finish_flag_body_shape_entered(body_rid, body, body_shape_index, local_
 
 func _on_coin_body_entered(body: Node2D) -> void:
 	if data.has(\"Level1\"):
-		data[\"Level1\"][1] = true
+		data[\"Level1\"][\"1\"] = true
 		saveGame(data)
 
 func _on_coin_2_body_entered(body: Node2D) -> void:
 	if data.has(\"Level1\"):
-		data[\"Level1\"][2] = true
+		data[\"Level1\"][\"2\"] = true
 		saveGame(data)
 
 func _on_coin_3_body_entered(body: Node2D) -> void: 
 	if data.has(\"Level1\"):
-		data[\"Level1\"][3] = true
+		data[\"Level1\"][\"3\"] = true
 		saveGame(data)
 
 func _on_coin_4_body_entered(body: Node2D) -> void:
 	if data.has(\"Level1\"):
-		data[\"Level1\"][4] = true
+		data[\"Level1\"][\"4\"] = true
 		saveGame(data)
 
 func _on_coin_5_body_entered(body: Node2D) -> void:
 	if data.has(\"Level1\"):
-		data[\"Level1\"][5] = true
+		data[\"Level1\"][\"5\"] = true
 		saveGame(data)
 
 
@@ -474,7 +474,7 @@ offset_bottom = 867.8
 scale = Vector2(0.05, 0.05)
 theme_override_colors/default_color = Color(0, 0, 0, 1)
 theme_override_font_sizes/normal_font_size = 300
-text = "2"
+text = "1"
 scroll_active = false
 
 [node name="Coins" type="Node2D" parent="."]

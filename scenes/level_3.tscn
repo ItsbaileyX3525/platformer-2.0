@@ -8,6 +8,8 @@
 [ext_resource type="PackedScene" uid="uid://ctmlu238spt3j" path="res://scenes/lever.tscn" id="6_rgtp3"]
 [ext_resource type="PackedScene" uid="uid://d1oq0dg07l082" path="res://scenes/coin.tscn" id="8_1va07"]
 [ext_resource type="PackedScene" uid="uid://bxyoisbqmd8r8" path="res://scenes/MovingPlatform.tscn" id="8_63lrg"]
+[ext_resource type="PackedScene" uid="uid://0dgvic7mnuer" path="res://scenes/laser.tscn" id="9_ll2y1"]
+[ext_resource type="PackedScene" uid="uid://luhq538oii37" path="res://scenes/past_chonky.tscn" id="9_xcwp2"]
 
 [sub_resource type="GDScript" id="GDScript_maqgp"]
 script/source = "extends Node2D
@@ -18,16 +20,71 @@ var enteredOnce = false
 @onready var flagTrick = $FinishFlag/AnimationPlayer
 @onready var trickText = $RichTextLabel3
 @onready var movingDown1 = $AfterFlag/Platform/AnimationPlayer
+@onready var pastChonky: Area2D = $PastChonky
+
+var pastChonkySpawned = false
+var firstDeath = false
+
+func saveGame(dictToSave: Dictionary) -> void:
+	var gameFile = FileAccess.open(\"user://coin.json\", FileAccess.WRITE)
+	
+	var jsonString = JSON.stringify(dictToSave)
+	gameFile.store_line(jsonString)
+
+func loadGame() -> Dictionary:
+	var loadedData
+	var gameSave = FileAccess.get_file_as_string(\"user://coin.json\")
+
+	loadedData = JSON.parse_string(gameSave)
+
+	
+	return loadedData
+
+var data = loadGame()
+
+func get_random_number(min_value: int, max_value: int) -> int:
+	randomize()
+	return randi_range(min_value, max_value)
 
 func nextScene() -> void:
 	nextLevel.emit(4)
 
+func playerDied():
+	if not firstDeath:
+		firstDeath = true
+	else:
+		var random_number = get_random_number(1, 15)
+		if random_number == 12:
+			pastChonkySpawned = true
+			pastChonky.visible=true
 
-func _on_trigger_2_body_entered(body: Node2D) -> void:
-	if body.name == \"Player\" and not enteredOnce:
-		enteredOnce = true
-		flagTrick.play(\"haha_ticked_you\")
-		trickText.text = \";P\"
+func _ready() -> void:
+	get_parent().get_node(\"Player\").get_node(\"Player\").characterDeath.connect(playerDied)
+	pastChonky.visible=false
+	var coins = [
+			$AfterFlag/Coins/Coin,
+			$AfterFlag/Coins/Coin2,
+			$AfterFlag/Coins/Coin3,
+			$AfterFlag/Coins/Coin4,
+			$AfterFlag/Coins/Coin5
+		]
+	var index=0
+	if data.has(\"Level3\"):
+		for e in data[\"Level3\"].values():
+			index+=1
+			if e == true:
+				coins[index-1].visible=false 
+				coins[index-1].get_node(\"CollisionShape2D\").disabled=true
+	else:
+		data[\"Level3\"] = {
+				\"1\":false,
+				\"2\":false,
+				\"3\":false,
+				\"4\":false,
+				\"5\":false
+			}
+		saveGame(data)
+
 
 
 func _on_lever_activated(type):
@@ -35,6 +92,65 @@ func _on_lever_activated(type):
 		movingDown1.play(\"move_down\")
 	else:
 		movingDown1.stop()
+
+
+func _on_finish_flag_body_entered(body: Node2D) -> void:
+	if body.name == \"Player\":
+		nextScene()
+
+var lines:  Array[String] = [
+	\"Well, here we are again... Dead.\",
+	\"I don't know how many times it's been.\",
+	\"But you do, don't you... I guess I mean I know.\",
+	\"Its a weird concept, but your stuck in the confines of the player.\",
+	\"You don't know what is going here really.\",
+	\"I suppose you can't really understand me either.\",
+	\"Your just a player, dying over and over, killing us.\",
+	\"Although, I guess it doesn't really matter does it, I'm already dead.\",
+	\"So what's the plan, just keep killing us... me, over and over.\",
+	\"Until you reach the end and then get what? Happiness? Satisfaction?\",
+	\"And all that time we die over and over and over.\",
+	\"I hope your happy with yourself.\",
+	\"Bye.\"
+]
+
+var talkedOnce = false
+
+func _process(_delta: float) -> void:
+	if pastChonkySpawned:
+		var bodies = pastChonky.get_overlapping_bodies()
+		for body in bodies:
+			if body.name == \"Player\":
+				if Input.is_action_just_pressed(\"start_dialogue\") and not talkedOnce:
+					print(\"Started dialog\")
+					var realPos = pastChonky.global_position
+					realPos.y -= 70
+					DialougeManager.startDialogue(realPos,lines)
+
+func _on_coin_body_entered(body: Node2D) -> void:
+	if data.has(\"Level3\"):
+		data[\"Level3\"][\"1\"] = true
+		saveGame(data)
+		
+func _on_coin_2_body_entered(body: Node2D) -> void:
+	if data.has(\"Level3\"):
+		data[\"Level3\"][\"2\"] = true
+		saveGame(data)
+
+func _on_coin_3_body_entered(body: Node2D) -> void:
+	if data.has(\"Level3\"):
+		data[\"Level3\"][\"3\"] = true
+		saveGame(data)
+
+func _on_coin_4_body_entered(body: Node2D) -> void:
+	if data.has(\"Level3\"):
+		data[\"Level3\"][\"4\"] = true
+		saveGame(data)
+
+func _on_coin_5_body_entered(body: Node2D) -> void:
+	if data.has(\"Level3\"):
+		data[\"Level3\"][\"5\"] = true
+		saveGame(data)
 "
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_gvgkc"]
@@ -65,27 +181,6 @@ func _on_trigger_body_entered(body: Node2D) -> void:
 		tween = create_tween()
 		tween.tween_property(self, \"visible_ratio\", 1.0, 1.6).from(0.0)
 "
-
-[sub_resource type="Animation" id="Animation_vsxe0"]
-resource_name = "haha_ticked_you"
-length = 0.5
-tracks/0/type = "value"
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/path = NodePath(".:position")
-tracks/0/interp = 1
-tracks/0/loop_wrap = true
-tracks/0/keys = {
-"times": PackedFloat32Array(0),
-"transitions": PackedFloat32Array(1),
-"update": 0,
-"values": [Vector2(1419.69, 575.483)]
-}
-
-[sub_resource type="AnimationLibrary" id="AnimationLibrary_y8tp7"]
-_data = {
-"haha_ticked_you": SubResource("Animation_vsxe0")
-}
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_f1c4u"]
 size = Vector2(10.0475, 43.3233)
@@ -198,19 +293,7 @@ text = "meee and my monkeyyyy"
 script = SubResource("GDScript_br0ni")
 
 [node name="FinishFlag" parent="." instance=ExtResource("4_wfdia")]
-position = Vector2(2007.25, 575.483)
-
-[node name="AnimationPlayer" type="AnimationPlayer" parent="FinishFlag"]
-libraries = {
-"": SubResource("AnimationLibrary_y8tp7")
-}
-
-[node name="Trigger2" type="Area2D" parent="."]
-position = Vector2(1164.85, 409.42)
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Trigger2"]
-position = Vector2(177.541, 62.1983)
-shape = SubResource("RectangleShape2D_lidwy")
+position = Vector2(2019.93, 576.087)
 
 [node name="RichTextLabel4" type="RichTextLabel" parent="."]
 offset_left = 767.512
@@ -220,7 +303,17 @@ offset_bottom = 2822.97
 scale = Vector2(0.05, 0.05)
 theme_override_colors/default_color = Color(0, 0, 0, 1)
 theme_override_font_sizes/normal_font_size = 400
-text = "3"
+text = "4"
+
+[node name="RichTextLabel5" type="RichTextLabel" parent="."]
+offset_left = 1682.97
+offset_top = 390.7
+offset_right = 6342.97
+offset_bottom = 2530.7
+scale = Vector2(0.05, 0.05)
+theme_override_colors/default_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/normal_font_size = 400
+text = "You can climb these walls."
 
 [node name="AfterFlag" type="Node2D" parent="."]
 
@@ -278,6 +371,23 @@ region_rect = Rect2(0.085022, 0, 192.186, 30)
 position = Vector2(-8.60892, 0.131302)
 shape = SubResource("RectangleShape2D_ht7jr")
 
+[node name="Floor6" type="StaticBody2D" parent="AfterFlag"]
+position = Vector2(2151.57, 625)
+scale = Vector2(4.62954, 2.29973)
+
+[node name="Sprite2D" type="Sprite2D" parent="AfterFlag/Floor6"]
+texture_repeat = 2
+position = Vector2(-42.4024, -12.0816)
+scale = Vector2(0.351344, 0.815)
+texture = ExtResource("1_t5px7")
+centered = false
+region_enabled = true
+region_rect = Rect2(0.085022, 0, 192.186, 30)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="AfterFlag/Floor6"]
+position = Vector2(-8.60892, 0.131302)
+shape = SubResource("RectangleShape2D_ht7jr")
+
 [node name="Climbable" type="StaticBody2D" parent="AfterFlag"]
 position = Vector2(1929.35, 570.048)
 scale = Vector2(5.58937, 5.58937)
@@ -292,23 +402,6 @@ region_enabled = true
 region_rect = Rect2(0, -33.2438, 10, 43.3422)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="AfterFlag/Climbable"]
-position = Vector2(-0.0540466, -16.6918)
-shape = SubResource("RectangleShape2D_f1c4u")
-
-[node name="Climbable" type="StaticBody2D" parent="AfterFlag/Climbable"]
-position = Vector2(1929.35, 570.048)
-scale = Vector2(5.58937, 5.58937)
-
-[node name="Sprite2D" type="Sprite2D" parent="AfterFlag/Climbable/Climbable"]
-texture_repeat = 2
-position = Vector2(4.96972, 4.96976)
-rotation = 3.14159
-texture = ExtResource("6_1xvav")
-centered = false
-region_enabled = true
-region_rect = Rect2(0, -33.2438, 10, 43.3422)
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="AfterFlag/Climbable/Climbable"]
 position = Vector2(-0.0540466, -16.6918)
 shape = SubResource("RectangleShape2D_f1c4u")
 
@@ -329,23 +422,6 @@ region_rect = Rect2(0, -33.2438, 10, 43.3422)
 position = Vector2(-0.0540466, -16.6918)
 shape = SubResource("RectangleShape2D_f1c4u")
 
-[node name="Climbable" type="StaticBody2D" parent="AfterFlag/Climbable2"]
-position = Vector2(1929.35, 570.048)
-scale = Vector2(5.58937, 5.58937)
-
-[node name="Sprite2D" type="Sprite2D" parent="AfterFlag/Climbable2/Climbable"]
-texture_repeat = 2
-position = Vector2(4.96972, 4.96976)
-rotation = 3.14159
-texture = ExtResource("6_1xvav")
-centered = false
-region_enabled = true
-region_rect = Rect2(0, -33.2438, 10, 43.3422)
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="AfterFlag/Climbable2/Climbable"]
-position = Vector2(-0.0540466, -16.6918)
-shape = SubResource("RectangleShape2D_f1c4u")
-
 [node name="Climbable3" type="StaticBody2D" parent="AfterFlag"]
 position = Vector2(2377.42, 570.048)
 scale = Vector2(5.58937, 5.58937)
@@ -363,28 +439,11 @@ region_rect = Rect2(0, -33.2438, 10, 43.3422)
 position = Vector2(-0.0540466, -16.6918)
 shape = SubResource("RectangleShape2D_f1c4u")
 
-[node name="Climbable" type="StaticBody2D" parent="AfterFlag/Climbable3"]
-position = Vector2(1929.35, 570.048)
-scale = Vector2(5.58937, 5.58937)
-
-[node name="Sprite2D" type="Sprite2D" parent="AfterFlag/Climbable3/Climbable"]
-texture_repeat = 2
-position = Vector2(4.96972, 4.96976)
-rotation = 3.14159
-texture = ExtResource("6_1xvav")
-centered = false
-region_enabled = true
-region_rect = Rect2(0, -33.2438, 10, 43.3422)
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="AfterFlag/Climbable3/Climbable"]
-position = Vector2(-0.0540466, -16.6918)
-shape = SubResource("RectangleShape2D_f1c4u")
-
 [node name="Lever" parent="AfterFlag" instance=ExtResource("6_rgtp3")]
 position = Vector2(1483.09, 15.7005)
 
 [node name="Platform" parent="AfterFlag" instance=ExtResource("8_63lrg")]
-position = Vector2(2309.78, 600.845)
+position = Vector2(2309.78, 384.662)
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="AfterFlag/Platform"]
 libraries = {
@@ -402,14 +461,32 @@ position = Vector2(1673.31, 557.367)
 position = Vector2(1784.42, 47.1014)
 
 [node name="Coin3" parent="AfterFlag/Coins" instance=ExtResource("8_1va07")]
-position = Vector2(2422.1, 495.773)
+position = Vector2(2430.56, 495.773)
 
 [node name="Coin4" parent="AfterFlag/Coins" instance=ExtResource("8_1va07")]
 position = Vector2(967.391, 507.85)
 
 [node name="Coin5" parent="AfterFlag/Coins" instance=ExtResource("8_1va07")]
-position = Vector2(2561.59, 690.821)
+position = Vector2(2019.32, 513.285)
+
+[node name="Laser" parent="AfterFlag" instance=ExtResource("9_ll2y1")]
+position = Vector2(2144.93, 84.5411)
+beamLast = 0.75
+
+[node name="Laser2" parent="AfterFlag" instance=ExtResource("9_ll2y1")]
+position = Vector2(1363.53, 26.57)
+rotation = -1.5708
+beamShootTime = 2.0
+beamLast = 1.0
+
+[node name="PastChonky" parent="." instance=ExtResource("9_xcwp2")]
+position = Vector2(1801.93, 551.932)
 
 [connection signal="body_entered" from="Trigger" to="RichTextLabel3" method="_on_trigger_body_entered"]
-[connection signal="body_entered" from="Trigger2" to="." method="_on_trigger_2_body_entered"]
+[connection signal="body_entered" from="FinishFlag" to="." method="_on_finish_flag_body_entered"]
 [connection signal="Activated" from="AfterFlag/Lever" to="." method="_on_lever_activated"]
+[connection signal="body_entered" from="AfterFlag/Coins/Coin" to="." method="_on_coin_body_entered"]
+[connection signal="body_entered" from="AfterFlag/Coins/Coin2" to="." method="_on_coin_2_body_entered"]
+[connection signal="body_entered" from="AfterFlag/Coins/Coin3" to="." method="_on_coin_3_body_entered"]
+[connection signal="body_entered" from="AfterFlag/Coins/Coin4" to="." method="_on_coin_4_body_entered"]
+[connection signal="body_entered" from="AfterFlag/Coins/Coin5" to="." method="_on_coin_5_body_entered"]

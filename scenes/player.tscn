@@ -1,4 +1,4 @@
-[gd_scene load_steps=33 format=3 uid="uid://h3i5gc0ryenh"]
+[gd_scene load_steps=34 format=3 uid="uid://h3i5gc0ryenh"]
 
 [ext_resource type="Script" path="res://scripts/player.gd" id="1_8bgxb"]
 [ext_resource type="Texture2D" uid="uid://ds24jidhoytug" path="res://assets/player/chonky-left.png" id="2_uva7f"]
@@ -158,7 +158,9 @@ _data = {
 }
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_p1rha"]
-size = Vector2(36, 124)
+size = Vector2(36, 85.3659)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_u0xf6"]
 
 [node name="Player" type="CharacterBody2D"]
 scale = Vector2(1.64, 1.64)
@@ -173,9 +175,18 @@ scale = Vector2(0.05, 0.05)
 theme_override_font_sizes/normal_font_size = 500
 text = "Deaths: 0"
 
+[node name="RichTextLabel3" type="RichTextLabel" parent="."]
+offset_left = -573.0
+offset_top = -483.537
+offset_right = 22033.0
+offset_bottom = 678.463
+scale = Vector2(0.05, 0.05)
+theme_override_font_sizes/normal_font_size = 500
+text = "Coins: 0"
+
 [node name="ChonkyLeft" type="Sprite2D" parent="."]
 position = Vector2(1, -63)
-scale = Vector2(1.998, 4.263)
+scale = Vector2(1.998, 2.997)
 texture = ExtResource("2_uva7f")
 hframes = 13
 
@@ -187,7 +198,7 @@ libraries = {
 
 [node name="ChonkyRight" type="Sprite2D" parent="."]
 position = Vector2(1, -63)
-scale = Vector2(1.998, 4.263)
+scale = Vector2(1.998, 2.997)
 texture = ExtResource("3_badim")
 hframes = 14
 
@@ -198,7 +209,7 @@ libraries = {
 
 [node name="IdleChonky" type="Sprite2D" parent="."]
 position = Vector2(0.999996, -63)
-scale = Vector2(1.99829, 4.26302)
+scale = Vector2(1.998, 2.997)
 texture = ExtResource("4_bnms7")
 hframes = 3
 vframes = 2
@@ -210,7 +221,7 @@ libraries = {
 
 [node name="DanceChonky" type="Sprite2D" parent="."]
 position = Vector2(1, -63)
-scale = Vector2(1.998, 4.263)
+scale = Vector2(1.998, 2.997)
 texture = ExtResource("5_kd4lg")
 hframes = 7
 
@@ -220,7 +231,7 @@ libraries = {
 }
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
-position = Vector2(1, -61)
+position = Vector2(1, -62.1951)
 shape = SubResource("RectangleShape2D_p1rha")
 
 [node name="Camera2D" type="Camera2D" parent="."]
@@ -291,7 +302,7 @@ scale = Vector2(0.518519, 0.518519)
 texture_normal = ExtResource("12_fqutd")
 
 [node name="Menu" type="TouchScreenButton" parent="MobileControls"]
-position = Vector2(-2.77789, -150.555)
+position = Vector2(-2.7779, -145)
 scale = Vector2(6.3111, 4.2814)
 texture_normal = ExtResource("13_n4pk7")
 
@@ -382,15 +393,30 @@ theme_override_styles/pressed = ExtResource("20_8g3gr")
 theme_override_styles/focus = ExtResource("20_8g3gr")
 text = "QUIT"
 
+[node name="ResumeMobile" type="TouchScreenButton" parent="Menu2"]
+position = Vector2(59.864, 35.3591)
+scale = Vector2(4.0136, 0.707182)
+shape = SubResource("RectangleShape2D_u0xf6")
+
+[node name="ReturnMobile" type="TouchScreenButton" parent="Menu2"]
+position = Vector2(60.3742, 66.7127)
+scale = Vector2(4.0136, 0.707182)
+shape = SubResource("RectangleShape2D_u0xf6")
+
+[node name="QuitMobile" type="TouchScreenButton" parent="Menu2"]
+position = Vector2(62.0749, 100.552)
+scale = Vector2(4.0136, 0.707182)
+shape = SubResource("RectangleShape2D_u0xf6")
+
 [node name="Timer" type="Timer" parent="."]
 wait_time = 2.5
 
 [node name="RayCast2D_Right" type="RayCast2D" parent="."]
-position = Vector2(0, 0.609756)
+position = Vector2(0, -18.9024)
 target_position = Vector2(20.122, 0)
 
 [node name="RayCast2D_Left" type="RayCast2D" parent="."]
-position = Vector2(0, 0.609756)
+position = Vector2(0, -18.9024)
 target_position = Vector2(-18.2927, 0)
 
 [connection signal="pressed" from="MobileControls/Left" to="." method="_on_left_pressed"]
@@ -412,3 +438,6 @@ target_position = Vector2(-18.2927, 0)
 [connection signal="pressed" from="Menu2/Resume" to="." method="_on_resume_pressed"]
 [connection signal="pressed" from="Menu2/Return" to="." method="_on_return_pressed"]
 [connection signal="pressed" from="Menu2/Quit" to="." method="_on_quit_pressed"]
+[connection signal="pressed" from="Menu2/ResumeMobile" to="." method="_on_resume_mobile_pressed"]
+[connection signal="pressed" from="Menu2/ReturnMobile" to="." method="_on_return_mobile_pressed"]
+[connection signal="pressed" from="Menu2/QuitMobile" to="." method="_on_quit_mobile_pressed"]

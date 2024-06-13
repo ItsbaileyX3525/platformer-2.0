@@ -1,0 +1,16 @@
+[gd_scene load_steps=3 format=3 uid="uid://luhq538oii37"]
+
+[ext_resource type="Texture2D" uid="uid://ciuar8bgxsemq" path="res://assets/player/ChonkyOfChristmasPast.png" id="1_ej1xj"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_sbcvy"]
+size = Vector2(77, 86)
+
+[node name="PastChonky" type="Area2D"]
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+scale = Vector2(1.998, 2.997)
+texture = ExtResource("1_ej1xj")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(1.5, 1)
+shape = SubResource("RectangleShape2D_sbcvy")

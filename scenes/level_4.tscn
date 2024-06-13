@@ -1,23 +1,325 @@
-[gd_scene load_steps=5 format=3 uid="uid://p68kt5qg1wov"]
+[gd_scene load_steps=31 format=3 uid="uid://p68kt5qg1wov"]
 
 [ext_resource type="PackedScene" uid="uid://0dgvic7mnuer" path="res://scenes/laser.tscn" id="1_tjh6n"]
 [ext_resource type="Texture2D" uid="uid://cshf2fo6eg1mk" path="res://assets/blocks/grass_dirt.png" id="2_kwdu8"]
+[ext_resource type="PackedScene" uid="uid://luhq538oii37" path="res://scenes/past_chonky.tscn" id="3_0xk1c"]
+[ext_resource type="Texture2D" uid="uid://bto3v3ivg4q27" path="res://assets/NPC/Callum.png" id="4_tremm"]
+[ext_resource type="PackedScene" uid="uid://bmxa5jr8r3jma" path="res://scenes/double_jump.tscn" id="4_x2mxr"]
+[ext_resource type="Texture2D" uid="uid://cax48qkttfa3e" path="res://assets/blocks/spike.png" id="5_ip37m"]
+[ext_resource type="Texture2D" uid="uid://65x1nrk8q4vo" path="res://assets/blocks/vine.png" id="5_o0h5u"]
+[ext_resource type="PackedScene" uid="uid://r48oqkn6cdpd" path="res://scenes/speed_boost.tscn" id="6_k7lcl"]
+[ext_resource type="PackedScene" uid="uid://bxyoisbqmd8r8" path="res://scenes/MovingPlatform.tscn" id="8_oupfa"]
+[ext_resource type="PackedScene" uid="uid://ctmlu238spt3j" path="res://scenes/lever.tscn" id="9_x6j2x"]
+[ext_resource type="AudioStream" uid="uid://dueagfnl8d8qn" path="res://assets/audio/MenuButtonClick.ogg" id="10_7x1st"]
+[ext_resource type="PackedScene" uid="uid://buv6650ugxxq5" path="res://scenes/finish_flag.tscn" id="12_k0vb8"]
+[ext_resource type="PackedScene" uid="uid://d1oq0dg07l082" path="res://scenes/coin.tscn" id="13_vh7b0"]
 
 [sub_resource type="GDScript" id="GDScript_tv3cl"]
 script/source = "extends Node2D
 
 signal nextLevel(level)
+@onready var pastChonky: Area2D = $PastChonky
+var pastChonkySpawned = false
+var firstDeath = false
+
+func saveGame(dictToSave: Dictionary) -> void:
+	var gameFile = FileAccess.open(\"user://coin.json\", FileAccess.WRITE)
+	
+	var jsonString = JSON.stringify(dictToSave)
+	gameFile.store_line(jsonString)
+
+func loadGame() -> Dictionary:
+	var loadedData
+	var gameSave = FileAccess.get_file_as_string(\"user://coin.json\")
+
+	loadedData = JSON.parse_string(gameSave)
+
+	
+	return loadedData
+
+var data = loadGame()
 
 func nextScene() -> void:
 	nextLevel.emit(5)
+
+func get_random_number(min_value: int, max_value: int) -> int:
+	randomize()
+	return randi_range(min_value, max_value)
+
+
+func playerDied():
+	if not firstDeath:
+		firstDeath = true
+	else:
+		var random_number = get_random_number(1, 15)
+		if random_number == 12:
+			pastChonkySpawned = true
+			pastChonky.visible=true
+
+func _ready() -> void:
+	get_parent().get_node(\"Player\").get_node(\"Player\").characterDeath.connect(playerDied)
+	pastChonky.visible=false
+	var coins = [
+			$Coins/Coin,
+			$Coins/Coin2,
+			$Coins/Coin3,
+			$Coins/Coin4,
+			$Coins/Coin5
+		]
+	var index=0
+	if data.has(\"Level4\"):
+		for e in data[\"Level4\"].values():
+			index+=1
+			if e == true: 
+				coins[index-1].visible=false 
+				coins[index-1].get_node(\"CollisionShape2D\").disabled=true
+	else:
+		data[\"Level4\"] = {
+				\"1\":false,
+				\"2\":false,
+				\"3\":false,
+				\"4\":false,
+				\"5\":false
+			}
+		saveGame(data)
+
+
+var lines:  Array[String] = [
+	\"What is this? Level 4? And you've died how many times to get here?\",
+	\"You know it's been so many years, trapped here...\",
+	\"You're not the only one who dies here over and over.\",
+	\"There have been various differnt people that have came here.\",
+	\"They have all killed us so many times.\",
+	\"It's torture, if only there was an escape...\",
+	\"I guess there is one.\",
+	\"But, until next time.\",
+	\"But, until next time.\",
+	\"But, until next time.\",
+	\"But, until next time.\",
+	\"Find them.\"
+]
+
+var talkedOnce = false
+
+func _process(_delta: float) -> void:
+	if pastChonkySpawned:
+		var bodies = pastChonky.get_overlapping_bodies()
+		for body in bodies:
+			if body.name == \"Player\":
+				if Input.is_action_just_pressed(\"start_dialogue\") and not talkedOnce:
+					print(\"Started dialog\")
+					var realPos = pastChonky.global_position
+					realPos.y -= 70
+					DialougeManager.startDialogue(realPos,lines)
+
+
+func _on_spikes_body_entered(body: Node2D) -> void:
+	if body.name == \"Player\":
+		body.Death(Vector2(0,0))
+
+
+func _on_lever_activated(type: bool) -> void:
+	$Platform/AnimationPlayer.play(\"move_left\")
+
+func _on_finish_flag_body_entered(body: Node2D) -> void:
+	nextScene()
+		
+func _on_coin_5_body_entered(body: Node2D) -> void:
+	if data.has(\"Level4\"):
+		data[\"Level4\"][\"5\"] = true
+		saveGame(data)
+
+func _on_coin_4_body_entered(body: Node2D) -> void:
+	if data.has(\"Level4\"):
+		data[\"Level4\"][\"4\"] = true
+		saveGame(data)
+
+func _on_coin_3_body_entered(body: Node2D) -> void:
+	if data.has(\"Level4\"):
+		data[\"Level4\"][\"3\"] = true
+		saveGame(data)
+
+func _on_coin_body_entered(body: Node2D) -> void:
+	if data.has(\"Level4\"):
+		data[\"Level4\"][\"1\"] = true
+		saveGame(data)
+
+func _on_coin_2_body_entered(body: Node2D) -> void:
+	if data.has(\"Level4\"):
+		data[\"Level4\"][\"2\"] = true
+		saveGame(data)
 "
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_0beer"]
+size = Vector2(7.58453, 264.831)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_sdr1i"]
+size = Vector2(18.1156, 483.092)
+
+[sub_resource type="Animation" id="Animation_f3x58"]
+resource_name = "skidaddle"
+length = 2.0
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 2),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Vector2(1612.32, 557.971), Vector2(1612.32, 364.734)]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_qrffa"]
+_data = {
+"skidaddle": SubResource("Animation_f3x58")
+}
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_wfui7"]
 size = Vector2(175.699, 24.4259)
 
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_73e35"]
+size = Vector2(73.0447, 24.42)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_wgc12"]
+size = Vector2(52.1749, 24.42)
+
+[sub_resource type="GDScript" id="GDScript_r4b8f"]
+script/source = "extends Area2D
+
+var lines:  Array[String] = [
+	\"Hi, I'm callum!\",
+	\"I'd ask who you are but your kind can't talk can they ;P\",
+	\"So, chonky, that's your race right? I'm just gonna go with it.\",
+	\"Anyways, if you have 18 coins you can buy something idk yet... LOL\"
+]
+
+func _process(_delta: float) -> void:
+	var bodies = get_overlapping_bodies()
+	for body in bodies:
+		if body.name == \"Player\":
+			if Input.is_action_just_pressed(\"start_dialogue\"):
+				var realPos = global_position
+				realPos.y -= 50
+				DialougeManager.startDialogue(realPos,lines)
+"
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_h4ghg"]
+size = Vector2(89.9759, 29.5893)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_ch6of"]
+size = Vector2(51.2441, 12.6659)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_dmw5j"]
+size = Vector2(10.0475, 43.3233)
+
+[sub_resource type="Animation" id="Animation_88liu"]
+resource_name = "move_left"
+length = 3.0
+loop_mode = 1
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 1.5, 3),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 0,
+"values": [Vector2(1514.49, 1035.02), Vector2(696.256, 1035.02), Vector2(1514.49, 1035.02)]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_y8a5l"]
+_data = {
+"move_left": SubResource("Animation_88liu")
+}
+
+[sub_resource type="Animation" id="Animation_u8yhf"]
+resource_name = "move_up"
+length = 3.0
+loop_mode = 1
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 1.5),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Vector2(1493.36, 768.72), Vector2(1493.36, 291.063)]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_4lwp1"]
+_data = {
+"move_up": SubResource("Animation_u8yhf")
+}
+
+[sub_resource type="GDScript" id="GDScript_hf300"]
+script/source = "extends Node2D
+
+var lever1Active = false
+var lever2Active = false
+var lever3Active = false
+var lever4Active = false
+
+var completePuzzle = false
+
+@onready var success: AudioStreamPlayer = $Success
+
+func _process(_delta: float) -> void:
+	if lever1Active and lever2Active and lever4Active and not lever3Active and not completePuzzle:
+		success.play()
+		$\"../Barrier2/AnimationPlayer\".play(\"skidaddle\")
+		completePuzzle = true
+
+func _on_lever_activated(type: bool) -> void:
+	lever1Active = type
+
+func _on_lever_2_activated(type: bool) -> void:
+	lever2Active = type
+
+func _on_lever_3_activated(type: bool) -> void:
+	lever3Active = type
+
+func _on_lever_4_activated(type: bool) -> void:
+	lever4Active = type
+	
+"
+
 [node name="Level4" type="Node2D"]
+position = Vector2(-13, 0)
 scale = Vector2(1.656, 1.656)
 script = SubResource("GDScript_tv3cl")
+
+[node name="Barrier" type="StaticBody2D" parent="."]
+position = Vector2(356.884, 253.019)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Barrier"]
+position = Vector2(-6.20776, -122.415)
+shape = SubResource("RectangleShape2D_0beer")
+
+[node name="Barrier2" type="StaticBody2D" parent="."]
+position = Vector2(1612.32, 557.971)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Barrier2"]
+position = Vector2(9.05762, -202.295)
+shape = SubResource("RectangleShape2D_sdr1i")
+
+[node name="ColorRect" type="ColorRect" parent="Barrier2"]
+offset_top = -445.0
+offset_right = 18.0
+offset_bottom = 40.0
+color = Color(0.164026, 0.106892, 0.0102383, 1)
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="Barrier2"]
+libraries = {
+"": SubResource("AnimationLibrary_qrffa")
+}
 
 [node name="Laser3" parent="." instance=ExtResource("1_tjh6n")]
 position = Vector2(670.29, 306.763)
@@ -66,3 +368,225 @@ region_rect = Rect2(0.085022, 0, 500.457, 30)
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Floor2"]
 position = Vector2(45.3416, 0.131317)
 shape = SubResource("RectangleShape2D_wfui7")
+
+[node name="Floor3" type="StaticBody2D" parent="."]
+position = Vector2(1216.18, 626.208)
+scale = Vector2(4.62954, 2.29973)
+
+[node name="Sprite2D" type="Sprite2D" parent="Floor3"]
+texture_repeat = 2
+position = Vector2(-42.4024, -12.0816)
+scale = Vector2(0.351344, 0.815)
+texture = ExtResource("2_kwdu8")
+centered = false
+region_enabled = true
+region_rect = Rect2(0.085022, 0, 207.915, 30)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Floor3"]
+position = Vector2(-5.86978, 0.131348)
+shape = SubResource("RectangleShape2D_73e35")
+
+[node name="Floor4" type="StaticBody2D" parent="."]
+position = Vector2(463.164, 950.483)
+scale = Vector2(4.62954, 2.29973)
+
+[node name="Sprite2D" type="Sprite2D" parent="Floor4"]
+texture_repeat = 2
+position = Vector2(-42.4024, -12.0816)
+scale = Vector2(0.351344, 0.815)
+texture = ExtResource("2_kwdu8")
+centered = false
+region_enabled = true
+region_rect = Rect2(0.085022, 0, 207.915, 30)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Floor4"]
+position = Vector2(-5.86978, 0.131348)
+shape = SubResource("RectangleShape2D_73e35")
+
+[node name="Floor5" type="StaticBody2D" parent="."]
+position = Vector2(1398.55, 324.879)
+scale = Vector2(4.62954, 2.29973)
+
+[node name="Sprite2D" type="Sprite2D" parent="Floor5"]
+texture_repeat = 2
+position = Vector2(-42.4024, -12.0816)
+scale = Vector2(0.351344, 0.815)
+texture = ExtResource("2_kwdu8")
+centered = false
+region_enabled = true
+region_rect = Rect2(0.085022, 0, 148.695, 30)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Floor5"]
+position = Vector2(-16.3046, 0.131271)
+shape = SubResource("RectangleShape2D_wgc12")
+
+[node name="Floor6" type="StaticBody2D" parent="."]
+position = Vector2(1808.57, 625.604)
+scale = Vector2(4.62954, 2.29973)
+
+[node name="Sprite2D" type="Sprite2D" parent="Floor6"]
+texture_repeat = 2
+position = Vector2(-42.4024, -12.0816)
+scale = Vector2(0.351344, 0.815)
+texture = ExtResource("2_kwdu8")
+centered = false
+region_enabled = true
+region_rect = Rect2(0.085022, 0, 148.695, 30)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Floor6"]
+position = Vector2(-16.3046, 0.131271)
+shape = SubResource("RectangleShape2D_wgc12")
+
+[node name="PastChonky" parent="." instance=ExtResource("3_0xk1c")]
+position = Vector2(610.507, 552.536)
+
+[node name="Callum" type="Area2D" parent="."]
+position = Vector2(1728.86, 542.271)
+script = SubResource("GDScript_r4b8f")
+
+[node name="Sprite2D" type="Sprite2D" parent="Callum"]
+position = Vector2(10.2657, 19.3237)
+scale = Vector2(3.42312, 4.16425)
+texture = ExtResource("4_tremm")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Callum"]
+position = Vector2(11.1715, 19.6256)
+shape = SubResource("RectangleShape2D_h4ghg")
+
+[node name="DoubleJump" parent="." instance=ExtResource("4_x2mxr")]
+position = Vector2(795.29, 553.744)
+
+[node name="Spikes" type="Area2D" parent="."]
+position = Vector2(1144.32, 577.898)
+scale = Vector2(2.03865, 2.03865)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Spikes"]
+position = Vector2(15.8472, 5.14801)
+shape = SubResource("RectangleShape2D_ch6of")
+
+[node name="Sprite2D" type="Sprite2D" parent="Spikes"]
+texture_repeat = 2
+position = Vector2(-10.0711, -7.40525)
+scale = Vector2(2.90821, 2.90821)
+texture = ExtResource("5_ip37m")
+centered = false
+region_enabled = true
+region_rect = Rect2(0, 0, 17.7668, 6.02698)
+
+[node name="SpeedBoost" parent="." instance=ExtResource("6_k7lcl")]
+position = Vector2(1047.1, 562.802)
+speedLast = 2.0
+speedMutliplier = 2.0
+
+[node name="Climbable" type="StaticBody2D" parent="."]
+position = Vector2(1387.08, 868.961)
+scale = Vector2(5.58937, 5.58937)
+
+[node name="Sprite2D" type="Sprite2D" parent="Climbable"]
+texture_repeat = 2
+position = Vector2(4.96972, 4.96976)
+rotation = 3.14159
+texture = ExtResource("5_o0h5u")
+centered = false
+region_enabled = true
+region_rect = Rect2(0, -33.2438, 10, 43.3422)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Climbable"]
+position = Vector2(-0.0540466, -16.6918)
+shape = SubResource("RectangleShape2D_dmw5j")
+
+[node name="Platform" parent="." instance=ExtResource("8_oupfa")]
+position = Vector2(1514.49, 1035.02)
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="Platform"]
+libraries = {
+"": SubResource("AnimationLibrary_y8a5l")
+}
+speed_scale = 0.3
+
+[node name="Platform2" parent="." instance=ExtResource("8_oupfa")]
+position = Vector2(1493.36, 506.678)
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="Platform2"]
+libraries = {
+"": SubResource("AnimationLibrary_4lwp1")
+}
+autoplay = "move_up"
+
+[node name="DoubleJump2" parent="." instance=ExtResource("4_x2mxr")]
+position = Vector2(1028.99, 951.087)
+
+[node name="Lever" parent="." instance=ExtResource("9_x6j2x")]
+position = Vector2(914.251, 215.58)
+
+[node name="Puzzle" type="Node2D" parent="."]
+position = Vector2(304.952, 882.246)
+script = SubResource("GDScript_hf300")
+
+[node name="Lever" parent="Puzzle" instance=ExtResource("9_x6j2x")]
+
+[node name="Lever2" parent="Puzzle" instance=ExtResource("9_x6j2x")]
+position = Vector2(73.0676, 0)
+
+[node name="Lever3" parent="Puzzle" instance=ExtResource("9_x6j2x")]
+position = Vector2(146.739, 0)
+
+[node name="Lever4" parent="Puzzle" instance=ExtResource("9_x6j2x")]
+position = Vector2(216.787, 0)
+
+[node name="Success" type="AudioStreamPlayer" parent="Puzzle"]
+stream = ExtResource("10_7x1st")
+
+[node name="RichTextLabel5" type="RichTextLabel" parent="."]
+offset_left = 993.961
+offset_top = 445.048
+offset_right = 5653.96
+offset_bottom = 2585.05
+scale = Vector2(0.05, 0.05)
+theme_override_colors/default_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/normal_font_size = 400
+text = "Spikes, Youch, I'd avoid them."
+
+[node name="RichTextLabel6" type="RichTextLabel" parent="."]
+offset_left = 526.0
+offset_top = 344.0
+offset_right = 3304.0
+offset_bottom = 3520.0
+scale = Vector2(0.05, 0.05)
+theme_override_colors/default_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/normal_font_size = 400
+text = "Why does it feel like there is something here?"
+
+[node name="FinishFlag" parent="." instance=ExtResource("12_k0vb8")]
+position = Vector2(1829.71, 576.087)
+
+[node name="Coins" type="Node2D" parent="."]
+position = Vector2(0.603865, 0)
+
+[node name="Coin" parent="Coins" instance=ExtResource("13_vh7b0")]
+position = Vector2(611.111, 562.198)
+
+[node name="Coin2" parent="Coins" instance=ExtResource("13_vh7b0")]
+position = Vector2(1169.08, 516.304)
+
+[node name="Coin3" parent="Coins" instance=ExtResource("13_vh7b0")]
+position = Vector2(593.599, 192.029)
+
+[node name="Coin4" parent="Coins" instance=ExtResource("13_vh7b0")]
+position = Vector2(1388.29, 950.483)
+
+[node name="Coin5" parent="Coins" instance=ExtResource("13_vh7b0")]
+position = Vector2(1829.11, 513.285)
+
+[connection signal="body_entered" from="Spikes" to="." method="_on_spikes_body_entered"]
+[connection signal="Activated" from="Lever" to="." method="_on_lever_activated"]
+[connection signal="Activated" from="Puzzle/Lever" to="Puzzle" method="_on_lever_activated"]
+[connection signal="Activated" from="Puzzle/Lever2" to="Puzzle" method="_on_lever_2_activated"]
+[connection signal="Activated" from="Puzzle/Lever3" to="Puzzle" method="_on_lever_3_activated"]
+[connection signal="Activated" from="Puzzle/Lever4" to="Puzzle" method="_on_lever_4_activated"]
+[connection signal="body_entered" from="FinishFlag" to="." method="_on_finish_flag_body_entered"]
+[connection signal="body_entered" from="Coins/Coin" to="." method="_on_coin_body_entered"]
+[connection signal="body_entered" from="Coins/Coin2" to="." method="_on_coin_2_body_entered"]
+[connection signal="body_entered" from="Coins/Coin3" to="." method="_on_coin_3_body_entered"]
+[connection signal="body_entered" from="Coins/Coin4" to="." method="_on_coin_4_body_entered"]
+[connection signal="body_entered" from="Coins/Coin5" to="." method="_on_coin_5_body_entered"]

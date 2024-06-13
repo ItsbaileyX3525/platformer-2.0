@@ -1,8 +1,9 @@
-[gd_scene load_steps=22 format=3 uid="uid://bybxtflsdktqu"]
+[gd_scene load_steps=23 format=3 uid="uid://bybxtflsdktqu"]
 
 [ext_resource type="Texture2D" uid="uid://cshf2fo6eg1mk" path="res://assets/blocks/grass_dirt.png" id="1_fpix0"]
 [ext_resource type="PackedScene" uid="uid://bxyoisbqmd8r8" path="res://scenes/MovingPlatform.tscn" id="2_ayage"]
 [ext_resource type="PackedScene" uid="uid://ctmlu238spt3j" path="res://scenes/lever.tscn" id="3_nvmuh"]
+[ext_resource type="PackedScene" uid="uid://luhq538oii37" path="res://scenes/past_chonky.tscn" id="7_6rnlq"]
 [ext_resource type="PackedScene" uid="uid://0dgvic7mnuer" path="res://scenes/laser.tscn" id="7_wyfmu"]
 [ext_resource type="PackedScene" uid="uid://buv6650ugxxq5" path="res://scenes/finish_flag.tscn" id="8_h0mpo"]
 [ext_resource type="PackedScene" uid="uid://d1oq0dg07l082" path="res://scenes/coin.tscn" id="9_7m4wk"]
@@ -20,6 +21,11 @@ func nextScene() -> void:
 @onready var Floor6Anim = $Floor6/AnimationPlayer
 @onready var movingPlatHori1Anim = $Right1/AnimationPlayer
 @onready var movingPlatVert1Anim = $Up1/AnimationPlayer
+@onready var pastChonky = $PastChonky
+
+var pastChonkySpawned = false
+var firstDeath = false
+var talkedOnce = false
 
 func saveGame(dictToSave: Dictionary) -> void:
 	var gameFile = FileAccess.open(\"user://coin.json\", FileAccess.WRITE)
@@ -28,17 +34,32 @@ func saveGame(dictToSave: Dictionary) -> void:
 	gameFile.store_line(jsonString)
 
 func loadGame() -> Dictionary:
-	var data
-	var saveGame = FileAccess.get_file_as_string(\"user://coin.json\")
+	var loadedData
+	var gameSave = FileAccess.get_file_as_string(\"user://coin.json\")
 
-	data = JSON.parse_string(saveGame)
+	loadedData = JSON.parse_string(gameSave)
 
 	
-	return data
+	return loadedData
 
 var data = loadGame()
 
+func get_random_number(min_value: int, max_value: int) -> int:
+	randomize()
+	return randi_range(min_value, max_value)
+
+func playerDied():
+	if not firstDeath:
+		firstDeath = true
+	else:
+		var random_number = get_random_number(1, 15)
+		if random_number == 12:
+			pastChonkySpawned = true
+			pastChonky.visible=true
+
 func _ready() -> void:
+	get_parent().get_node(\"Player\").get_node(\"Player\").characterDeath.connect(playerDied)
+	pastChonky.visible=false
 	var coins = [
 		$Coins/Coin,
 		$Coins/Coin2,
@@ -48,21 +69,24 @@ func _ready() -> void:
 	]
 	var index=0
 	if data.has(\"Level2\"):
+		print(data[\"Level2\"])
 		for e in data[\"Level2\"].values():
 			index+=1
 			if e == true:
+				print(\"true\")
 				coins[index-1].visible=false 
 				coins[index-1].get_node(\"CollisionShape2D\").disabled=true
+			else:
+				print(\"passed\")
 	else:
 		data[\"Level2\"] = {
-				1:false,
-				2:false,
-				3:false,
-				4:false,
-				5:false
+				\"1\":false,
+				\"2\":false,
+				\"3\":false,
+				\"4\":false,
+				\"5\":false
 			}
-		var saves = data
-		saveGame(saves)
+		saveGame(data)
 
 	movingPlatVert1Anim.play(\"move_up\")
 	movingPlatHori1Anim.play(\"move_right\")
@@ -74,27 +98,27 @@ func _on_finish_flag_body_entered(body):
 
 func _on_coin_body_entered(body: Node2D) -> void:
 	if data.has(\"Level2\"):
-		data[\"Level2\"][1] = true
+		data[\"Level2\"][\"1\"] = true
 		saveGame(data)
 		
 func _on_coin_2_body_entered(body: Node2D) -> void:
 	if data.has(\"Level2\"):
-		data[\"Level2\"][2] = true
+		data[\"Level2\"][\"2\"] = true
 		saveGame(data)
 
 func _on_coin_3_body_entered(body: Node2D) -> void:
 	if data.has(\"Level2\"):
-		data[\"Level2\"][3] = true
+		data[\"Level2\"][\"3\"] = true
 		saveGame(data)
 
 func _on_coin_4_body_entered(body: Node2D) -> void:
 	if data.has(\"Level2\"):
-		data[\"Level2\"][4] = true
+		data[\"Level2\"][\"4\"] = true
 		saveGame(data)
 
 func _on_coin_5_body_entered(body: Node2D) -> void:
 	if data.has(\"Level2\"):
-		data[\"Level2\"][5] = true
+		data[\"Level2\"][\"5\"] = true
 		saveGame(data)
 
 
@@ -110,6 +134,33 @@ func _on_lever_activated(type):
 		movingPlatHori1Anim.speed_scale = .75
 	else:
 		movingPlatHori1Anim.speed_scale = 0.0
+
+var lines:  Array[String] = [
+	\"Do you know why I am here?\",
+	\"It's because I'm you.\",
+	\"We have died many, many times.\",
+	\"More than I can even count.\",
+	\"I want this to stop.\",
+	\"We keep on failing over and over.\",
+	\"It makes  me wonder sometimes.\",
+	\"That if we are here just to suffer.\",
+	\"To fail over and over again.\",
+	\"Just for someone else's pleasure.\",
+	\"Perhaps I'm thinking about it too much.\",
+	\"Maybe this is just how we're supposed to be.\",
+	\"Bye, for now.\"
+]
+
+func _process(_delta: float) -> void:
+	if pastChonkySpawned:
+		var bodies = pastChonky.get_overlapping_bodies()
+		for body in bodies:
+			if body.name == \"Player\":
+				if Input.is_action_just_pressed(\"start_dialogue\") and not talkedOnce:
+					talkedOnce = true
+					var realPos = pastChonky.global_position
+					realPos.y -= 70
+					DialougeManager.startDialogue(realPos,lines)
 "
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_3gjr7"]
@@ -415,7 +466,7 @@ offset_bottom = 1141.21
 scale = Vector2(0.05, 0.05)
 theme_override_colors/default_color = Color(0, 0, 0, 1)
 theme_override_font_sizes/normal_font_size = 600
-text = "7"
+text = "2"
 scroll_active = false
 
 [node name="Coins" type="Node2D" parent="."]
@@ -435,6 +486,9 @@ position = Vector2(530.797, 254.831)
 [node name="Coin5" parent="Coins" instance=ExtResource("9_7m4wk")]
 position = Vector2(2335.75, 521.135)
 
+[node name="PastChonky" parent="." instance=ExtResource("7_6rnlq")]
+position = Vector2(261.473, 553.744)
+
 [connection signal="Activated" from="Lever" to="." method="_on_lever_activated"]
 [connection signal="Activated" from="Lever2" to="." method="_on_lever_2_activated"]
 [connection signal="body_entered" from="FinishFlag" to="." method="_on_finish_flag_body_entered"]
@@ -443,3 +497,4 @@ position = Vector2(2335.75, 521.135)
 [connection signal="body_entered" from="Coins/Coin3" to="." method="_on_coin_3_body_entered"]
 [connection signal="body_entered" from="Coins/Coin4" to="." method="_on_coin_4_body_entered"]
 [connection signal="body_entered" from="Coins/Coin5" to="." method="_on_coin_5_body_entered"]
+[connection signal="body_entered" from="PastChonky" to="." method="_on_past_chonky_body_entered"]

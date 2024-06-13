@@ -1,4 +1,4 @@
-[gd_scene load_steps=23 format=3 uid="uid://bih6wwy54x413"]
+[gd_scene load_steps=28 format=3 uid="uid://bih6wwy54x413"]
 
 [ext_resource type="Texture2D" uid="uid://cwkb1uuhhiqlq" path="res://assets/sky.jpg" id="1_6q4mn"]
 [ext_resource type="AudioStream" uid="uid://dulqgsoolth50" path="res://assets/audio/background/Menu.ogg" id="1_byiwn"]
@@ -9,7 +9,9 @@
 [ext_resource type="Texture2D" uid="uid://djw4olanyk7m5" path="res://assets/levels/Level2.png" id="5_8u03a"]
 [ext_resource type="Texture2D" uid="uid://c2arlclb0kqa6" path="res://assets/controls/RightArrow.png" id="6_gt04h"]
 [ext_resource type="Texture2D" uid="uid://baekfp3igmnse" path="res://assets/controls/LeftArrow.png" id="7_7dege"]
+[ext_resource type="Texture2D" uid="uid://bwxwopqic3mey" path="res://assets/levels/Level3.png" id="8_8csj7"]
 [ext_resource type="StyleBox" uid="uid://bp4enqk3iqech" path="res://scenes/SelectHover.tres" id="9_2xds1"]
+[ext_resource type="Texture2D" uid="uid://8nlew6nn8txa" path="res://assets/levels/Level4.png" id="9_35p7o"]
 [ext_resource type="StyleBox" uid="uid://3jcy00gngprl" path="res://scenes/Select.tres" id="9_m1fa6"]
 [ext_resource type="Texture2D" uid="uid://buvlwgc5b56r2" path="res://assets/Background - dark.png" id="12_tvfhk"]
 
@@ -52,7 +54,6 @@ var levelsCompleted = gameData[\"levelsCompleted\"]
 func _on_start_pressed() -> void:
 	events.emit(int(levelsCompleted))
 
-
 func _on_select_pressed() -> void:
 	mainScene.visible=false
 	background.visible=false
@@ -73,8 +74,34 @@ func _on_levels_send_this_to_granddad(event: int) -> void:
 	print(\"Event recieved\")
 	events.emit(event)
 
-
 func _on_return_pressed() -> void:
+	mainScene.visible=true
+	background.visible=true
+	levelScene.visible=false
+	if Input.get_connected_joypads().size() >= 1:
+		$Main/MarginContainer/VBoxContainer/Start.grab_focus()
+
+
+func _on_start_mobile_pressed() -> void:
+	events.emit(int(levelsCompleted))
+
+func _on_select_mobile_pressed() -> void:
+	mainScene.visible=false
+	background.visible=false
+	levelScene.visible=true
+	if Input.get_connected_joypads().size() >= 1:
+		$Levels/Previous.grab_focus()
+
+
+func _on_credits_mobile_pressed() -> void:
+	mainScene.visible=false
+	creditsScene.visible=true
+
+func _on_quit_mobile_pressed() -> void:
+	get_tree().quit()
+
+
+func _on_return_mobile_pressed() -> void:
 	mainScene.visible=true
 	background.visible=true
 	levelScene.visible=false
@@ -124,6 +151,8 @@ corner_radius_top_right = 200
 corner_radius_bottom_right = 200
 corner_radius_bottom_left = 200
 
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_1odx5"]
+
 [sub_resource type="GDScript" id="GDScript_wjcbh"]
 script/source = "extends Node2D
 
@@ -151,12 +180,14 @@ signal sendThisToGranddad(event)
 
 @onready var levelImages = {
 	1: $LevelImages/level1,
-	2: $LevelImages/level2
+	2: $LevelImages/level2,
+	3: $LevelImages/level3,
+	4: $LevelImages/level4
 }
 
 var currentLevel = 1
 var minLevel = 1
-@export var maxLevel = 2
+@export var maxLevel = 4
 
 func _on_previous_pressed() -> void:
 	if currentLevel != minLevel:
@@ -182,6 +213,29 @@ func _on_next_pressed() -> void:
 
 func _on_start_game_pressed() -> void:
 	sendThisToGranddad.emit(currentLevel)
+
+func _on_previous_mobile_pressed() -> void:
+	if currentLevel != minLevel:
+		currentLevel-=1
+	else:
+		currentLevel = int(levelsCompleted)
+	levelText.text = \" LEVEL: %s\" % currentLevel
+	for e in levelImages.values():
+		e.visible=false
+	levelImages[currentLevel].visible=true
+
+func _on_next_mobile_pressed() -> void:
+	if currentLevel != int(levelsCompleted):
+		currentLevel+=1
+	else:
+		currentLevel = minLevel
+	levelText.text = \" LEVEL: %s\" % currentLevel
+	for e in levelImages.values():
+		e.visible=false
+	levelImages[currentLevel].visible=true
+
+func _on_start_game_mobile_pressed() -> void:
+	sendThisToGranddad.emit(currentLevel)
 "
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_jhcny"]
@@ -199,6 +253,8 @@ corner_radius_top_right = 1
 corner_radius_bottom_right = 1
 corner_radius_bottom_left = 1
 anti_aliasing = false
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_f4ijp"]
 
 [sub_resource type="GDScript" id="GDScript_v3prl"]
 script/source = "extends Node2D
@@ -222,7 +278,13 @@ func _process(delta) -> void:
 func _on_return_pressed() -> void:
 	visible = false
 	$\"../Main\".visible=true
+
+func _on_return_mobile_pressed() -> void:
+	visible = false
+	$\"../Main\".visible=true
 "
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_7tr5h"]
 
 [node name="Intro" type="Node2D"]
 position = Vector2(1, 0)
@@ -234,6 +296,7 @@ scale = Vector2(0.99999, 0.99999)
 texture = ExtResource("1_6q4mn")
 
 [node name="Main" type="Node2D" parent="."]
+visible = false
 
 [node name="RichTextLabel" type="RichTextLabel" parent="Main"]
 offset_left = 492.0
@@ -329,8 +392,29 @@ theme_override_styles/pressed = ExtResource("4_af6qx")
 theme_override_styles/focus = ExtResource("4_af6qx")
 text = "QUIT"
 
+[node name="Mobile" type="Node2D" parent="Main"]
+
+[node name="StartMobile" type="TouchScreenButton" parent="Main/Mobile"]
+position = Vector2(981, 428)
+scale = Vector2(23.92, 3.68)
+shape = SubResource("RectangleShape2D_1odx5")
+
+[node name="SelectMobile" type="TouchScreenButton" parent="Main/Mobile"]
+position = Vector2(981, 583)
+scale = Vector2(23.92, 3.68)
+shape = SubResource("RectangleShape2D_1odx5")
+
+[node name="CreditsMobile" type="TouchScreenButton" parent="Main/Mobile"]
+position = Vector2(981, 738)
+scale = Vector2(23.92, 3.68)
+shape = SubResource("RectangleShape2D_1odx5")
+
+[node name="QuitMobile" type="TouchScreenButton" parent="Main/Mobile"]
+position = Vector2(981, 891)
+scale = Vector2(23.92, 3.68)
+shape = SubResource("RectangleShape2D_1odx5")
+
 [node name="Levels" type="Node2D" parent="."]
-visible = false
 script = SubResource("GDScript_wjcbh")
 
 [node name="LevelImages" type="Node2D" parent="Levels"]
@@ -345,6 +429,18 @@ visible = false
 position = Vector2(926, 532)
 scale = Vector2(1.19999, 1.19999)
 texture = ExtResource("5_8u03a")
+
+[node name="level3" type="Sprite2D" parent="Levels/LevelImages"]
+visible = false
+position = Vector2(961, 525)
+scale = Vector2(0.91999, 0.91999)
+texture = ExtResource("8_8csj7")
+
+[node name="level4" type="Sprite2D" parent="Levels/LevelImages"]
+visible = false
+position = Vector2(961, 525)
+scale = Vector2(0.91999, 0.91999)
+texture = ExtResource("9_35p7o")
 
 [node name="Return" type="Button" parent="Levels"]
 offset_right = 8.0
@@ -429,6 +525,28 @@ theme_override_styles/pressed = ExtResource("4_af6qx")
 theme_override_styles/focus = ExtResource("4_af6qx")
 text = "START GAME"
 
+[node name="Mobile" type="Node2D" parent="Levels"]
+
+[node name="ReturnMobile" type="TouchScreenButton" parent="Levels/Mobile"]
+position = Vector2(148, 46)
+scale = Vector2(15.2, 4.56)
+shape = SubResource("RectangleShape2D_f4ijp")
+
+[node name="PreviousMobile" type="TouchScreenButton" parent="Levels/Mobile"]
+position = Vector2(247, 514)
+scale = Vector2(12.48, 4.96)
+shape = SubResource("RectangleShape2D_f4ijp")
+
+[node name="NextMobile" type="TouchScreenButton" parent="Levels/Mobile"]
+position = Vector2(1653, 514)
+scale = Vector2(12.48, 4.96)
+shape = SubResource("RectangleShape2D_f4ijp")
+
+[node name="StartGameMobile" type="TouchScreenButton" parent="Levels/Mobile"]
+position = Vector2(989, 975)
+scale = Vector2(25.04, 4.6)
+shape = SubResource("RectangleShape2D_f4ijp")
+
 [node name="Credits" type="Node2D" parent="."]
 visible = false
 script = SubResource("GDScript_v3prl")
@@ -467,6 +585,11 @@ theme_override_styles/pressed = ExtResource("4_af6qx")
 theme_override_styles/focus = ExtResource("4_af6qx")
 text = "RETURN"
 
+[node name="ReturnMobile" type="TouchScreenButton" parent="Credits"]
+position = Vector2(191, 59)
+scale = Vector2(19.36, 5.72)
+shape = SubResource("RectangleShape2D_7tr5h")
+
 [node name="Version" type="RichTextLabel" parent="."]
 offset_left = -54.0
 offset_top = 991.0
@@ -482,9 +605,18 @@ text = "   Version: Beta"
 [connection signal="pressed" from="Main/MarginContainer/VBoxContainer/Select" to="." method="_on_select_pressed"]
 [connection signal="pressed" from="Main/MarginContainer/VBoxContainer/Credits" to="." method="_on_credits_pressed"]
 [connection signal="pressed" from="Main/MarginContainer/VBoxContainer/Quit" to="." method="_on_quit_pressed"]
+[connection signal="pressed" from="Main/Mobile/StartMobile" to="." method="_on_start_mobile_pressed"]
+[connection signal="pressed" from="Main/Mobile/SelectMobile" to="." method="_on_select_mobile_pressed"]
+[connection signal="pressed" from="Main/Mobile/CreditsMobile" to="." method="_on_credits_mobile_pressed"]
+[connection signal="pressed" from="Main/Mobile/QuitMobile" to="." method="_on_quit_mobile_pressed"]
 [connection signal="sendThisToGranddad" from="Levels" to="." method="_on_levels_send_this_to_granddad"]
 [connection signal="pressed" from="Levels/Return" to="." method="_on_return_pressed"]
 [connection signal="pressed" from="Levels/Next" to="Levels" method="_on_next_pressed"]
 [connection signal="pressed" from="Levels/Previous" to="Levels" method="_on_previous_pressed"]
 [connection signal="pressed" from="Levels/StartGame" to="Levels" method="_on_start_game_pressed"]
+[connection signal="pressed" from="Levels/Mobile/ReturnMobile" to="." method="_on_return_mobile_pressed"]
+[connection signal="pressed" from="Levels/Mobile/PreviousMobile" to="Levels" method="_on_previous_mobile_pressed"]
+[connection signal="pressed" from="Levels/Mobile/NextMobile" to="Levels" method="_on_next_mobile_pressed"]
+[connection signal="pressed" from="Levels/Mobile/StartGameMobile" to="Levels" method="_on_start_game_mobile_pressed"]
 [connection signal="pressed" from="Credits/Return" to="Credits" method="_on_return_pressed"]
+[connection signal="pressed" from="Credits/ReturnMobile" to="Credits" method="_on_return_mobile_pressed"]
