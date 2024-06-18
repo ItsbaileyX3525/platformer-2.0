@@ -16,14 +16,14 @@ script/source = "extends Node2D
 
 signal nextLevel(level)
 
-var enteredOnce = false
-@onready var flagTrick = $FinishFlag/AnimationPlayer
-@onready var trickText = $RichTextLabel3
-@onready var movingDown1 = $AfterFlag/Platform/AnimationPlayer
+var enteredOnce := false
+@onready var flagTrick := $FinishFlag/AnimationPlayer
+@onready var trickText := $RichTextLabel3
+@onready var movingDown1 := $AfterFlag/Platform/AnimationPlayer
 @onready var pastChonky: Area2D = $PastChonky
 
-var pastChonkySpawned = false
-var firstDeath = false
+var pastChonkySpawned := false
+var firstDeath := false
 
 func saveGame(dictToSave: Dictionary) -> void:
 	var gameFile = FileAccess.open(\"user://coin.json\", FileAccess.WRITE)
@@ -40,7 +40,7 @@ func loadGame() -> Dictionary:
 	
 	return loadedData
 
-var data = loadGame()
+var data := loadGame()
 
 func get_random_number(min_value: int, max_value: int) -> int:
 	randomize()
@@ -166,12 +166,7 @@ size = Vector2(11, 254)
 script/source = "extends RichTextLabel
 
 var tween: Tween
-var enteredOnce = false
-
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta: float) -> void:
-	pass
-
+var enteredOnce := false
 
 func _on_trigger_body_entered(body: Node2D) -> void:
 	if body.name == \"Player\" and not enteredOnce:

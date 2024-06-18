@@ -18,14 +18,14 @@ func nextScene() -> void:
 
 #Vertical = ^
 #Horizontal = <>
-@onready var Floor6Anim = $Floor6/AnimationPlayer
-@onready var movingPlatHori1Anim = $Right1/AnimationPlayer
-@onready var movingPlatVert1Anim = $Up1/AnimationPlayer
-@onready var pastChonky = $PastChonky
+@onready var Floor6Anim := $Floor6/AnimationPlayer
+@onready var movingPlatHori1Anim := $Right1/AnimationPlayer
+@onready var movingPlatVert1Anim := $Up1/AnimationPlayer
+@onready var pastChonky := $PastChonky
 
-var pastChonkySpawned = false
-var firstDeath = false
-var talkedOnce = false
+var pastChonkySpawned := false
+var firstDeath := false
+var talkedOnce := false
 
 func saveGame(dictToSave: Dictionary) -> void:
 	var gameFile = FileAccess.open(\"user://coin.json\", FileAccess.WRITE)

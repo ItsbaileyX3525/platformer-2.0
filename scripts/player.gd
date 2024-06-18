@@ -5,61 +5,60 @@ extends CharacterBody2D
 @export var jumpForce = 600
 @export var climbSpeed = 300
 @export var invinc := false
-var isClimbing = false
-@export var deathBarrier: Node2D
+var isClimbing := false
 
-@onready var raycastLeft = $RayCast2D_Left
-@onready var raycastRight = $RayCast2D_Right
+@onready var raycastLeft := $RayCast2D_Left
+@onready var raycastRight := $RayCast2D_Right
 
 @onready var coinsCounter: RichTextLabel = $RichTextLabel3
-@onready var realTimer = $Timer
-@onready var idleChonk = $IdleChonky
-@onready var idleAnim = $IdleChonky/AnimationPlayer
-@onready var leftChonk = $ChonkyLeft
-@onready var leftChonkAnim = $ChonkyLeft/AnimationPlayer
-@onready var rightChonkAnim = $ChonkyRight/AnimationPlayer
-@onready var rightChonk = $ChonkyRight
-@onready var danceChonk = $DanceChonky
-@onready var backgroundSFX = $BackgroundMusic
-@onready var backgroundSFX2 = $BackgroundMusic2
-@onready var danceChonkAnim = $DanceChonky/AnimationPlayer
-@onready var deathCounter = $RichTextLabel
-@onready var transition = $ColorRect
-@onready var transitionText = $RichTextLabel2
-@onready var deathSFX = $Death
-@onready var danceSFX = $Dance
-@onready var danceSFX2 = $Dance2
-@onready var controlsNode = $MobileControls
-@onready var LeftButton = $MobileControls/Left
-@onready var RightButton = $MobileControls/Right
-@onready var UpButton = $MobileControls/Jump
-@onready var MenuNode = $Menu2
+@onready var realTimer := $Timer
+@onready var idleChonk := $IdleChonky
+@onready var idleAnim := $IdleChonky/AnimationPlayer
+@onready var leftChonk := $ChonkyLeft
+@onready var leftChonkAnim := $ChonkyLeft/AnimationPlayer
+@onready var rightChonkAnim := $ChonkyRight/AnimationPlayer
+@onready var rightChonk := $ChonkyRight
+@onready var danceChonk := $DanceChonky
+@onready var backgroundSFX := $BackgroundMusic
+@onready var backgroundSFX2 := $BackgroundMusic2
+@onready var danceChonkAnim := $DanceChonky/AnimationPlayer
+@onready var deathCounter := $RichTextLabel
+@onready var transition := $ColorRect
+@onready var transitionText := $RichTextLabel2
+@onready var deathSFX := $Death
+@onready var danceSFX := $Dance
+@onready var danceSFX2 := $Dance2
+@onready var controlsNode := $MobileControls
+@onready var LeftButton := $MobileControls/Left
+@onready var RightButton := $MobileControls/Right
+@onready var UpButton := $MobileControls/Jump
+@onready var MenuNode := $Menu2
 
 signal yoParentNode()
 signal characterDeath()
 
-var deaths = 0
-var fixedTimestep = 1.0/60.0
-var timer = 0.0
-var jumpTimer = 0.0
-var isDancing = false
-var backgroundTime = 0.0
-var onMobile = false
-var coins = 0
-var speedyBoi = false
-var speedTimer = 0.0
-var speedCanLast = 5.0
-var speedMultiplier = 1.5
-var canDoubleJump = false
-var inMenu = false
-var secretsClicked = 0
-var doneSecret = false
-var canClimb = false
+var deaths := 0
+var fixedTimestep := 1.0/60.0
+var timer := 0.0
+var jumpTimer := 0.0
+var isDancing := false
+var backgroundTime := 0.0
+var onMobile := false
+var coins := 0
+var speedyBoi := false
+var speedTimer := 0.0
+var speedCanLast := 5.0
+var speedMultiplier := 1.5
+var canDoubleJump := false
+var inMenu := false
+var secretsClicked := 0
+var doneSecret := false
+var canClimb := false
 
 #Mobile controls
-var movingLeft = false
-var jumping = false
-var movingRight = false
+var movingLeft := false
+var jumping := false
+var movingRight := false
 
 func saveGame(dictToSave: Dictionary) -> void:
 	var gameFile = FileAccess.open("user://playerSave.json", FileAccess.WRITE)
@@ -94,18 +93,25 @@ func giveCoin(amount: int) -> void:
 
 
 func _ready() -> void:
-	coins = data["coins"]
-	deaths = data["deaths"]
+	if "coins" in data:
+		coins = data["coins"]
+	else:
+		coins = 0
+	if "deaths" in data:
+		deaths = data["deaths"]
+	else:
+		deaths = 0
 	deathCounter.text = "Deaths: %s" % deaths
 	coinsCounter.text = "Coins: %s" % coins
 	raycastLeft.enabled = true
 	raycastRight.enabled = true
 	match OS.get_name():
-		"Windows":
-			controlsNode.visible=false
+		"Android":
+			controlsNode.visible=true
+		"iOS":
+			controlsNode.visible=true
 		"Web":
 			$Menu2/Quit.visible=false
-			controlsNode.visible=false
 			onMobile = JavaScriptBridge.eval("/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)", true)
 			if onMobile:
 				controlsNode.visible=true
@@ -160,6 +166,7 @@ func  step() -> void:
 	if Input.is_action_just_pressed("pause"):
 		MenuNode.visible= not MenuNode.visible
 		inMenu = not inMenu
+		get_tree().paused = not get_tree().paused
 		if Input.get_connected_joypads().size() >= 1:
 			$Menu2/Resume.grab_focus()
 
@@ -334,6 +341,7 @@ func _on_menu_released():
 
 func _on_resume_pressed() -> void:
 	MenuNode.visible=false
+	get_tree().paused = false
 	inMenu = false
 
 func _on_dance_pressed() -> void:
@@ -356,6 +364,7 @@ func _on_down_released() -> void:
 
 func _on_return_pressed() -> void:
 	yoParentNode.emit("Return")
+	get_tree().paused = false
 
 func _on_quit_pressed() -> void:
 	get_tree().quit()
@@ -366,7 +375,9 @@ func _on_quit_mobile_pressed() -> void:
 
 func _on_return_mobile_pressed() -> void:
 	yoParentNode.emit("Return")
+	get_tree().paused = false
 
 func _on_resume_mobile_pressed() -> void:
 	MenuNode.visible=false
+	get_tree().paused = false
 	inMenu = false

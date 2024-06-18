@@ -7,13 +7,13 @@
 [sub_resource type="GDScript" id="GDScript_i4wyn"]
 script/source = "extends Area2D
 
-@onready var enabledSprite = $Enabled
-@onready var disabledSprite = $Disabled
-@onready var clickAudio = $AudioStreamPlayer2D
+@onready var enabledSprite := $Enabled
+@onready var disabledSprite := $Disabled
+@onready var clickAudio := $AudioStreamPlayer2D
 
 signal Activated(type: bool)
 
-@export var state = false
+@export var state := false
 
 func _process(delta: float) -> void:
 	if state:

@@ -6,12 +6,12 @@
 [sub_resource type="GDScript" id="GDScript_0bm54"]
 script/source = "extends Area2D
 
-@onready var collectSFX = $Collect
+@onready var collectSFX := $Collect
 var tweenUp: Tween
 var tweenDown: Tween
-var defaultPositionX = 0.0
-var defaultPositionY = 0.0
-var moveUpTween = false
+var defaultPositionX := 0.0
+var defaultPositionY := 0.0
+var moveUpTween := false
 
 func upTween():
 	tweenUp = create_tween()

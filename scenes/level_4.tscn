@@ -19,8 +19,8 @@ script/source = "extends Node2D
 
 signal nextLevel(level)
 @onready var pastChonky: Area2D = $PastChonky
-var pastChonkySpawned = false
-var firstDeath = false
+var pastChonkySpawned := false
+var firstDeath := false
 
 func saveGame(dictToSave: Dictionary) -> void:
 	var gameFile = FileAccess.open(\"user://coin.json\", FileAccess.WRITE)
@@ -37,7 +37,7 @@ func loadGame() -> Dictionary:
 	
 	return loadedData
 
-var data = loadGame()
+var data := loadGame()
 
 func nextScene() -> void:
 	nextLevel.emit(5)
@@ -154,7 +154,7 @@ func _on_coin_2_body_entered(body: Node2D) -> void:
 size = Vector2(7.58453, 264.831)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_sdr1i"]
-size = Vector2(18.1156, 483.092)
+size = Vector2(18.1156, 552.536)
 
 [sub_resource type="Animation" id="Animation_f3x58"]
 resource_name = "skidaddle"
@@ -307,11 +307,11 @@ shape = SubResource("RectangleShape2D_0beer")
 position = Vector2(1612.32, 557.971)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Barrier2"]
-position = Vector2(9.05762, -202.295)
+position = Vector2(9.05774, -237.017)
 shape = SubResource("RectangleShape2D_sdr1i")
 
 [node name="ColorRect" type="ColorRect" parent="Barrier2"]
-offset_top = -445.0
+offset_top = -515.0
 offset_right = 18.0
 offset_bottom = 40.0
 color = Color(0.164026, 0.106892, 0.0102383, 1)
@@ -577,6 +577,16 @@ position = Vector2(1388.29, 950.483)
 
 [node name="Coin5" parent="Coins" instance=ExtResource("13_vh7b0")]
 position = Vector2(1829.11, 513.285)
+
+[node name="RichTextLabel7" type="RichTextLabel" parent="."]
+offset_left = 1448.07
+offset_top = 591.184
+offset_right = 4226.07
+offset_bottom = 3767.18
+scale = Vector2(0.05, 0.05)
+theme_override_colors/default_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/normal_font_size = 400
+text = "Hmmmm, I think there is stuff under here"
 
 [connection signal="body_entered" from="Spikes" to="." method="_on_spikes_body_entered"]
 [connection signal="Activated" from="Lever" to="." method="_on_lever_activated"]

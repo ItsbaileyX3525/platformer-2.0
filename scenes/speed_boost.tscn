@@ -9,14 +9,14 @@ script/source = "extends Area2D
 @export var speedLast: float = 5
 @export var speedMutliplier: float = 1.5
 
-var canCollect = true
-var regenActive = false
+var canCollect := true
+var regenActive := false
 var tweenUp: Tween
 var tweenDown: Tween
-var defaultPositionX = 0.0
-var defaultPositionY = 0.0
-var moveUpTween = false
-var timer = 0
+var defaultPositionX := 0.0
+var defaultPositionY := 0.0
+var moveUpTween := false
+var timer := 0.0
 
 func upTween():
 	print(\"Tween began\")

@@ -278,6 +278,7 @@ volume_db = -24.361
 stream = ExtResource("10_aor2r")
 
 [node name="MobileControls" type="Node2D" parent="."]
+visible = false
 position = Vector2(-564.024, 40.8537)
 scale = Vector2(3.29269, 3.29269)
 
@@ -322,6 +323,7 @@ scale = Vector2(2.62248, 2.62248)
 texture_normal = ExtResource("18_ircvx")
 
 [node name="Menu2" type="Node2D" parent="."]
+process_mode = 3
 visible = false
 position = Vector2(-210.976, -461.585)
 scale = Vector2(3.58537, 4.41463)

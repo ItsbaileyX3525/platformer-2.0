@@ -3,18 +3,18 @@ extends Node2D
 const PlayerNode = preload("res://scenes/player.tscn")
 const Intro = preload("res://scenes/intro.tscn")
 
-@onready var levelTimer = $NextLevel
-@onready var levelCompleteSFX = $LevelComplete
-@onready var levelCompleteSFX2 = $"LevelComplete?"
-@onready var PlayerLayer = $Player
-@onready var background = $Background
-@onready var backgroundSprite1 = $Background/Normal
-@onready var backgroundSprite2 = $Background/YeaNotSoNormal
+@onready var levelTimer := $NextLevel
+@onready var levelCompleteSFX := $LevelComplete
+@onready var levelCompleteSFX2 := $"LevelComplete?"
+@onready var PlayerLayer := $Player
+@onready var background := $Background
+@onready var backgroundSprite1 := $Background/Normal
+@onready var backgroundSprite2 := $Background/YeaNotSoNormal
 
 @export var levelToLoad: int = 0
 
 var intro
-var playerExists = false
+var playerExists := false
 var Player: Node2D
 var child_instance
 

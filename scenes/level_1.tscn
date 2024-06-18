@@ -13,7 +13,7 @@ script/source = "extends Node2D
 
 signal nextLevel(level)
 
-@onready var doorAnim = $StaticBody2D/AnimationPlayer
+@onready var doorAnim := $StaticBody2D/AnimationPlayer
 
 func playAnim():
 	doorAnim.speed_scale = 1
@@ -53,7 +53,7 @@ func loadGame() -> Dictionary:
 	
 	return loadedData
 
-var data = loadGame()
+var data := loadGame()
 
 func _ready() -> void:
 	reverseAnim()

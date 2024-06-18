@@ -5,16 +5,16 @@
 [sub_resource type="GDScript" id="GDScript_ouvk4"]
 script/source = "extends Area2D
 
-@export var regenTimer = 6
+@export var regenTimer := 6
 
-var canCollect = true
-var regenActive = false
+var canCollect := true
+var regenActive := false
 var tweenUp: Tween
 var tweenDown: Tween
-var defaultPositionX = 0.0
-var defaultPositionY = 0.0
-var moveUpTween = false
-var timer = 0
+var defaultPositionX := 0.0
+var defaultPositionY := 0.0
+var moveUpTween := false
+var timer := 0.0
 
 func upTween():
 	tweenUp = create_tween()

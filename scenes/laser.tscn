@@ -7,18 +7,18 @@
 [sub_resource type="GDScript" id="GDScript_7uux7"]
 script/source = "extends AnimatableBody2D
 
-@export var beamShootTime = 1.5
-@export var beamLast = .5
+@export var beamShootTime := 1.5
+@export var beamLast := .5
 @export var newPosition: Vector2 = Vector2(0,0)
 
-@onready var Beam = $Beam
-@onready var zapSFX = $Zap
+@onready var Beam := $Beam
+@onready var zapSFX := $Zap
 
-var timer = 0
-var timer2 = 0
-var canDie = false
-var playerDied = false
-var singleItems = false
+var timer := 0
+var timer2 := 0
+var canDie := false
+var playerDied := false
+var singleItems := false
 
 func _ready():
 	Beam.visible=false
