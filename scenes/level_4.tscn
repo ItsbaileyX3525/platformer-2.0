@@ -264,6 +264,7 @@ func _process(_delta: float) -> void:
 						DialougeManager.startDialogue(realPos,linesPurchased,speechSound)
 						data[\"level4Purchase\"] = true
 						purchased = true
+						saveGame(data)
 					else:
 						var realPos: Vector2 = global_position
 						realPos.y -= 50

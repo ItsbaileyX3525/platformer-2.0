@@ -753,6 +753,8 @@ text = "[font=res://assets/Helvetica.ttf]Version 1.1:
 
 • Added click sounds to the menu which I completely forgot I was supposed to do.
 
+• Added climbing raycasting to the upperhalf of the body so it can climb easier
+
 • Added a changelog.
 [/font_size]
 Version 1.0:
