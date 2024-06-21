@@ -1,31 +1,40 @@
-[gd_scene load_steps=4 format=3 uid="uid://cgntqku4tx218"]
+[gd_scene load_steps=6 format=3 uid="uid://cgntqku4tx218"]
 
 [ext_resource type="Texture2D" uid="uid://djfgpkicthsxn" path="res://assets/Speech.png" id="1_a4dxl"]
-[ext_resource type="AudioStream" uid="uid://uyugbd4gk6tm" path="res://assets/audio/speaking.ogg" id="2_o56fu"]
+[ext_resource type="Texture2D" uid="uid://c2arlclb0kqa6" path="res://assets/controls/RightArrow.png" id="2_886cf"]
+[ext_resource type="AudioStream" uid="uid://npadeykvvwar" path="res://assets/audio/speaking.ogg" id="2_o56fu"]
+[ext_resource type="Texture2D" uid="uid://drumdulhsys04" path="res://assets/SpeechTail.png" id="3_l804c"]
 
 [sub_resource type="GDScript" id="GDScript_v1ssk"]
 script/source = "extends MarginContainer
 
-@onready var label = $MarginContainer/Label
-@onready var timer = $LetterDisplayTimer
-@onready var speak = $AudioStreamPlayer2D
+@onready var label := $MarginContainer/Label
+@onready var timer := $LetterDisplayTimer
+@onready var speak := $AudioStreamPlayer
+@onready var nextIndicator: Sprite2D = $NinePatchRect/Control/NextIndicator
 
-const MAX_WIDTH = 256
+const MAX_WIDTH := 256
 
-var text = \"\"
-var letterIndex = 0
+var text := \"\"
+var letterIndex := 0
+var isSpeech: bool
 
-var letterTime = 0.09
-var spaceTime = 0.09
-var puncTime = 0.2
-
+var letterTime := 0.09
+var spaceTime := 0.09
+var puncTime := 0.2
 
 signal finishedDisplaying()
 
-func displayText(textToShow: String):
+func displayText(textToShow: String,speechSfx) -> void:
 	text = textToShow
 	label.text = textToShow
-	
+	if typeof(speechSfx) == TYPE_BOOL:
+		isSpeech = false
+		print(\"No has speech\")
+	else:
+		print(\"Has speech\")
+		speak.stream = speechSfx
+		isSpeech = true
 	await resized
 	custom_minimum_size.x = min(size.x, MAX_WIDTH)
 	
@@ -41,14 +50,13 @@ func displayText(textToShow: String):
 	label.text = \"\"
 	_displayLetter()
 		
-func _displayLetter():
+func _displayLetter() -> void:
 	label.text += text[letterIndex]
-	
-	speak.play()
 	
 	letterIndex += 1
 	if letterIndex >= text.length():
 		finishedDisplaying.emit()
+		nextIndicator.visible=true
 		return
 	
 	match text[letterIndex]:
@@ -58,6 +66,13 @@ func _displayLetter():
 			timer.start(spaceTime)
 		_:
 			timer.start(letterTime)
+			
+			if isSpeech:
+				var newAudioPlayer := speak.duplicate()
+				get_tree().root.add_child(newAudioPlayer)
+				newAudioPlayer.play()
+				await newAudioPlayer.finished
+				newAudioPlayer.queue_free()
 
 func _on_letter_display_timer_timeout() -> void:
 	_displayLetter()
@@ -76,6 +91,37 @@ patch_margin_top = 16
 patch_margin_right = 16
 patch_margin_bottom = 16
 
+[node name="Control" type="Control" parent="NinePatchRect"]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 0
+grow_vertical = 0
+
+[node name="NextIndicator" type="Sprite2D" parent="NinePatchRect/Control"]
+visible = false
+position = Vector2(-5, -6)
+texture = ExtResource("2_886cf")
+
+[node name="Control2" type="Control" parent="NinePatchRect"]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = 1.0
+offset_right = 1.0
+grow_horizontal = 2
+grow_vertical = 0
+
+[node name="Sprite2D" type="Sprite2D" parent="NinePatchRect/Control2"]
+position = Vector2(-1, 3)
+texture = ExtResource("3_l804c")
+
 [node name="MarginContainer" type="MarginContainer" parent="."]
 layout_mode = 2
 theme_override_constants/margin_left = 8
@@ -91,7 +137,7 @@ vertical_alignment = 1
 [node name="LetterDisplayTimer" type="Timer" parent="."]
 one_shot = true
 
-[node name="AudioStreamPlayer2D" type="AudioStreamPlayer2D" parent="."]
+[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="."]
 stream = ExtResource("2_o56fu")
 
 [connection signal="timeout" from="LetterDisplayTimer" to="." method="_on_letter_display_timer_timeout"]

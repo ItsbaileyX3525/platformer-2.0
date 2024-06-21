@@ -14,10 +14,9 @@
 [sub_resource type="GDScript" id="GDScript_maqgp"]
 script/source = "extends Node2D
 
-signal nextLevel(level)
+signal nextLevel(level: int)
 
 var enteredOnce := false
-@onready var flagTrick := $FinishFlag/AnimationPlayer
 @onready var trickText := $RichTextLabel3
 @onready var movingDown1 := $AfterFlag/Platform/AnimationPlayer
 @onready var pastChonky: Area2D = $PastChonky
@@ -26,14 +25,14 @@ var pastChonkySpawned := false
 var firstDeath := false
 
 func saveGame(dictToSave: Dictionary) -> void:
-	var gameFile = FileAccess.open(\"user://coin.json\", FileAccess.WRITE)
+	var gameFile := FileAccess.open(\"user://coin.json\", FileAccess.WRITE)
 	
-	var jsonString = JSON.stringify(dictToSave)
+	var jsonString := JSON.stringify(dictToSave)
 	gameFile.store_line(jsonString)
 
 func loadGame() -> Dictionary:
-	var loadedData
-	var gameSave = FileAccess.get_file_as_string(\"user://coin.json\")
+	var loadedData: Dictionary
+	var gameSave := FileAccess.get_file_as_string(\"user://coin.json\")
 
 	loadedData = JSON.parse_string(gameSave)
 
@@ -49,11 +48,11 @@ func get_random_number(min_value: int, max_value: int) -> int:
 func nextScene() -> void:
 	nextLevel.emit(4)
 
-func playerDied():
+func playerDied() -> void:
 	if not firstDeath:
 		firstDeath = true
 	else:
-		var random_number = get_random_number(1, 15)
+		var random_number := get_random_number(1, 15)
 		if random_number == 12:
 			pastChonkySpawned = true
 			pastChonky.visible=true
@@ -61,16 +60,16 @@ func playerDied():
 func _ready() -> void:
 	get_parent().get_node(\"Player\").get_node(\"Player\").characterDeath.connect(playerDied)
 	pastChonky.visible=false
-	var coins = [
+	var coins := [
 			$AfterFlag/Coins/Coin,
 			$AfterFlag/Coins/Coin2,
 			$AfterFlag/Coins/Coin3,
 			$AfterFlag/Coins/Coin4,
 			$AfterFlag/Coins/Coin5
 		]
-	var index=0
+	var index := 0
 	if data.has(\"Level3\"):
-		for e in data[\"Level3\"].values():
+		for e: bool in data[\"Level3\"].values():
 			index+=1
 			if e == true:
 				coins[index-1].visible=false 
@@ -87,7 +86,7 @@ func _ready() -> void:
 
 
 
-func _on_lever_activated(type):
+func _on_lever_activated(type: bool) -> void:
 	if type:
 		movingDown1.play(\"move_down\")
 	else:
@@ -114,18 +113,18 @@ var lines:  Array[String] = [
 	\"Bye.\"
 ]
 
-var talkedOnce = false
+var talkedOnce := false
+@onready var speechSound := preload(\"res://assets/audio/speaking.ogg\")
 
 func _process(_delta: float) -> void:
 	if pastChonkySpawned:
-		var bodies = pastChonky.get_overlapping_bodies()
-		for body in bodies:
+		var bodies: Array = pastChonky.get_overlapping_bodies()
+		for body: Node2D in bodies:
 			if body.name == \"Player\":
-				if Input.is_action_just_pressed(\"start_dialogue\") and not talkedOnce:
-					print(\"Started dialog\")
-					var realPos = pastChonky.global_position
+				if Input.is_action_just_pressed(\"start_dialogue\") and not talkedOnce and not DialougeManager.isdialogueActive:
+					var realPos: Vector2 = pastChonky.global_position
 					realPos.y -= 70
-					DialougeManager.startDialogue(realPos,lines)
+					DialougeManager.startDialogue(realPos,lines,speechSound)
 
 func _on_coin_body_entered(body: Node2D) -> void:
 	if data.has(\"Level3\"):

@@ -1,29 +1,35 @@
-[gd_scene load_steps=45 format=3 uid="uid://bih6wwy54x413"]
+[gd_scene load_steps=42 format=3 uid="uid://bih6wwy54x413"]
 
 [ext_resource type="Texture2D" uid="uid://cwkb1uuhhiqlq" path="res://assets/sky.jpg" id="1_6q4mn"]
-[ext_resource type="AudioStream" uid="uid://dulqgsoolth50" path="res://assets/audio/background/Menu.ogg" id="1_byiwn"]
-[ext_resource type="AudioStream" uid="uid://dueagfnl8d8qn" path="res://assets/audio/MenuButtonClick.ogg" id="2_ykn15"]
+[ext_resource type="AudioStream" uid="uid://duppxy2na6n04" path="res://assets/audio/background/Menu.ogg" id="1_byiwn"]
+[ext_resource type="AudioStream" uid="uid://b50qppscpwis2" path="res://assets/audio/MenuButtonClick.ogg" id="2_ykn15"]
 [ext_resource type="StyleBox" uid="uid://bq3kuqasu1v87" path="res://Styles/focus.tres" id="4_af6qx"]
-[ext_resource type="Texture2D" uid="uid://b4qlnvleplddl" path="res://assets/levels/Level1.png" id="4_gopnw"]
 [ext_resource type="StyleBox" uid="uid://c7doboqhbf41q" path="res://Styles/Normal.tres" id="4_nuuxl"]
-[ext_resource type="Texture2D" uid="uid://djw4olanyk7m5" path="res://assets/levels/Level2.png" id="5_8u03a"]
 [ext_resource type="Texture2D" uid="uid://c2arlclb0kqa6" path="res://assets/controls/RightArrow.png" id="6_gt04h"]
+[ext_resource type="Texture2D" uid="uid://b0gbwdsk3fbfw" path="res://assets/levels/Level1.jpg" id="6_ohk6p"]
+[ext_resource type="Texture2D" uid="uid://chuq5y1d0h6bc" path="res://assets/levels/Level2.jpg" id="7_3c2ui"]
 [ext_resource type="Texture2D" uid="uid://baekfp3igmnse" path="res://assets/controls/LeftArrow.png" id="7_7dege"]
-[ext_resource type="Texture2D" uid="uid://bwxwopqic3mey" path="res://assets/levels/Level3.png" id="8_8csj7"]
+[ext_resource type="Texture2D" uid="uid://cqjhc03uhjd8g" path="res://assets/levels/Level3.jpg" id="8_8y243"]
 [ext_resource type="StyleBox" uid="uid://bp4enqk3iqech" path="res://scenes/SelectHover.tres" id="9_2xds1"]
-[ext_resource type="Texture2D" uid="uid://8nlew6nn8txa" path="res://assets/levels/Level4.png" id="9_35p7o"]
+[ext_resource type="Texture2D" uid="uid://bq0weysaj4mo3" path="res://assets/levels/Level4.jpg" id="9_jxxqs"]
 [ext_resource type="StyleBox" uid="uid://3jcy00gngprl" path="res://scenes/Select.tres" id="9_m1fa6"]
+[ext_resource type="Texture2D" uid="uid://b3u37trv6og6i" path="res://assets/levels/Level5.jpg" id="10_d45yt"]
 [ext_resource type="Texture2D" uid="uid://buvlwgc5b56r2" path="res://assets/Background - dark.png" id="12_tvfhk"]
+[ext_resource type="StyleBox" uid="uid://ugn46re8mqhk" path="res://Styles/PressedHover.tres" id="13_cwk5e"]
 [ext_resource type="StyleBox" uid="uid://mv2wxqvur07" path="res://scenes/textBackground.tres" id="14_jwh3c"]
 [ext_resource type="Texture2D" uid="uid://desgw77h1cxk4" path="res://assets/graphics/enabled.png" id="14_sqmd8"]
 [ext_resource type="Texture2D" uid="uid://d0wddt7hkupeb" path="res://assets/graphics/disabled.png" id="15_3qdf7"]
 [ext_resource type="Texture2D" uid="uid://cu4qdv0es2jd5" path="res://assets/graphics/disabledButLikeActuallyDisabled.png" id="16_3cv78"]
 [ext_resource type="Texture2D" uid="uid://cjtlcxu63kqqf" path="res://assets/graphics/circleSlider.png" id="16_mq4vh"]
+[ext_resource type="StyleBox" uid="uid://ndpvpi5545qx" path="res://Styles/checkboxNormal.tres" id="20_2pa6y"]
+[ext_resource type="StyleBox" uid="uid://3lb6eacwh3q3" path="res://Styles/CheckboxPressed.tres" id="21_ae3bi"]
+[ext_resource type="StyleBox" uid="uid://7isvcua8p3hb" path="res://Styles/CheckboxFocus.tres" id="22_amb8m"]
+[ext_resource type="StyleBox" uid="uid://dsalqmheb6ub3" path="res://Styles/GrabberHighlight.tres" id="24_ovr8k"]
 
 [sub_resource type="GDScript" id="GDScript_q7wxx"]
 script/source = "extends Node2D
 
-signal events(event)
+signal events(event: int)
 
 @export var loadGameProper := true
 @onready var mainScene: Node2D = $Main
@@ -32,51 +38,59 @@ signal events(event)
 @onready var settingsScene: Node2D = $Settings
 @onready var background: Sprite2D = $Normal
 @onready var quit: Button = $Main/MarginContainer/VBoxContainer/Quit
+@onready var menuClick: AudioStreamPlayer = $Main/MenuClick
+@onready var menuMusic: AudioStreamPlayer = $Main/MenuMusic
 
-var onMobile = false
+var onMobile := false
+
+func _ready() -> void:
+	menuMusic.play()
+	background.visible=true
+	loadBasicScene()
+	if \"levelsCompleted\" in gameData:
+		levelsCompleted = gameData[\"levelsCompleted\"]
+	else:
+		levelsCompleted = 0
+	if \"fullscreen\" in gameData:
+		var isFullscreen: String = gameData[\"fullscreen\"]
+		if isFullscreen == \"true\":
+			DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN)
+		else:
+			DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED)
+	if Input.get_connected_joypads().size() >= 1:
+		$Main/MarginContainer/VBoxContainer/Start.grab_focus()
+	var onWeb := OS.get_name()
+	if onWeb == \"Web\":
+		quit.visible=false
+	if onWeb == \"Android\" or onWeb == \"iOS\":
+		onMobile=true
 
 func loadGame() -> Dictionary:
-	var data
+	var data: Dictionary
 	if not FileAccess.file_exists(\"user://saveLevel.json\"): 
-		var save_dict = {
+		var save_dict := {
 			\"levelsCompleted\": 1
 		}
 		return save_dict
 	else:
-		var saveGame = FileAccess.get_file_as_string(\"user://saveLevel.json\")
+		var saveGame := FileAccess.get_file_as_string(\"user://saveLevel.json\")
 
 		data = JSON.parse_string(saveGame)
 
 	
 	return data
 
-var gameData = loadGame()
-
-func _ready() -> void:
-	loadBasicScene()
-	if \"fullscreen\" in gameData:
-		var isFullscreen = gameData[\"fullscreen\"]
-		if isFullscreen == \"true\":
-			DisplayServer.window_set_mode(3)
-		else:
-			DisplayServer.window_set_mode(2)
-	if Input.get_connected_joypads().size() >= 1:
-		$Main/MarginContainer/VBoxContainer/Start.grab_focus()
-	var onWeb = OS.get_name()
-	if onWeb == \"Web\":
-		quit.visible=false
-	if onWeb == \"Android\" or onWeb == \"iOS\":
-		onMobile=true
-
-
-var levelsCompleted = gameData[\"levelsCompleted\"]
+var gameData := loadGame()
+var levelsCompleted: float
 
 func _on_start_pressed() -> void:
 	if not onMobile:
+		menuClick.play()
 		events.emit(int(levelsCompleted))
 
 func _on_select_pressed() -> void:
 	if not onMobile:
+		menuClick.play()
 		mainScene.visible=false
 		background.visible=false
 		levelScene.visible=true
@@ -85,6 +99,7 @@ func _on_select_pressed() -> void:
 
 func _on_credits_pressed() -> void:
 	if not onMobile:
+		menuClick.play()
 		mainScene.visible=false
 		creditsScene.visible=true
 
@@ -94,11 +109,12 @@ func _on_quit_pressed() -> void:
 
 
 func _on_levels_send_this_to_granddad(event: int) -> void:
-	print(\"Event recieved\")
+	menuClick.play()
 	events.emit(event)
 
 func _on_return_pressed() -> void:
 	if not onMobile:
+		menuClick.play()
 		mainScene.visible=true
 		background.visible=true
 		levelScene.visible=false
@@ -113,12 +129,14 @@ func _on_select_mobile_pressed() -> void:
 	mainScene.visible=false
 	background.visible=false
 	levelScene.visible=true
+	menuClick.play()
 	if Input.get_connected_joypads().size() >= 1:
 		$Levels/Previous.grab_focus()
 
 
 func _on_credits_mobile_pressed() -> void:
 	mainScene.visible=false
+	menuClick.play()
 	creditsScene.visible=true
 
 func _on_quit_mobile_pressed() -> void:
@@ -126,6 +144,7 @@ func _on_quit_mobile_pressed() -> void:
 
 func _on_return_mobile_pressed() -> void:
 	mainScene.visible=true
+	menuClick.play()
 	background.visible=true
 	levelScene.visible=false
 	if Input.get_connected_joypads().size() >= 1:
@@ -135,7 +154,7 @@ func _on_return_mobile_pressed() -> void:
 		
 
 #Just in case I forget to disable some scenes by mistake
-func loadBasicScene():
+func loadBasicScene() -> void:
 	if loadGameProper:
 		mainScene.visible=true
 		levelScene.visible=false
@@ -154,8 +173,9 @@ script/source = "extends Node2D
 @onready var settings: Node2D = $\"../Settings\"
 @onready var settingsMobile: TouchScreenButton = $SettingsMobile
 @onready var main: Node2D = $\".\"
+@onready var menuClick: AudioStreamPlayer = $MenuClick
 
-var onMobile = false
+var onMobile := false
 
 func _ready() -> void:
 	if OS.get_name() != \"Android\" && OS.get_name() != \"iOS\":
@@ -168,20 +188,24 @@ func _ready() -> void:
 				
 func _on_changelog_pressed() -> void:
 	if not onMobile:
+		menuClick.play()
 		changelogMenu.visible = not changelogMenu.visible
 
 func _on_changelog_mobile_pressed() -> void:
 	changelogMenu.visible = not changelogMenu.visible
+	menuClick.play()
 	for e in mobile.get_children():
 		e.visible = not e.visible
 			
 func _on_settings_pressed() -> void:
 	if not onMobile:
+		menuClick.play()
 		settings.visible = not settings.visible
 		main.visible = not main.visible
 		
 func _on_settings_mobile_pressed() -> void:
 	settings.visible = not settings.visible
+	menuClick.play()
 	main.visible = not main.visible
 "
 
@@ -207,27 +231,6 @@ tracks/0/keys = {
 _data = {
 "move": SubResource("Animation_2we87")
 }
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ou282"]
-bg_color = Color(0.313726, 0.313726, 0.313726, 0.52549)
-corner_radius_top_left = 200
-corner_radius_top_right = 200
-corner_radius_bottom_right = 200
-corner_radius_bottom_left = 200
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_i1rex"]
-bg_color = Color(0.313726, 0.313726, 0.313726, 0.52549)
-corner_radius_top_left = 200
-corner_radius_top_right = 200
-corner_radius_bottom_right = 200
-corner_radius_bottom_left = 200
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ve633"]
-bg_color = Color(0.313726, 0.313726, 0.313726, 0.52549)
-corner_radius_top_left = 200
-corner_radius_top_right = 200
-corner_radius_bottom_right = 200
-corner_radius_bottom_left = 200
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_hrfmj"]
 
@@ -271,19 +274,23 @@ VScrollBar/styles/grabber_pressed = SubResource("StyleBoxFlat_3080d")
 [sub_resource type="GDScript" id="GDScript_wjcbh"]
 script/source = "extends Node2D
 
-@onready var mobileButtons = $Mobile
-@onready var levelText = $RichTextLabel2
-@onready var levelImages = {
+@onready var mobileButtons := $Mobile
+@onready var levelText := $RichTextLabel2
+@onready var levelImages := {
 	1: $LevelImages/level1,
 	2: $LevelImages/level2,
 	3: $LevelImages/level3,
-	4: $LevelImages/level4
+	4: $LevelImages/level4,
+	5: $LevelImages/level5
 }
-var currentLevel = 1
-var minLevel = 1
-@export var maxLevel = 4
+var currentLevel := 1
+var minLevel := 1
+var gameData := loadGame()
+var levelsCompleted: float
+@export var maxLevel := 5
 @onready var pc: Node2D = $PC
-var onMobile = false
+@onready var menuClick: AudioStreamPlayer = $\"../Main/MenuClick\"
+var onMobile := false
 
 func _ready() -> void:
 	if OS.get_name() != \"Android\" && OS.get_name() != \"iOS\":
@@ -291,46 +298,49 @@ func _ready() -> void:
 			e.visible = false
 	else:
 		onMobile = true
+	if \"levelsCompleted\" in gameData:
+		levelsCompleted = gameData[\"levelsCompleted\"]
+	else:
+		levelsCompleted = 1
 
 func loadGame() -> Dictionary:
-	var data
+	var data: Dictionary
 	if not FileAccess.file_exists(\"user://saveLevel.json\"): 
-		var save_dict = {
+		var save_dict := {
 			\"levelsCompleted\": 1
 		}
 		return save_dict
 	else:
-		var saveGame = FileAccess.get_file_as_string(\"user://saveLevel.json\")
+		var saveGame := FileAccess.get_file_as_string(\"user://saveLevel.json\")
 
 		data = JSON.parse_string(saveGame)
 
 	
 	return data
 
-var gameData = loadGame()
-var levelsCompleted = gameData[\"levelsCompleted\"]
-
-signal sendThisToGranddad(event)
+signal sendThisToGranddad(event: String)
 
 func _on_previous_pressed() -> void:
 	if not onMobile:
+		menuClick.play()
 		if currentLevel != minLevel:
 			currentLevel-=1
 		else:
 			currentLevel = int(levelsCompleted)
 		levelText.text = \" LEVEL: %s\" % currentLevel
-		for e in levelImages.values():
+		for e: Node2D in levelImages.values():
 			e.visible=false
 		levelImages[currentLevel].visible=true
 
 func _on_next_pressed() -> void:
 	if not onMobile:
+		menuClick.play()
 		if currentLevel != int(levelsCompleted):
 			currentLevel+=1
 		else:
 			currentLevel = minLevel
 		levelText.text = \" LEVEL: %s\" % currentLevel
-		for e in levelImages.values():
+		for e:Node2D in levelImages.values():
 			e.visible=false
 		levelImages[currentLevel].visible=true
 	
@@ -338,47 +348,35 @@ func _on_next_pressed() -> void:
 
 func _on_start_game_pressed() -> void:
 	if not onMobile:
+		menuClick.play()
 		sendThisToGranddad.emit(currentLevel)
 
 func _on_previous_mobile_pressed() -> void:
+	menuClick.play()
 	if currentLevel != minLevel:
 		currentLevel-=1
 	else:
 		currentLevel = int(levelsCompleted)
 	levelText.text = \" LEVEL: %s\" % currentLevel
-	for e in levelImages.values():
+	for e:Node2D in levelImages.values():
 		e.visible=false
 	levelImages[currentLevel].visible=true
 
 func _on_next_mobile_pressed() -> void:
+	menuClick.play()
 	if currentLevel != int(levelsCompleted):
 		currentLevel+=1
 	else:
 		currentLevel = minLevel
 	levelText.text = \" LEVEL: %s\" % currentLevel
-	for e in levelImages.values():
+	for e:Node2D in levelImages.values():
 		e.visible=false
 	levelImages[currentLevel].visible=true
 
 func _on_start_game_mobile_pressed() -> void:
+	menuClick.play()
 	sendThisToGranddad.emit(currentLevel)
 "
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_jhcny"]
-bg_color = Color(0.0588235, 0.0588235, 0.0588235, 0.52549)
-corner_radius_top_left = 1
-corner_radius_top_right = 1
-corner_radius_bottom_right = 1
-corner_radius_bottom_left = 1
-anti_aliasing = false
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_5cbrk"]
-bg_color = Color(0.0605304, 0.0605303, 0.0605304, 0.52549)
-corner_radius_top_left = 1
-corner_radius_top_right = 1
-corner_radius_bottom_right = 1
-corner_radius_bottom_left = 1
-anti_aliasing = false
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_f4ijp"]
 
@@ -386,8 +384,6 @@ anti_aliasing = false
 script/source = "extends Node2D
 
 @onready var fullscreenCheckbox: CheckBox = $Fullscreen/fullscreenCheckbox
-@onready var mobile: Node2D = $Mobile
-@onready var pc: Node2D = $PC
 @onready var masterVolumeText: RichTextLabel = $Volume/MasterVolumeText
 @onready var volumeSlider: HSlider = $Volume/HSlider
 @onready var settingsNode: Node2D = $\".\"
@@ -395,27 +391,33 @@ script/source = "extends Node2D
 @onready var vsyncCheckbox: CheckBox = $Vsync/VsyncCheckbox
 @onready var fpsSlider: HSlider = $FPSLimit/FPSSlider
 @onready var fpsLimitText: RichTextLabel = $FPSLimit/FPSLimitText
+@onready var menuClick: AudioStreamPlayer = $\"../Main/MenuClick\"
+@onready var fpsCounter: RichTextLabel = $FPSCounter
 
 var onMobile := false
 var isVsync: bool
 var fpsLimit := 60
+var isFullscreen: bool
 
 func loadGame() -> Dictionary:
-	var data
-	var saveGame = FileAccess.get_file_as_string(\"user://saveLevel.json\")
-	data = JSON.parse_string(saveGame)
+	var data: Dictionary
+	var gameSave := FileAccess.get_file_as_string(\"user://saveLevel.json\")
+	data = JSON.parse_string(gameSave)
 	return data
 
 func saveGame(dictToSave: Dictionary) -> void:
-	var gameFile = FileAccess.open(\"user://saveLevel.json\", FileAccess.WRITE)
+	var gameFile := FileAccess.open(\"user://saveLevel.json\", FileAccess.WRITE)
 	
-	var jsonString = JSON.stringify(dictToSave)
+	var jsonString := JSON.stringify(dictToSave)
 	gameFile.store_line(jsonString)
 
-var gameData = loadGame()
+var gameData := loadGame()
 
 func remap_value(value: float, from_min: float, from_max: float, to_min: float, to_max: float) -> float:
 	return (value - from_min) / (from_max - from_min) * (to_max - to_min) + to_min
+
+func _process(delta: float) -> void:
+	fpsCounter.text = \" FPS: \" + str(Engine.get_frames_per_second())
 
 func _ready() -> void:
 	if OS.get_name() != \"Android\" and OS.get_name() != \"iOS\":
@@ -426,26 +428,25 @@ func _ready() -> void:
 	
 	if \"fpsLimit\" in gameData:
 		fpsLimit = gameData[\"fpsLimit\"]
-		print(fpsLimit)
 		fpsSlider.value = fpsLimit
 		Engine.max_fps = fpsLimit
 		fpsLimitText.text = \"FPS LIMIT: %s\" % str(fpsLimit)
 	if \"fullscreen\" in gameData:
-		var isFullscreen = gameData[\"fullscreen\"]
-		if isFullscreen == \"true\":
+		var tempIsFullscreen: String = gameData[\"fullscreen\"]
+		if tempIsFullscreen == \"true\":
 			isFullscreen = true
 		else:
 			isFullscreen = false
 		fullscreenCheckbox.button_pressed = isFullscreen
 	if \"vsync\" in gameData:
-		var tempIsVsync = gameData[\"fullscreen\"]
+		var tempIsVsync: String = gameData[\"fullscreen\"]
 		if tempIsVsync == \"true\":
 			isVsync = true
 		else:
 			isVsync = false
 		vsyncCheckbox.button_pressed = isVsync
 	if \"volume\" in gameData:
-		var volume = float(gameData[\"volume\"])
+		var volume := float(gameData[\"volume\"])
 		masterVolumeText.text = \"MASTER VOLUME:%s\" % str(remap_value(volume, -80, 20, 0, 100))
 		volumeSlider.value = volume
 		AudioServer.set_bus_volume_db(AudioServer.get_bus_index(\"Master\"), volume/3) 
@@ -457,27 +458,29 @@ func _ready() -> void:
 func _on_fullscreen_checkbox_toggled(toggled_on: bool) -> void:
 	if toggled_on:
 		gameData[\"fullscreen\"] = \"true\"
-		DisplayServer.window_set_mode(3)
+		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN)
 	else:
 		gameData[\"fullscreen\"] = \"false\"
-		DisplayServer.window_set_mode(2)
+		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED)
 
-var saveSoundVolume = 0
+var saveSoundVolume := 0
 
 func _on_h_slider_value_changed(value: float) -> void:
 	masterVolumeText.text = \"MASTER VOLUME:%s\" % str(remap_value(value, -80, 20, 0, 100))
 	AudioServer.set_bus_volume_db(AudioServer.get_bus_index(\"Master\"), value/3)
-	saveSoundVolume = value
+	saveSoundVolume = int(value)
 
 func _on_h_slider_drag_ended(value_changed: bool) -> void:
 	gameData[\"volume\"] = saveSoundVolume
 
 func _on_return_mobile_pressed() -> void:
+	menuClick.play()
 	settingsNode.visible = false
 	mainNode.visible=true
 	saveGame(gameData)
 
 func _on_return_pressed() -> void:
+	menuClick.play()
 	if not onMobile:
 		settingsNode.visible = false
 		mainNode.visible=true
@@ -492,7 +495,7 @@ func _on_vsync_checkbox_toggled(toggled_on: bool) -> void:
 		DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_DISABLED)
 
 func _on_fps_slider_value_changed(value: float) -> void:
-	fpsLimit = value
+	fpsLimit = int(value)
 	fpsLimitText.text = \"FPS LIMIT: %s\" % str(value)
 
 func _on_fps_slider_drag_ended(value_changed: bool) -> void:
@@ -503,29 +506,16 @@ func _on_fps_slider_drag_ended(value_changed: bool) -> void:
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_7tr5h"]
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_owr5s"]
-bg_color = Color(0.6, 0.6, 0.6, 0)
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_bt6ib"]
-bg_color = Color(0.6, 0.6, 0.6, 0)
-border_color = Color(0.8, 0.8, 0.8, 0)
-anti_aliasing = false
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_7h6cq"]
-bg_color = Color(0.6, 0.6, 0.6, 0)
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_gko56"]
-bg_color = Color(0.239216, 0.239216, 0.239216, 0.815686)
-
 [sub_resource type="GDScript" id="GDScript_v3prl"]
 script/source = "extends Node2D
 
-@onready var credits = $RichTextLabel
+@onready var credits := $RichTextLabel
 @onready var returnMobile: TouchScreenButton = $ReturnMobile
-var fixedTimestep = 1.0/60.0
-var timer = 0.0
+var fixedTimestep := 1.0/60.0
+var timer := 0.0
 @onready var returnButton: Button = $Return
-var onMobile = false
+var onMobile := false
+@onready var menuClick: AudioStreamPlayer = $\"../Main/MenuClick\"
 
 func _ready() -> void:
 	if OS.get_name() != \"Android\" && OS.get_name() != \"iOS\":
@@ -538,22 +528,26 @@ func deltaTime() -> void:
 	else:
 		credits.position.y = 1050
 
-func _process(delta) -> void:
+func _process(delta: float) -> void:
 	timer+=delta
 	if timer >= fixedTimestep:
 		deltaTime()
 
 func _on_return_pressed() -> void:
 	if not onMobile:
+		menuClick.play()
 		visible = false
 		$\"../Main\".visible=true
 
 func _on_return_mobile_pressed() -> void:
+	menuClick.play()
 	visible = false
 	$\"../Main\".visible=true
 "
 
 [node name="Intro" type="Node2D"]
+texture_filter = 1
+texture_repeat = 1
 position = Vector2(1, 0)
 script = SubResource("GDScript_q7wxx")
 
@@ -629,7 +623,6 @@ speed_scale = 0.6
 
 [node name="MenuMusic" type="AudioStreamPlayer" parent="Main"]
 stream = ExtResource("1_byiwn")
-autoplay = true
 
 [node name="MenuClick" type="AudioStreamPlayer" parent="Main"]
 stream = ExtResource("2_ykn15")
@@ -672,7 +665,7 @@ focus_neighbor_bottom = NodePath("../Credits")
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 180
 theme_override_font_sizes/font_size = 1200
-theme_override_styles/normal = SubResource("StyleBoxFlat_ou282")
+theme_override_styles/normal = ExtResource("4_nuuxl")
 theme_override_styles/hover = ExtResource("4_af6qx")
 theme_override_styles/pressed = ExtResource("4_af6qx")
 theme_override_styles/focus = ExtResource("4_af6qx")
@@ -685,7 +678,7 @@ focus_neighbor_bottom = NodePath("../Quit")
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 180
 theme_override_font_sizes/font_size = 1200
-theme_override_styles/normal = SubResource("StyleBoxFlat_i1rex")
+theme_override_styles/normal = ExtResource("4_nuuxl")
 theme_override_styles/hover = ExtResource("4_af6qx")
 theme_override_styles/pressed = ExtResource("4_af6qx")
 theme_override_styles/focus = ExtResource("4_af6qx")
@@ -697,7 +690,7 @@ focus_neighbor_top = NodePath("../Credits")
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 180
 theme_override_font_sizes/font_size = 1200
-theme_override_styles/normal = SubResource("StyleBoxFlat_ve633")
+theme_override_styles/normal = ExtResource("4_nuuxl")
 theme_override_styles/hover = ExtResource("4_af6qx")
 theme_override_styles/pressed = ExtResource("4_af6qx")
 theme_override_styles/focus = ExtResource("4_af6qx")
@@ -746,13 +739,21 @@ theme = SubResource("Theme_ip3f1")
 bbcode_enabled = true
 text = "[font=res://assets/Helvetica.ttf]Version 1.1:
 [font_size=13]
-• The pause button now works as intended, allowing the user to pause the game and all the objects stop moving
+• The pause button now works as intended, allowing the user to pause the game and all the objects stop moving.
 
 • Introduced the settings menu to allow the user set v-sync, fps limit, if they should be in fullscreen or not and be able to set the master volume of all the audio in the game.
 
-• Fixed some issues regarding how the menu scenes load
+• Added level 5!
 
-• Added a changelog
+• Optimised the games loading time and overall performance... Not that it needed it lol.
+
+• I plan to use data streaming for the image background for levels to save storage.
+
+• Fixed some issues regarding how the menu scenes load.
+
+• Added click sounds to the menu which I completely forgot I was supposed to do.
+
+• Added a changelog.
 [/font_size]
 Version 1.0:
 [font_size=13]
@@ -782,26 +783,32 @@ script = SubResource("GDScript_wjcbh")
 
 [node name="level1" type="Sprite2D" parent="Levels/LevelImages"]
 position = Vector2(961, 525)
-scale = Vector2(1.19999, 1.19999)
-texture = ExtResource("4_gopnw")
+scale = Vector2(0.839994, 0.839994)
+texture = ExtResource("6_ohk6p")
 
 [node name="level2" type="Sprite2D" parent="Levels/LevelImages"]
 visible = false
 position = Vector2(926, 532)
-scale = Vector2(1.19999, 1.19999)
-texture = ExtResource("5_8u03a")
+scale = Vector2(0.839994, 0.839994)
+texture = ExtResource("7_3c2ui")
 
 [node name="level3" type="Sprite2D" parent="Levels/LevelImages"]
 visible = false
 position = Vector2(961, 525)
-scale = Vector2(0.91999, 0.91999)
-texture = ExtResource("8_8csj7")
+scale = Vector2(0.839991, 0.839991)
+texture = ExtResource("8_8y243")
 
 [node name="level4" type="Sprite2D" parent="Levels/LevelImages"]
 visible = false
 position = Vector2(961, 525)
-scale = Vector2(0.91999, 0.91999)
-texture = ExtResource("9_35p7o")
+scale = Vector2(0.839988, 0.839988)
+texture = ExtResource("9_jxxqs")
+
+[node name="level5" type="Sprite2D" parent="Levels/LevelImages"]
+visible = false
+position = Vector2(961, 525)
+scale = Vector2(0.839988, 0.839988)
+texture = ExtResource("10_d45yt")
 
 [node name="RichTextLabel2" type="RichTextLabel" parent="Levels"]
 offset_left = 741.0
@@ -846,7 +853,7 @@ theme_override_constants/outline_size = 200
 theme_override_font_sizes/font_size = 1500
 theme_override_styles/normal = ExtResource("9_m1fa6")
 theme_override_styles/hover = ExtResource("9_2xds1")
-theme_override_styles/pressed = SubResource("StyleBoxFlat_jhcny")
+theme_override_styles/pressed = ExtResource("13_cwk5e")
 theme_override_styles/focus = ExtResource("9_2xds1")
 icon = ExtResource("6_gt04h")
 
@@ -865,7 +872,7 @@ theme_override_constants/outline_size = 200
 theme_override_font_sizes/font_size = 1500
 theme_override_styles/normal = ExtResource("9_m1fa6")
 theme_override_styles/hover = ExtResource("9_2xds1")
-theme_override_styles/pressed = SubResource("StyleBoxFlat_5cbrk")
+theme_override_styles/pressed = ExtResource("13_cwk5e")
 theme_override_styles/focus = ExtResource("9_2xds1")
 icon = ExtResource("7_7dege")
 
@@ -926,6 +933,31 @@ theme_override_font_sizes/normal_font_size = 1200
 bbcode_enabled = true
 text = "[center]SETTINGS[/center]"
 
+[node name="RequiredInfo(DestorysGameCodeIfDeleted)" type="RichTextLabel" parent="Settings"]
+offset_left = 395.0
+offset_top = 292.0
+offset_right = 51061.0
+offset_bottom = 5025.0
+scale = Vector2(0.03, 0.075)
+theme_override_colors/default_color = Color(0, 0, 0, 1)
+theme_override_colors/font_outline_color = Color(1, 1, 1, 1)
+theme_override_constants/outline_size = 128
+theme_override_font_sizes/normal_font_size = 1200
+bbcode_enabled = true
+text = "[center]If you're looking for graphical settings im sorry but you won't find any because you should already get 60+ fps regardless of your GPU otherwise you have a literal potato PC[/center]"
+
+[node name="FPSCounter" type="RichTextLabel" parent="Settings"]
+offset_left = 1530.0
+offset_top = -2.0
+offset_right = 14496.0
+offset_bottom = 1485.0
+scale = Vector2(0.03, 0.075)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 128
+theme_override_font_sizes/normal_font_size = 1200
+bbcode_enabled = true
+text = " FPS: 1200000"
+
 [node name="Return" type="Button" parent="Settings"]
 offset_right = 4800.0
 offset_bottom = 1467.0
@@ -970,9 +1002,9 @@ theme_override_icons/checked = ExtResource("14_sqmd8")
 theme_override_icons/checked_disabled = ExtResource("16_3cv78")
 theme_override_icons/unchecked = ExtResource("15_3qdf7")
 theme_override_icons/unchecked_disabled = ExtResource("16_3cv78")
-theme_override_styles/normal = SubResource("StyleBoxFlat_owr5s")
-theme_override_styles/pressed = SubResource("StyleBoxFlat_bt6ib")
-theme_override_styles/focus = SubResource("StyleBoxFlat_7h6cq")
+theme_override_styles/normal = ExtResource("20_2pa6y")
+theme_override_styles/pressed = ExtResource("21_ae3bi")
+theme_override_styles/focus = ExtResource("22_amb8m")
 button_pressed = true
 
 [node name="Volume" type="Node2D" parent="Settings"]
@@ -984,7 +1016,7 @@ offset_bottom = 412.0
 scale = Vector2(1.64, 1.64)
 theme_override_icons/grabber = ExtResource("16_mq4vh")
 theme_override_icons/grabber_highlight = ExtResource("16_mq4vh")
-theme_override_styles/grabber_area_highlight = SubResource("StyleBoxFlat_gko56")
+theme_override_styles/grabber_area_highlight = ExtResource("24_ovr8k")
 min_value = -80.0
 max_value = 20.0
 rounded = true
@@ -1026,9 +1058,9 @@ theme_override_icons/checked = ExtResource("14_sqmd8")
 theme_override_icons/checked_disabled = ExtResource("16_3cv78")
 theme_override_icons/unchecked = ExtResource("15_3qdf7")
 theme_override_icons/unchecked_disabled = ExtResource("16_3cv78")
-theme_override_styles/normal = SubResource("StyleBoxFlat_owr5s")
-theme_override_styles/pressed = SubResource("StyleBoxFlat_bt6ib")
-theme_override_styles/focus = SubResource("StyleBoxFlat_7h6cq")
+theme_override_styles/normal = ExtResource("20_2pa6y")
+theme_override_styles/pressed = ExtResource("21_ae3bi")
+theme_override_styles/focus = ExtResource("22_amb8m")
 button_pressed = true
 
 [node name="FPSLimit" type="Node2D" parent="Settings"]
@@ -1041,7 +1073,7 @@ offset_bottom = 668.0
 scale = Vector2(1.64, 1.64)
 theme_override_icons/grabber = ExtResource("16_mq4vh")
 theme_override_icons/grabber_highlight = ExtResource("16_mq4vh")
-theme_override_styles/grabber_area_highlight = SubResource("StyleBoxFlat_gko56")
+theme_override_styles/grabber_area_highlight = ExtResource("24_ovr8k")
 min_value = 30.0
 max_value = 240.0
 value = 60.0

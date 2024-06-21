@@ -1,0 +1,53 @@
+[gd_scene load_steps=6 format=3 uid="uid://c5qrmndxldf7i"]
+
+[ext_resource type="Texture2D" uid="uid://b7lcxkyacj5a6" path="res://assets/blocks/levers/ButtonPressed.png" id="1_q87km"]
+[ext_resource type="Texture2D" uid="uid://bh6ietu0nrguo" path="res://assets/blocks/levers/Button.png" id="2_qirc4"]
+[ext_resource type="AudioStream" uid="uid://cc8amwk887j1" path="res://assets/audio/ButtonPress.ogg" id="3_6j7qh"]
+
+[sub_resource type="GDScript" id="GDScript_eoxt5"]
+script/source = "extends Area2D
+
+signal Activated()
+
+@onready var pressed: Sprite2D = $Pressed
+@onready var notPressed: Sprite2D = $NotPressed
+@onready var pressSFX: AudioStreamPlayer2D = $Press
+var canPress: bool = true
+
+func _physics_process(delta: float) -> void:
+	var bodies: Array = get_overlapping_bodies()
+	for body: Node2D in bodies:
+		if body.name == \"Player\":
+			if Input.is_action_just_pressed(\"click\") and canPress:
+				pressSFX.play()
+				Activated.emit()
+				canPress = false
+				pressed.visible=true
+				notPressed.visible=false
+				await get_tree().create_timer(.6).timeout
+				pressed.visible=false
+				notPressed.visible=true
+				canPress=true
+				
+"
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_uwy4q"]
+radius = 12.0232
+
+[node name="Button" type="Area2D"]
+scale = Vector2(1.52, 1.52)
+script = SubResource("GDScript_eoxt5")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+scale = Vector2(1.08125, 1.08125)
+shape = SubResource("CircleShape2D_uwy4q")
+
+[node name="Pressed" type="Sprite2D" parent="."]
+texture = ExtResource("1_q87km")
+
+[node name="NotPressed" type="Sprite2D" parent="."]
+texture = ExtResource("2_qirc4")
+
+[node name="Press" type="AudioStreamPlayer2D" parent="."]
+stream = ExtResource("3_6j7qh")
+max_distance = 1000.0

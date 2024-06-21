@@ -1,14 +1,16 @@
 extends CharacterBody2D
 
-@export var speed = 300
-@export var gravity = 30
-@export var jumpForce = 600
-@export var climbSpeed = 300
+@export var speed := 300
+@export var gravity := 30
+@export var jumpForce := 600
+@export var climbSpeed := 300
 @export var invinc := false
 var isClimbing := false
 
 @onready var raycastLeft := $RayCast2D_Left
+@onready var raycastLeftH: RayCast2D = $RayCast2D_LeftH
 @onready var raycastRight := $RayCast2D_Right
+@onready var raycastRightH: RayCast2D = $RayCast2D_RightH
 
 @onready var coinsCounter: RichTextLabel = $RichTextLabel3
 @onready var realTimer := $Timer
@@ -61,28 +63,28 @@ var jumping := false
 var movingRight := false
 
 func saveGame(dictToSave: Dictionary) -> void:
-	var gameFile = FileAccess.open("user://playerSave.json", FileAccess.WRITE)
+	var gameFile := FileAccess.open("user://playerSave.json", FileAccess.WRITE)
 	
-	var jsonString = JSON.stringify(dictToSave)
+	var jsonString := JSON.stringify(dictToSave)
 	gameFile.store_line(jsonString)
 
 func loadGame() -> Dictionary:
-	var loadedData
+	var loadedData: Dictionary 
 	if not FileAccess.file_exists("user://playerSave.json"): 
-		var save_dict = {
+		var save_dict := {
 			"deaths": 0,
 			"coins": 0
 		}
 		return save_dict
 	else:
-		var gameSave = FileAccess.get_file_as_string("user://playerSave.json")
+		var gameSave := FileAccess.get_file_as_string("user://playerSave.json")
 
 		loadedData = JSON.parse_string(gameSave)
 
 	
 	return loadedData
 
-var data = loadGame()
+var data := loadGame()
 
 func giveCoin(amount: int) -> void:
 	coins += 1
@@ -105,6 +107,8 @@ func _ready() -> void:
 	coinsCounter.text = "Coins: %s" % coins
 	raycastLeft.enabled = true
 	raycastRight.enabled = true
+	raycastLeftH.enabled = true
+	raycastRightH.enabled = true
 	match OS.get_name():
 		"Android":
 			controlsNode.visible=true
@@ -116,12 +120,12 @@ func _ready() -> void:
 			if onMobile:
 				controlsNode.visible=true
 
-func show_transition():
+func show_transition() -> void:
 	transition.visible=true
 	transitionText.visible=true
 	gravity=0
 
-func hide_transition():
+func hide_transition() -> void:
 	transition.visible=false
 	transitionText.visible=false
 	position.y = -350
@@ -138,13 +142,13 @@ func Death(newPos: Vector2) -> void:
 		data["deaths"] = deaths
 		saveGame(data)
 	
-func addPoint():
+func addPoint() -> void:
 	secretsClicked+=1
 
-func addJump():
+func addJump() -> void:
 	canDoubleJump = true
 
-func addSpeed(length: float = 5, speedAmount: float = 1.5):
+func addSpeed(length: float = 5, speedAmount: float = 1.5) -> void:
 	speedTimer = 0
 	speedCanLast = length
 	speedMultiplier = speedAmount
@@ -155,6 +159,7 @@ func addSpeed(length: float = 5, speedAmount: float = 1.5):
 	speedyBoi = true
 
 
+var collider: StaticBody2D
 func  step() -> void:
 	if !is_on_floor():
 		if not isClimbing:
@@ -171,13 +176,23 @@ func  step() -> void:
 			$Menu2/Resume.grab_focus()
 
 	if raycastLeft.is_colliding():
-		var collider = raycastLeft.get_collider()
-		var colliderName = collider.name.rstrip("0123456789")
+		collider = raycastLeft.get_collider()
+		var colliderName := collider.name.rstrip("0123456789")
 		if collider and colliderName == "Climbable":
 			canClimb = true
 	elif raycastRight.is_colliding():
-		var collider = raycastRight.get_collider()
-		var colliderName = collider.name.rstrip("0123456789")
+		collider = raycastRight.get_collider()
+		var colliderName := collider.name.rstrip("0123456789")
+		if collider and colliderName  == "Climbable":
+			canClimb = true
+	elif raycastLeftH.is_colliding():
+		collider = raycastLeftH.get_collider()
+		var colliderName := collider.name.rstrip("0123456789")
+		if collider and colliderName  == "Climbable":
+			canClimb = true
+	elif raycastRightH.is_colliding():
+		collider = raycastRightH.get_collider()
+		var colliderName := collider.name.rstrip("0123456789")
 		if collider and colliderName  == "Climbable":
 			canClimb = true
 	else:
@@ -194,7 +209,7 @@ func  step() -> void:
 		else:
 			isClimbing=false
 
-func _physics_process(delta):
+func _physics_process(delta: float) -> void:
 	timer += delta
 	if timer>= fixedTimestep:
 		timer=0
@@ -230,7 +245,7 @@ func _physics_process(delta):
 			velocity.y = -jumpForce
 			canDoubleJump=false
 	
-		var hDirection = Input.get_axis("move_left", "move_right") 
+		var hDirection := Input.get_axis("move_left", "move_right") 
 		
 		if not speedyBoi:
 			velocity.x = speed * hDirection
@@ -239,7 +254,6 @@ func _physics_process(delta):
 	
 		move_and_slide()
 		
-
 		if Input.is_action_pressed("move_right") && Input.is_action_pressed("move_left"):
 			if not idleAnim.is_playing() and not isDancing:
 				idleAnim.play("idle")
@@ -325,18 +339,16 @@ func _on_left_released() -> void:
 
 func _on_interact_pressed() -> void:
 	Input.action_press("click")
-	Input.action_press("start_dialogue")
 	Input.action_press("advance_dialogue")
 
 func _on_interact_released() -> void:
 	Input.action_release("click")
-	Input.action_release("start_dialogue")
 	Input.action_release("advance_dialogue")
 
-func _on_menu_pressed():
+func _on_menu_pressed() -> void:
 	Input.action_press("pause")
 
-func _on_menu_released():
+func _on_menu_released() -> void:
 	Input.action_release("pause")
 
 func _on_resume_pressed() -> void:
@@ -381,3 +393,9 @@ func _on_resume_mobile_pressed() -> void:
 	MenuNode.visible=false
 	get_tree().paused = false
 	inMenu = false
+
+func _on_dialog_pressed() -> void:
+	Input.action_press("start_dialogue")
+
+func _on_dialog_released() -> void:
+	Input.action_release("start_dialogue")

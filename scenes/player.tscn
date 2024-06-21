@@ -1,23 +1,24 @@
-[gd_scene load_steps=34 format=3 uid="uid://h3i5gc0ryenh"]
+[gd_scene load_steps=35 format=3 uid="uid://h3i5gc0ryenh"]
 
 [ext_resource type="Script" path="res://scripts/player.gd" id="1_8bgxb"]
 [ext_resource type="Texture2D" uid="uid://ds24jidhoytug" path="res://assets/player/chonky-left.png" id="2_uva7f"]
 [ext_resource type="Texture2D" uid="uid://5jbxda6i1gr1" path="res://assets/player/chonky-right.png" id="3_badim"]
 [ext_resource type="Texture2D" uid="uid://da2ohsntu2lc6" path="res://assets/player/idle.png" id="4_bnms7"]
 [ext_resource type="Texture2D" uid="uid://dhc2f2a0ivlq5" path="res://assets/player/chonky-dance.png" id="5_kd4lg"]
-[ext_resource type="AudioStream" uid="uid://24b2uys66btn" path="res://assets/audio/EpikMoosic.ogg" id="6_32d6w"]
-[ext_resource type="AudioStream" uid="uid://b3k3yi6ynb8ge" path="res://assets/audio/DanceDanceRevloution.ogg" id="7_071do"]
-[ext_resource type="AudioStream" uid="uid://d1lkh8r6tom57" path="res://assets/audio/background/Elevator.ogg" id="8_1wv2j"]
+[ext_resource type="AudioStream" uid="uid://cxdqfu1fwifmf" path="res://assets/audio/EpikMoosic.ogg" id="6_32d6w"]
+[ext_resource type="AudioStream" uid="uid://bd44gnoawbsl1" path="res://assets/audio/DanceDanceRevloution.ogg" id="7_071do"]
+[ext_resource type="AudioStream" uid="uid://cefkyi3vdwqes" path="res://assets/audio/background/Elevator.ogg" id="8_1wv2j"]
 [ext_resource type="Texture2D" uid="uid://baekfp3igmnse" path="res://assets/controls/LeftArrow.png" id="9_j76um"]
-[ext_resource type="AudioStream" uid="uid://bvenwqyt3u2sb" path="res://assets/audio/background/NormalBG.ogg" id="9_s5naw"]
+[ext_resource type="AudioStream" uid="uid://bmrl84eny86y1" path="res://assets/audio/background/NormalBG.ogg" id="9_s5naw"]
 [ext_resource type="Texture2D" uid="uid://c2arlclb0kqa6" path="res://assets/controls/RightArrow.png" id="10_2ugt7"]
-[ext_resource type="AudioStream" uid="uid://b0dr3ih0pmx0v" path="res://assets/audio/Death.ogg" id="10_aor2r"]
+[ext_resource type="AudioStream" uid="uid://fulen6fb0odo" path="res://assets/audio/Death.ogg" id="10_aor2r"]
 [ext_resource type="Texture2D" uid="uid://cxftyuvnmuvcc" path="res://assets/graphics/AButton.png" id="11_y41yq"]
 [ext_resource type="Texture2D" uid="uid://drltavv2gvjwh" path="res://assets/graphics/XButton.png" id="12_fqutd"]
 [ext_resource type="Texture2D" uid="uid://bac88jqg1upis" path="res://assets/Menu.png" id="13_n4pk7"]
 [ext_resource type="Texture2D" uid="uid://cw10b0hgrl8yx" path="res://assets/graphics/YButton.png" id="14_lkvpf"]
 [ext_resource type="Texture2D" uid="uid://os56x15agqbt" path="res://assets/controls/UpArrow.png" id="17_xyxhs"]
 [ext_resource type="Texture2D" uid="uid://kk23a5ju4qet" path="res://assets/controls/DownArrow.png" id="18_ircvx"]
+[ext_resource type="Texture2D" uid="uid://dth6k4cv3rx8x" path="res://assets/graphics/BButton.png" id="19_g0tti"]
 [ext_resource type="StyleBox" uid="uid://c7doboqhbf41q" path="res://Styles/Normal.tres" id="19_okrwj"]
 [ext_resource type="StyleBox" uid="uid://bq3kuqasu1v87" path="res://Styles/focus.tres" id="20_8g3gr"]
 
@@ -293,7 +294,7 @@ scale = Vector2(2.62248, 2.62248)
 texture_normal = ExtResource("10_2ugt7")
 
 [node name="Jump" type="TouchScreenButton" parent="MobileControls"]
-position = Vector2(290.925, -7.62939e-06)
+position = Vector2(292.962, -8.14814)
 scale = Vector2(0.859522, 0.859522)
 texture_normal = ExtResource("11_y41yq")
 
@@ -308,7 +309,7 @@ scale = Vector2(6.3111, 4.2814)
 texture_normal = ExtResource("13_n4pk7")
 
 [node name="Dance" type="TouchScreenButton" parent="MobileControls"]
-position = Vector2(310.74, -30.9259)
+position = Vector2(316.296, -30.7407)
 scale = Vector2(0.407411, 0.407411)
 texture_normal = ExtResource("14_lkvpf")
 
@@ -321,6 +322,11 @@ texture_normal = ExtResource("17_xyxhs")
 position = Vector2(24.0739, 4.81479)
 scale = Vector2(2.62248, 2.62248)
 texture_normal = ExtResource("18_ircvx")
+
+[node name="Dialog" type="TouchScreenButton" parent="MobileControls"]
+position = Vector2(293.147, -53.3332)
+scale = Vector2(0.518519, 0.518519)
+texture_normal = ExtResource("19_g0tti")
 
 [node name="Menu2" type="Node2D" parent="."]
 process_mode = 3
@@ -421,6 +427,14 @@ target_position = Vector2(20.122, 0)
 position = Vector2(0, -18.9024)
 target_position = Vector2(-18.2927, 0)
 
+[node name="RayCast2D_RightH" type="RayCast2D" parent="."]
+position = Vector2(0, -67.6829)
+target_position = Vector2(20.122, 0)
+
+[node name="RayCast2D_LeftH" type="RayCast2D" parent="."]
+position = Vector2(0, -67.6829)
+target_position = Vector2(-18.2927, 0)
+
 [connection signal="pressed" from="MobileControls/Left" to="." method="_on_left_pressed"]
 [connection signal="released" from="MobileControls/Left" to="." method="_on_left_released"]
 [connection signal="pressed" from="MobileControls/Right" to="." method="_on_right_pressed"]
@@ -437,6 +451,8 @@ target_position = Vector2(-18.2927, 0)
 [connection signal="released" from="MobileControls/Up" to="." method="_on_up_released"]
 [connection signal="pressed" from="MobileControls/Down" to="." method="_on_down_pressed"]
 [connection signal="released" from="MobileControls/Down" to="." method="_on_down_released"]
+[connection signal="pressed" from="MobileControls/Dialog" to="." method="_on_dialog_pressed"]
+[connection signal="released" from="MobileControls/Dialog" to="." method="_on_dialog_released"]
 [connection signal="pressed" from="Menu2/Resume" to="." method="_on_resume_pressed"]
 [connection signal="pressed" from="Menu2/Return" to="." method="_on_return_pressed"]
 [connection signal="pressed" from="Menu2/Quit" to="." method="_on_quit_pressed"]

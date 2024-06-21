@@ -2,7 +2,7 @@
 
 importer="oggvorbisstr"
 type="AudioStreamOggVorbis"
-uid="uid://d1lkh8r6tom57"
+uid="uid://cefkyi3vdwqes"
 path="res://.godot/imported/Elevator.ogg-b433d86b5df357183cdbcb1e3113367d.oggvorbisstr"
 
 [deps]
@@ -12,8 +12,8 @@ dest_files=["res://.godot/imported/Elevator.ogg-b433d86b5df357183cdbcb1e3113367d
 
 [params]
 
-loop=true
-loop_offset=0.0
-bpm=0.0
+loop=false
+loop_offset=0
+bpm=0
 beat_count=0
 bar_beats=4

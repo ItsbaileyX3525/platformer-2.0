@@ -16,13 +16,13 @@ var defaultPositionY := 0.0
 var moveUpTween := false
 var timer := 0.0
 
-func upTween():
+func upTween() -> void:
 	tweenUp = create_tween()
 	tweenUp.tween_property(self, \"position\", Vector2(defaultPositionX,defaultPositionY-20), 1.0)
 	await tweenUp.finished
 	downTween()
 	
-func downTween():
+func downTween() -> void:
 	tweenDown = create_tween()
 	tweenDown.tween_property(self, \"position\", Vector2(defaultPositionX,defaultPositionY), 1.0)
 	await tweenDown.finished
@@ -33,7 +33,7 @@ func _ready() -> void:
 	defaultPositionY = position.y
 	upTween()
 
-func _process(delta):
+func _process(delta: float) -> void:
 	if regenActive:
 		timer+=delta
 	if timer >= regenTimer:
@@ -42,7 +42,7 @@ func _process(delta):
 		regenActive=false
 		canCollect = true
 
-func _on_body_entered(body):
+func _on_body_entered(body: Node2D) -> void:
 	if body.name == \"Player\":
 		if canCollect:
 			body.addJump()

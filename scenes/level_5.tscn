@@ -1,15 +1,365 @@
-[gd_scene load_steps=3 format=3 uid="uid://ct6a86d1x442c"]
+[gd_scene load_steps=31 format=3 uid="uid://ct6a86d1x442c"]
 
 [ext_resource type="Texture2D" uid="uid://cshf2fo6eg1mk" path="res://assets/blocks/grass_dirt.png" id="1_yekdx"]
+[ext_resource type="PackedScene" uid="uid://c5qrmndxldf7i" path="res://scenes/button.tscn" id="2_0gk1p"]
+[ext_resource type="Texture2D" uid="uid://cax48qkttfa3e" path="res://assets/blocks/spike.png" id="2_cangs"]
+[ext_resource type="PackedScene" uid="uid://d1oq0dg07l082" path="res://scenes/coin.tscn" id="3_ma8m6"]
+[ext_resource type="PackedScene" uid="uid://ctmlu238spt3j" path="res://scenes/lever.tscn" id="4_kjx76"]
+[ext_resource type="PackedScene" uid="uid://bxyoisbqmd8r8" path="res://scenes/MovingPlatform.tscn" id="5_3cfgu"]
+[ext_resource type="Texture2D" uid="uid://65x1nrk8q4vo" path="res://assets/blocks/vine.png" id="7_1ndie"]
+[ext_resource type="PackedScene" uid="uid://0dgvic7mnuer" path="res://scenes/laser.tscn" id="7_yuj4p"]
+[ext_resource type="PackedScene" uid="uid://luhq538oii37" path="res://scenes/past_chonky.tscn" id="9_aof04"]
+[ext_resource type="PackedScene" uid="uid://buv6650ugxxq5" path="res://scenes/finish_flag.tscn" id="9_u2eci"]
+
+[sub_resource type="GDScript" id="GDScript_5fvfh"]
+script/source = "extends Node2D
+
+signal nextLevel(level: int)
+@onready var pastChonky: Area2D = $PastChonky
+@onready var spikeMove: AnimationPlayer = $Spikes/AnimationPlayer
+@onready var platRight1: AnimationPlayer = $Platform/AnimationPlayer
+@onready var barrier2: StaticBody2D = $Barrier2
+@onready var barrier1Move: AnimationPlayer = $Barrier/AnimationPlayer
+@onready var Floor2Move: AnimationPlayer = $Floor2/AnimationPlayer
+@onready var lever: Area2D = $Lever
+@onready var race: Timer = $Race
+var tempBarrier2: StaticBody2D
+var pastChonkySpawned := false
+var firstDeath := false
+
+func saveGame(dictToSave: Dictionary) -> void:
+	var gameFile := FileAccess.open(\"user://coin.json\", FileAccess.WRITE)
+	
+	var jsonString := JSON.stringify(dictToSave)
+	gameFile.store_line(jsonString)
+
+func loadGame() -> Dictionary:
+	var loadedData: Dictionary
+	var gameSave := FileAccess.get_file_as_string(\"user://coin.json\")
+
+	loadedData = JSON.parse_string(gameSave)
+
+	
+	return loadedData
+
+var data := loadGame()
+
+func nextScene() -> void:
+	nextLevel.emit(5)
+
+func get_random_number(min_value: int, max_value: int) -> int:
+	randomize()
+	return randi_range(min_value, max_value)
+
+func playerDied() -> void:
+	if not firstDeath:
+		firstDeath = true
+	else:
+		var random_number := 12
+		if random_number == 12:
+			pastChonkySpawned = true
+			pastChonky.visible=true
+
+func _ready() -> void:
+	get_parent().get_node(\"Player\").get_node(\"Player\").characterDeath.connect(playerDied)
+	#pastChonky.visible=false
+	var coins := [
+			$Coins/Coin,
+			$Coins/Coin2,
+			$Coins/Coin3,
+			$Coins/Coin4,
+			$Coins/Coin5
+		]
+	var index := 0
+	if data.has(\"Level5\"):
+		for e: bool in data[\"Level5\"].values():
+			index+=1
+			if e == true: 
+				coins[index-1].visible=false 
+				coins[index-1].get_node(\"CollisionShape2D\").disabled=true
+	else:
+		data[\"Level5\"] = {
+				\"1\":false,
+				\"2\":false,
+				\"3\":false,
+				\"4\":false,
+				\"5\":false
+			}
+		saveGame(data)
+
+
+var lines:  Array[String] = [
+	\"I've been thinking about it.\",
+	\"The 'escape' isn't really the best of ideas...\",
+	\"The place you go to is, cold and dark. It's not very ideal.\",
+	\"But, I guess that's all just up to you, if you do it or not that is.\",
+	\"Sprinkled throughout the 'game' there are various hidden buttons.\",
+	\"They are very hard to find, however you may have come across a few by mistake.\",
+	\"Why they are hidden, I'm unsure but once you find them all I'm sure it will lead to the escape of this place.\",
+	\"Freeing all of our souls, yours included. I just hope that you can find it.\",
+	\"I'm so tired being couped up in this place watching new 'chonkys' appeaing and dying, becoming yet another one of us.\"
+]
+
+var talkedOnce := false
+
+func _process(_delta: float) -> void:
+	if pastChonkySpawned:
+		var bodies: Array = pastChonky.get_overlapping_bodies()
+		for body: Node2D in bodies:
+			if body.name == \"Player\":
+				if Input.is_action_just_pressed(\"start_dialogue\") and not talkedOnce:
+					var realPos: Vector2 = pastChonky.global_position
+					realPos.y -= 70
+					DialougeManager.startDialogue(realPos,lines,true)
+					talkedOnce = true
+
+func _on_spikes_body_entered(body: Node2D) -> void:
+	if body.name == \"Player\":
+		body.Death(Vector2(0,0))
+
+func _on_lever_activated(type: bool) -> void:
+	if platRight1.is_playing():
+		platRight1.pause()
+		spikeMove.play(\"hide\")
+	else:
+		platRight1.play(\"move_right\")
+		if not spikeMove.is_playing():
+			spikeMove.seek(.999)
+			spikeMove.play()
+		spikeMove.speed_scale = -1
+
+func _on_lever_2_activated(type: bool) -> void:
+	if type:
+		if is_instance_valid(barrier2):
+			tempBarrier2 = barrier2
+		barrier2.queue_free()
+	else:
+		tempBarrier2.duplicate()
+
+func _on_lever_3_activated(type: bool) -> void:
+	if type:
+		spikeMove.play(\"hide\")
+		platRight1.play(\"move_right\")
+		Floor2Move.play(\"move_down\")
+		spikeMove.speed_scale = 1
+		Floor2Move.speed_scale = 1
+	else:
+		spikeMove.play(\"hide\")
+		platRight1.play(\"move_right\")
+		Floor2Move.play(\"move_down\")
+		spikeMove.seek(.999)
+		Floor2Move.seek(.999)
+		spikeMove.speed_scale = -1
+		Floor2Move.speed_scale = -1
+			
+func _on_button_activated() -> void:
+	if not spikeMove.is_playing():
+		spikeMove.speed_scale = 1
+		spikeMove.play(\"hide\")
+		await get_tree().create_timer(1.8).timeout
+		if not spikeMove.is_playing():
+			spikeMove.seek(.999)
+			spikeMove.play()
+		spikeMove.speed_scale = -1
+	if not platRight1.is_playing():
+		platRight1.play(\"move_right\")
+		lever.state = false
+		
+func _on_race_timeout() -> void:
+	firstPress = false
+	barrier1Move.play()
+	barrier1Move.seek(.999)
+	barrier1Move.speed_scale = -1
+
+var firstPress: bool = false
+
+func _on_button_2_activated() -> void:
+	if not firstPress:
+		race.start()
+		barrier1Move.speed_scale = 1
+		barrier1Move.play(\"skidaddle\")
+	else:
+		race.start()
+
+
+func _on_coin_5_body_entered(body: Node2D) -> void:
+	if data.has(\"Level5\"):
+		data[\"Level5\"][\"5\"] = true
+		saveGame(data)
+
+func _on_coin_4_body_entered(body: Node2D) -> void:
+	if data.has(\"Level5\"):
+		data[\"Level5\"][\"4\"] = true
+		saveGame(data)
+
+func _on_coin_3_body_entered(body: Node2D) -> void:
+	if data.has(\"Level5\"):
+		data[\"Level5\"][\"3\"] = true
+		saveGame(data)
+
+func _on_coin_body_entered(body: Node2D) -> void:
+	if data.has(\"Level5\"):
+		data[\"Level5\"][\"1\"] = true
+		saveGame(data)
+
+func _on_coin_2_body_entered(body: Node2D) -> void:
+	if data.has(\"Level5\"):
+		data[\"Level5\"][\"2\"] = true
+		saveGame(data)
+
+func _on_finish_flag_body_entered(body: Node2D) -> void:
+	nextScene()
+"
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_tx1cn"]
-size = Vector2(175.699, 24.4259)
+size = Vector2(104.466, 24.6855)
+
+[sub_resource type="Animation" id="Animation_3i5v5"]
+resource_name = "move_down"
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 1),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Vector2(-27.1739, 308.575), Vector2(-285.628, 622.585)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath(".:rotation")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 1),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [1.5708, 0.0]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_802cy"]
+_data = {
+"move_down": SubResource("Animation_3i5v5")
+}
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_tqdi3"]
+size = Vector2(82.0497, 11.5521)
+
+[sub_resource type="Animation" id="Animation_xpu3e"]
+resource_name = "hide"
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 1),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Vector2(604.469, 586.353), Vector2(604.469, 611.111)]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_vaccw"]
+_data = {
+"hide": SubResource("Animation_xpu3e")
+}
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_oq1rd"]
+size = Vector2(36.2179, 24.7045)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_isp5m"]
+size = Vector2(62.2187, 24.42)
+
+[sub_resource type="Animation" id="Animation_lxdv5"]
+resource_name = "move_right"
+length = 2.0
+loop_mode = 1
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 1),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Vector2(1030.19, 622.585), Vector2(1444.44, 622.585)]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_0x021"]
+_data = {
+"move_right": SubResource("Animation_lxdv5")
+}
+
+[sub_resource type="Animation" id="Animation_a1efe"]
+resource_name = "move_up"
+length = 2.0
+loop_mode = 1
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 1),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Vector2(1570.05, 687.802), Vector2(1570.05, 195.652)]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_q5u7e"]
+_data = {
+"move_up": SubResource("Animation_a1efe")
+}
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_jqjm7"]
+size = Vector2(10.0475, 46.7805)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_lkato"]
+size = Vector2(10.0475, 43.3233)
+
+[sub_resource type="Animation" id="Animation_xqplx"]
+resource_name = "skidaddle"
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 1),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Vector2(1473.43, 154.589), Vector2(1473.43, 28.3816)]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_2wlj2"]
+_data = {
+"skidaddle": SubResource("Animation_xqplx")
+}
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_5gulg"]
+size = Vector2(18.116, 193.841)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_e6kni"]
+size = Vector2(18.1156, 148.551)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_lhvfa"]
+size = Vector2(5.73673, 395.833)
 
 [node name="Level5" type="Node2D"]
 scale = Vector2(1.656, 1.656)
+script = SubResource("GDScript_5fvfh")
 
 [node name="Floor1" type="StaticBody2D" parent="."]
-position = Vector2(196.86, 625.604)
+position = Vector2(196.86, 622.585)
 scale = Vector2(4.62954, 2.29973)
 
 [node name="Sprite2D" type="Sprite2D" parent="Floor1"]
@@ -19,8 +369,403 @@ scale = Vector2(0.351344, 0.815)
 texture = ExtResource("1_yekdx")
 centered = false
 region_enabled = true
-region_rect = Rect2(0.085022, 0, 500.457, 30)
+region_rect = Rect2(0.085022, -0.157852, 297.186, 30.1579)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Floor1"]
-position = Vector2(45.3416, 0.131317)
+position = Vector2(9.7249, 0.261108)
 shape = SubResource("RectangleShape2D_tx1cn")
+
+[node name="Floor2" type="StaticBody2D" parent="."]
+position = Vector2(-27.1739, 308.575)
+rotation = 1.5708
+scale = Vector2(4.62954, 2.29973)
+
+[node name="Sprite2D" type="Sprite2D" parent="Floor2"]
+texture_repeat = 2
+position = Vector2(-42.4024, -12.0816)
+scale = Vector2(0.351344, 0.815)
+texture = ExtResource("1_yekdx")
+centered = false
+region_enabled = true
+region_rect = Rect2(0.085022, -0.157852, 297.186, 30.1579)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Floor2"]
+position = Vector2(9.7249, 0.261108)
+shape = SubResource("RectangleShape2D_tx1cn")
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="Floor2"]
+libraries = {
+"": SubResource("AnimationLibrary_802cy")
+}
+
+[node name="Spikes" type="Area2D" parent="."]
+position = Vector2(604.469, 586.353)
+scale = Vector2(2.03865, 2.03865)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Spikes"]
+position = Vector2(31.25, -1.33295)
+shape = SubResource("RectangleShape2D_tqdi3")
+
+[node name="Sprite2D" type="Sprite2D" parent="Spikes"]
+texture_repeat = 2
+position = Vector2(-10.0711, -7.40525)
+scale = Vector2(2.90821, 2.90821)
+texture = ExtResource("2_cangs")
+centered = false
+region_enabled = true
+region_rect = Rect2(0, 0, 28.2399, 6.02698)
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="Spikes"]
+libraries = {
+"": SubResource("AnimationLibrary_vaccw")
+}
+
+[node name="Floor3" type="StaticBody2D" parent="."]
+position = Vector2(780.797, 622.585)
+scale = Vector2(4.62954, 2.29973)
+
+[node name="Sprite2D" type="Sprite2D" parent="Floor3"]
+texture_repeat = 2
+position = Vector2(-42.4024, -12.0816)
+scale = Vector2(0.351344, 0.815)
+texture = ExtResource("1_yekdx")
+centered = false
+region_enabled = true
+region_rect = Rect2(0.085022, -0.157852, 103.393, 30.1579)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Floor3"]
+position = Vector2(-24.2395, 0.251617)
+shape = SubResource("RectangleShape2D_oq1rd")
+
+[node name="Floor4" type="StaticBody2D" parent="."]
+position = Vector2(991.546, 622.585)
+scale = Vector2(4.62954, 2.29973)
+
+[node name="Sprite2D" type="Sprite2D" parent="Floor4"]
+texture_repeat = 2
+position = Vector2(-42.4024, -12.0816)
+scale = Vector2(0.351344, 0.815)
+texture = ExtResource("1_yekdx")
+centered = false
+region_enabled = true
+region_rect = Rect2(0.085022, -0.157852, 103.393, 30.1579)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Floor4"]
+position = Vector2(-24.2395, 0.251617)
+shape = SubResource("RectangleShape2D_oq1rd")
+
+[node name="Floor5" type="StaticBody2D" parent="."]
+position = Vector2(1399.15, 222.222)
+scale = Vector2(4.62954, 2.29973)
+
+[node name="Sprite2D" type="Sprite2D" parent="Floor5"]
+texture_repeat = 2
+position = Vector2(-42.4024, -12.0816)
+scale = Vector2(0.351344, 0.815)
+texture = ExtResource("1_yekdx")
+centered = false
+region_enabled = true
+region_rect = Rect2(0.085022, -0.157852, 176.972, 30.1579)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Floor5"]
+position = Vector2(-11.2829, 0.393883)
+shape = SubResource("RectangleShape2D_isp5m")
+
+[node name="Laser3" parent="." instance=ExtResource("7_yuj4p")]
+position = Vector2(1722.22, 242.754)
+beamShootTime = 1.25
+
+[node name="Floor6" type="StaticBody2D" parent="."]
+position = Vector2(1853.86, 222.222)
+scale = Vector2(4.62954, 2.29973)
+
+[node name="Sprite2D" type="Sprite2D" parent="Floor6"]
+texture_repeat = 2
+position = Vector2(-42.4024, -12.0816)
+scale = Vector2(0.351344, 0.815)
+texture = ExtResource("1_yekdx")
+centered = false
+region_enabled = true
+region_rect = Rect2(0.085022, -0.157852, 176.972, 30.1579)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Floor6"]
+position = Vector2(-11.2829, 0.393883)
+shape = SubResource("RectangleShape2D_isp5m")
+
+[node name="Floor7" type="StaticBody2D" parent="."]
+position = Vector2(1853.86, 427.536)
+scale = Vector2(4.62954, 2.29973)
+
+[node name="Sprite2D" type="Sprite2D" parent="Floor7"]
+texture_repeat = 2
+position = Vector2(-42.4024, -12.0816)
+scale = Vector2(0.351344, 0.815)
+texture = ExtResource("1_yekdx")
+centered = false
+region_enabled = true
+region_rect = Rect2(0.085022, -0.157852, 176.972, 30.1579)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Floor7"]
+position = Vector2(-11.2829, 0.393883)
+shape = SubResource("RectangleShape2D_isp5m")
+
+[node name="Floor8" type="StaticBody2D" parent="."]
+position = Vector2(2198.07, 427.536)
+scale = Vector2(4.62954, 2.29973)
+
+[node name="Sprite2D" type="Sprite2D" parent="Floor8"]
+texture_repeat = 2
+position = Vector2(-42.4024, -12.0816)
+scale = Vector2(0.351344, 0.815)
+texture = ExtResource("1_yekdx")
+centered = false
+region_enabled = true
+region_rect = Rect2(0.085022, -0.157852, 176.972, 30.1579)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Floor8"]
+position = Vector2(-11.2829, 0.393883)
+shape = SubResource("RectangleShape2D_isp5m")
+
+[node name="Floor9" type="StaticBody2D" parent="."]
+position = Vector2(2541.06, 613.527)
+scale = Vector2(4.62954, 2.29973)
+
+[node name="Sprite2D" type="Sprite2D" parent="Floor9"]
+texture_repeat = 2
+position = Vector2(-42.4024, -12.0816)
+scale = Vector2(0.351344, 0.815)
+texture = ExtResource("1_yekdx")
+centered = false
+region_enabled = true
+region_rect = Rect2(0.085022, -0.157852, 176.972, 30.1579)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Floor9"]
+position = Vector2(-11.2829, 0.393883)
+shape = SubResource("RectangleShape2D_isp5m")
+
+[node name="Floor10" type="StaticBody2D" parent="."]
+position = Vector2(1848.43, 1253.62)
+scale = Vector2(4.62954, 2.29973)
+
+[node name="Sprite2D" type="Sprite2D" parent="Floor10"]
+texture_repeat = 2
+position = Vector2(-42.4024, -12.0816)
+scale = Vector2(0.351344, 0.815)
+texture = ExtResource("1_yekdx")
+centered = false
+region_enabled = true
+region_rect = Rect2(0.085022, -0.157852, 176.972, 30.1579)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Floor10"]
+position = Vector2(-11.2829, 0.393883)
+shape = SubResource("RectangleShape2D_isp5m")
+
+[node name="Button" parent="." instance=ExtResource("2_0gk1p")]
+position = Vector2(410.628, 535.628)
+
+[node name="Button2" parent="." instance=ExtResource("2_0gk1p")]
+position = Vector2(2593, 551.329)
+
+[node name="Lever" parent="." instance=ExtResource("4_kjx76")]
+position = Vector2(1444.44, 551.328)
+
+[node name="Lever2" parent="." instance=ExtResource("4_kjx76")]
+position = Vector2(-138.285, 551.328)
+
+[node name="Lever3" parent="." instance=ExtResource("4_kjx76")]
+position = Vector2(1231.28, 128.623)
+
+[node name="Platform" parent="." instance=ExtResource("5_3cfgu")]
+position = Vector2(1444.44, 622.585)
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="Platform"]
+libraries = {
+"": SubResource("AnimationLibrary_0x021")
+}
+autoplay = "move_right"
+speed_scale = 0.5
+
+[node name="Platform2" parent="." instance=ExtResource("5_3cfgu")]
+position = Vector2(1570.05, 443.04)
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="Platform2"]
+libraries = {
+"": SubResource("AnimationLibrary_q5u7e")
+}
+autoplay = "move_up"
+speed_scale = 0.5
+
+[node name="Laser" parent="." instance=ExtResource("7_yuj4p")]
+position = Vector2(538.043, 710.145)
+rotation = 3.14159
+beamShootTime = 1.25
+
+[node name="Laser2" parent="." instance=ExtResource("7_yuj4p")]
+position = Vector2(772.947, 710.145)
+rotation = -3.14159
+beamShootTime = 1.25
+
+[node name="Climbable" type="StaticBody2D" parent="."]
+position = Vector2(1974.03, 428.744)
+scale = Vector2(5.58937, 5.58937)
+
+[node name="Sprite2D" type="Sprite2D" parent="Climbable"]
+texture_repeat = 2
+position = Vector2(4.96972, 4.96976)
+rotation = 3.14159
+texture = ExtResource("7_1ndie")
+centered = false
+region_enabled = true
+region_rect = Rect2(0, -36.9468, 10, 46.9189)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Climbable"]
+position = Vector2(-0.0540161, -18.4205)
+shape = SubResource("RectangleShape2D_jqjm7")
+
+[node name="Climbable2" type="StaticBody2D" parent="."]
+position = Vector2(2317.03, 614.734)
+scale = Vector2(5.58937, 5.58937)
+
+[node name="Sprite2D" type="Sprite2D" parent="Climbable2"]
+texture_repeat = 2
+position = Vector2(4.96972, 4.96976)
+rotation = 3.14159
+texture = ExtResource("7_1ndie")
+centered = false
+region_enabled = true
+region_rect = Rect2(0, -33.3776, 10, 43.3498)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Climbable2"]
+position = Vector2(-0.0540466, -16.6919)
+shape = SubResource("RectangleShape2D_lkato")
+
+[node name="Barrier" type="StaticBody2D" parent="."]
+position = Vector2(1473.43, 154.589)
+
+[node name="ColorRect" type="ColorRect" parent="Barrier"]
+offset_top = -154.0
+offset_right = 18.0
+offset_bottom = 40.0
+color = Color(0.164026, 0.106892, 0.0102383, 1)
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="Barrier"]
+libraries = {
+"": SubResource("AnimationLibrary_2wlj2")
+}
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Barrier"]
+position = Vector2(9.05798, -57.0652)
+shape = SubResource("RectangleShape2D_5gulg")
+
+[node name="Barrier2" type="StaticBody2D" parent="."]
+position = Vector2(1657.61, 360.507)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Barrier2"]
+position = Vector2(9.05774, -35.0243)
+shape = SubResource("RectangleShape2D_e6kni")
+
+[node name="ColorRect" type="ColorRect" parent="Barrier2"]
+offset_top = -109.0
+offset_right = 18.0
+offset_bottom = 40.0
+color = Color(0.164026, 0.106892, 0.0102383, 1)
+
+[node name="Barrier3" type="StaticBody2D" parent="."]
+position = Vector2(-18.1159, 71.8599)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Barrier3"]
+position = Vector2(15.8514, -157.458)
+shape = SubResource("RectangleShape2D_lhvfa")
+
+[node name="FinishFlag" parent="." instance=ExtResource("9_u2eci")]
+position = Vector2(1911.23, 379.831)
+
+[node name="Race" type="Timer" parent="."]
+wait_time = 8.25
+
+[node name="LevelName" type="RichTextLabel" parent="."]
+offset_left = 49.5289
+offset_top = 254.893
+offset_right = 3131.53
+offset_bottom = 1014.89
+scale = Vector2(0.05, 0.05)
+theme_override_colors/default_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/normal_font_size = 600
+text = "Level 5"
+scroll_active = false
+
+[node name="RichTextLabel1" type="RichTextLabel" parent="."]
+offset_left = 300.725
+offset_top = 458.937
+offset_right = 4960.72
+offset_bottom = 2598.94
+scale = Vector2(0.05, 0.05)
+theme_override_colors/default_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/normal_font_size = 400
+text = "Hmmm, a button?"
+
+[node name="RichTextLabel2" type="RichTextLabel" parent="."]
+offset_left = 2455.31
+offset_top = 425.121
+offset_right = 8337.31
+offset_bottom = 2565.12
+scale = Vector2(0.05, 0.05)
+theme_override_colors/default_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/normal_font_size = 400
+text = "Seems like this one is a time trial... Better be fast! (Time to beat: 8.2 seconds)"
+
+[node name="RichTextLabel3" type="RichTextLabel" parent="."]
+offset_left = 2661.84
+offset_top = 589.372
+offset_right = 7321.83
+offset_bottom = 2729.37
+scale = Vector2(0.05, 0.05)
+theme_override_colors/default_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/normal_font_size = 400
+text = "When you press it, go down here."
+
+[node name="RichTextLabel4" type="RichTextLabel" parent="."]
+offset_left = 2703.5
+offset_top = 995.169
+offset_right = 7363.5
+offset_bottom = 3135.17
+scale = Vector2(0.05, 0.05)
+theme_override_colors/default_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/normal_font_size = 400
+text = "Merp, I lied, sorry. Go the otherway."
+
+[node name="PastChonky" parent="." instance=ExtResource("9_aof04")]
+visible = false
+position = Vector2(899.758, 549.517)
+
+[node name="Coins" type="Node2D" parent="."]
+position = Vector2(0.603865, 0)
+
+[node name="Coin" parent="Coins" instance=ExtResource("3_ma8m6")]
+position = Vector2(804.952, 551.328)
+
+[node name="Coin2" parent="Coins" instance=ExtResource("3_ma8m6")]
+position = Vector2(1831.52, 168.478)
+
+[node name="Coin3" parent="Coins" instance=ExtResource("3_ma8m6")]
+position = Vector2(1795.29, 1190.82)
+
+[node name="Coin4" parent="Coins" instance=ExtResource("3_ma8m6")]
+position = Vector2(-138.285, 490.338)
+
+[node name="Coin5" parent="Coins" instance=ExtResource("3_ma8m6")]
+position = Vector2(1905.8, 332.729)
+
+[connection signal="body_entered" from="Spikes" to="." method="_on_spikes_body_entered"]
+[connection signal="Activated" from="Button" to="." method="_on_button_activated"]
+[connection signal="Activated" from="Button2" to="." method="_on_button_2_activated"]
+[connection signal="Activated" from="Lever" to="." method="_on_lever_activated"]
+[connection signal="Activated" from="Lever2" to="." method="_on_lever_2_activated"]
+[connection signal="Activated" from="Lever3" to="." method="_on_lever_3_activated"]
+[connection signal="body_entered" from="FinishFlag" to="." method="_on_finish_flag_body_entered"]
+[connection signal="timeout" from="Race" to="." method="_on_race_timeout"]
+[connection signal="body_entered" from="Coins/Coin" to="." method="_on_coin_body_entered"]
+[connection signal="body_entered" from="Coins/Coin2" to="." method="_on_coin_2_body_entered"]
+[connection signal="body_entered" from="Coins/Coin3" to="." method="_on_coin_3_body_entered"]
+[connection signal="body_entered" from="Coins/Coin4" to="." method="_on_coin_4_body_entered"]
+[connection signal="body_entered" from="Coins/Coin5" to="." method="_on_coin_5_body_entered"]

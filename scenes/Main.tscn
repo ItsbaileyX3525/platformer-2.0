@@ -2,9 +2,9 @@
 
 [ext_resource type="Script" path="res://scripts/Main.gd" id="1_hfcv2"]
 [ext_resource type="Texture2D" uid="uid://cwkb1uuhhiqlq" path="res://assets/sky.jpg" id="2_py6u2"]
-[ext_resource type="AudioStream" uid="uid://661qjyjklrvq" path="res://assets/audio/Victory.mp3" id="3_musoy"]
 [ext_resource type="Texture2D" uid="uid://buvlwgc5b56r2" path="res://assets/Background - dark.png" id="3_rn24r"]
-[ext_resource type="AudioStream" uid="uid://c7ijt5577ogxm" path="res://assets/audio/Crackle.ogg" id="5_qr2rp"]
+[ext_resource type="AudioStream" uid="uid://balrerbhqjhxu" path="res://assets/audio/Victory.ogg" id="4_r3sm1"]
+[ext_resource type="AudioStream" uid="uid://qlid4hdgtrnc" path="res://assets/audio/Crackle.ogg" id="5_qr2rp"]
 
 [node name="World" type="Node2D"]
 position = Vector2(-4, 1)
@@ -28,7 +28,7 @@ scale = Vector2(2.59999, 2.59999)
 texture = ExtResource("2_py6u2")
 
 [node name="LevelComplete" type="AudioStreamPlayer" parent="."]
-stream = ExtResource("3_musoy")
+stream = ExtResource("4_r3sm1")
 
 [node name="LevelComplete?" type="AudioStreamPlayer" parent="."]
 stream = ExtResource("5_qr2rp")

@@ -2,7 +2,7 @@
 
 [ext_resource type="Texture2D" uid="uid://do33at3qja57i" path="res://assets/blocks/levers/InactiveLever.png" id="1_rm3hx"]
 [ext_resource type="Texture2D" uid="uid://56m1cuy4vomm" path="res://assets/blocks/levers/ActiveLever.png" id="2_8js0w"]
-[ext_resource type="AudioStream" uid="uid://bb6tk4bk2wjg6" path="res://assets/audio/LeverSwitch.ogg" id="3_jqym1"]
+[ext_resource type="AudioStream" uid="uid://dw7yilci45jhu" path="res://assets/audio/LeverSwitch.ogg" id="3_jqym1"]
 
 [sub_resource type="GDScript" id="GDScript_i4wyn"]
 script/source = "extends Area2D
@@ -24,8 +24,8 @@ func _process(delta: float) -> void:
 		disabledSprite.visible = true
 
 func _physics_process(delta: float) -> void:
-	var bodies = get_overlapping_bodies()
-	for body in bodies:
+	var bodies := get_overlapping_bodies()
+	for body: Node2D in bodies:
 		if body.name == \"Player\":
 			if Input.is_action_just_pressed(\"click\"):
 				state = not state

@@ -11,7 +11,7 @@
 [sub_resource type="GDScript" id="GDScript_yp2nr"]
 script/source = "extends Node2D
 
-signal nextLevel(level)
+signal nextLevel(level: int)
 
 func nextScene() -> void:
 	nextLevel.emit(3)
@@ -28,31 +28,31 @@ var firstDeath := false
 var talkedOnce := false
 
 func saveGame(dictToSave: Dictionary) -> void:
-	var gameFile = FileAccess.open(\"user://coin.json\", FileAccess.WRITE)
+	var gameFile := FileAccess.open(\"user://coin.json\", FileAccess.WRITE)
 	
-	var jsonString = JSON.stringify(dictToSave)
+	var jsonString := JSON.stringify(dictToSave)
 	gameFile.store_line(jsonString)
 
 func loadGame() -> Dictionary:
-	var loadedData
-	var gameSave = FileAccess.get_file_as_string(\"user://coin.json\")
+	var loadedData: Dictionary
+	var gameSave := FileAccess.get_file_as_string(\"user://coin.json\")
 
 	loadedData = JSON.parse_string(gameSave)
 
 	
 	return loadedData
 
-var data = loadGame()
+var data := loadGame()
 
 func get_random_number(min_value: int, max_value: int) -> int:
 	randomize()
 	return randi_range(min_value, max_value)
 
-func playerDied():
+func playerDied() -> void:
 	if not firstDeath:
 		firstDeath = true
 	else:
-		var random_number = get_random_number(1, 15)
+		var random_number := get_random_number(1, 15)
 		if random_number == 12:
 			pastChonkySpawned = true
 			pastChonky.visible=true
@@ -60,24 +60,20 @@ func playerDied():
 func _ready() -> void:
 	get_parent().get_node(\"Player\").get_node(\"Player\").characterDeath.connect(playerDied)
 	pastChonky.visible=false
-	var coins = [
+	var coins := [
 		$Coins/Coin,
 		$Coins/Coin2,
 		$Coins/Coin3,
 		$Coins/Coin4,
 		$Coins/Coin5
 	]
-	var index=0
+	var index := 0
 	if data.has(\"Level2\"):
-		print(data[\"Level2\"])
-		for e in data[\"Level2\"].values():
+		for e: bool in data[\"Level2\"].values():
 			index+=1
 			if e == true:
-				print(\"true\")
 				coins[index-1].visible=false 
 				coins[index-1].get_node(\"CollisionShape2D\").disabled=true
-			else:
-				print(\"passed\")
 	else:
 		data[\"Level2\"] = {
 				\"1\":false,
@@ -92,7 +88,7 @@ func _ready() -> void:
 	movingPlatHori1Anim.play(\"move_right\")
 	movingPlatHori1Anim.speed_scale = 0
  
-func _on_finish_flag_body_entered(body):
+func _on_finish_flag_body_entered(body: Node2D) -> void:
 	if body.name == \"Player\":
 		nextScene()
 
@@ -122,14 +118,14 @@ func _on_coin_5_body_entered(body: Node2D) -> void:
 		saveGame(data)
 
 
-func _on_lever_2_activated(type):
+func _on_lever_2_activated(type: bool) -> void:
 	if type:
 		Floor6Anim.play(\"move_place\")
 	else:
 		Floor6Anim.stop()
 
 
-func _on_lever_activated(type):
+func _on_lever_activated(type: bool) -> void:
 	if type:
 		movingPlatHori1Anim.speed_scale = .75
 	else:
@@ -151,16 +147,18 @@ var lines:  Array[String] = [
 	\"Bye, for now.\"
 ]
 
+@onready var speechSound := preload(\"res://assets/audio/speaking.ogg\")
+
 func _process(_delta: float) -> void:
 	if pastChonkySpawned:
-		var bodies = pastChonky.get_overlapping_bodies()
-		for body in bodies:
+		var bodies: Array = pastChonky.get_overlapping_bodies()
+		for body: Node2D in bodies:
 			if body.name == \"Player\":
-				if Input.is_action_just_pressed(\"start_dialogue\") and not talkedOnce:
+				if Input.is_action_just_pressed(\"start_dialogue\") and not talkedOnce and not DialougeManager.isdialogueActive:
 					talkedOnce = true
-					var realPos = pastChonky.global_position
+					var realPos: Vector2 = pastChonky.global_position
 					realPos.y -= 70
-					DialougeManager.startDialogue(realPos,lines)
+					DialougeManager.startDialogue(realPos,lines,speechSound)
 "
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_3gjr7"]

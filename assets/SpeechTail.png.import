@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://djw4olanyk7m5"
-path="res://.godot/imported/Level2.png-31173151cc7c5d3969b4b453c65012cb.ctex"
+uid="uid://drumdulhsys04"
+path="res://.godot/imported/SpeechTail.png-1dc0e0beeb7a7b71ee3dbd744b93dd02.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/levels/Level2.png"
-dest_files=["res://.godot/imported/Level2.png-31173151cc7c5d3969b4b453c65012cb.ctex"]
+source_file="res://assets/SpeechTail.png"
+dest_files=["res://.godot/imported/SpeechTail.png-1dc0e0beeb7a7b71ee3dbd744b93dd02.ctex"]
 
 [params]
 

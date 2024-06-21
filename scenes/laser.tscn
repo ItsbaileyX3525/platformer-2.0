@@ -2,7 +2,7 @@
 
 [ext_resource type="Texture2D" uid="uid://cookdqpwwgp48" path="res://assets/blocks/Laser.png" id="1_7c7lg"]
 [ext_resource type="Texture2D" uid="uid://cv682c76g4p5d" path="res://assets/blocks/Beam.png" id="2_m7u6t"]
-[ext_resource type="AudioStream" uid="uid://cdk6ncx1reowr" path="res://assets/audio/laserZap.ogg" id="3_gvrmx"]
+[ext_resource type="AudioStream" uid="uid://bbatujd6k777i" path="res://assets/audio/laserZap.ogg" id="3_gvrmx"]
 
 [sub_resource type="GDScript" id="GDScript_7uux7"]
 script/source = "extends AnimatableBody2D
@@ -14,17 +14,17 @@ script/source = "extends AnimatableBody2D
 @onready var Beam := $Beam
 @onready var zapSFX := $Zap
 
-var timer := 0
-var timer2 := 0
+var timer := 0.0
+var timer2 := 0.0
 var canDie := false
 var playerDied := false
 var singleItems := false
 
-func _ready():
+func _ready() -> void:
 	Beam.visible=false
 
 
-func _process(delta):
+func _process(delta: float) -> void:
 	timer+=delta
 	if timer>beamShootTime and not canDie:
 		Beam.visible=true
@@ -42,8 +42,8 @@ func _process(delta):
 		Beam.visible=false
 		canDie=false
 		singleItems=false
-	var bodies = Beam.get_overlapping_bodies()
-	for body in bodies:
+	var bodies: Array = Beam.get_overlapping_bodies()
+	for body: Node2D in bodies:
 		if body.name == \"Player\":
 			if canDie and not playerDied:
 				body.Death(newPosition)

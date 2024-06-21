@@ -11,31 +11,31 @@
 [sub_resource type="GDScript" id="GDScript_ifgnb"]
 script/source = "extends Node2D
 
-signal nextLevel(level)
+signal nextLevel(level: int)
 
 @onready var doorAnim := $StaticBody2D/AnimationPlayer
 
-func playAnim():
+func playAnim() -> void:
 	doorAnim.speed_scale = 1
 	if not doorAnim.is_playing():
 		doorAnim.play(\"drop\")
 	
-func reverseAnim():
+func reverseAnim() -> void:
 	doorAnim.speed_scale = -1
 	if not doorAnim.is_playing():
 		doorAnim.seek(.999)
 		doorAnim.play(\"drop\")
 
 func saveGame(dictToSave: Dictionary) -> void:
-	var gameFile = FileAccess.open(\"user://coin.json\", FileAccess.WRITE)
+	var gameFile := FileAccess.open(\"user://coin.json\", FileAccess.WRITE)
 	
-	var jsonString = JSON.stringify(dictToSave)
+	var jsonString := JSON.stringify(dictToSave)
 	gameFile.store_line(jsonString)
 
 func loadGame() -> Dictionary:
-	var loadedData
+	var loadedData: Dictionary
 	if not FileAccess.file_exists(\"user://coin.json\"): 
-		var save_dict = {
+		var save_dict := {
 			\"Level1\": {
 				\"1\":false,
 				\"2\":false,
@@ -46,7 +46,7 @@ func loadGame() -> Dictionary:
 		}
 		return save_dict
 	else:
-		var gameSave = FileAccess.get_file_as_string(\"user://coin.json\")
+		var gameSave := FileAccess.get_file_as_string(\"user://coin.json\")
 
 		loadedData = JSON.parse_string(gameSave)
 
@@ -57,16 +57,16 @@ var data := loadGame()
 
 func _ready() -> void:
 	reverseAnim()
-	var coins = [
+	var coins := [
 		$Coins/Coin,
 		$Coins/Coin2,
 		$Coins/Coin3,
 		$Coins/Coin4,
 		$Coins/Coin5
 	]
-	var index=0
+	var index := 0
 	if data.has(\"Level1\"):
-		for e in data[\"Level1\"].values():
+		for e: bool in data[\"Level1\"].values():
 			index+=1
 			if e == true:
 				coins[index-1].visible=false 
@@ -79,15 +79,11 @@ func _ready() -> void:
 				\"4\":false,
 				\"5\":false
 			}
-		var saves = data
+		var saves := data
 		saveGame(saves)
 
 func nextScene() -> void:
 	nextLevel.emit(2)
-
-func _on_finish_flag_body_shape_entered(body_rid, body, body_shape_index, local_shape_index):
-	if body.name == \"Player\":
-		nextScene()
 
 func _on_coin_body_entered(body: Node2D) -> void:
 	if data.has(\"Level1\"):
@@ -115,11 +111,16 @@ func _on_coin_5_body_entered(body: Node2D) -> void:
 		saveGame(data)
 
 
-func _on_lever_activated(type):
+func _on_lever_activated(type: bool) -> void:
 	if type:
 		playAnim()
 	else:
 		reverseAnim()
+
+
+func _on_finish_flag_body_entered(body: Node2D) -> void:
+	if body.name == \"Player\":
+		nextScene()
 "
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_cyw15"]
@@ -495,7 +496,7 @@ position = Vector2(2411.81, 501.329)
 position = Vector2(1692.44, 207.176)
 
 [connection signal="Activated" from="Lever" to="." method="_on_lever_activated"]
-[connection signal="body_shape_entered" from="FinishFlag" to="." method="_on_finish_flag_body_shape_entered"]
+[connection signal="body_entered" from="FinishFlag" to="." method="_on_finish_flag_body_entered"]
 [connection signal="body_entered" from="Coins/Coin" to="." method="_on_coin_body_entered"]
 [connection signal="body_entered" from="Coins/Coin2" to="." method="_on_coin_2_body_entered"]
 [connection signal="body_entered" from="Coins/Coin3" to="." method="_on_coin_3_body_entered"]
