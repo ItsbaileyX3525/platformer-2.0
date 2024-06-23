@@ -1,89 +1,94 @@
 extends CharacterBody2D
 
-@export var speed = 300
-@export var gravity = 30
-@export var jumpForce = 600
-@export var climbSpeed = 300
+@export var speed := 350.0
+@export var gravity := 30
+@export var jumpForce := 600
+@export var climbSpeed := 300
+@export var acceleration := 3500.0
 @export var invinc := false
-var isClimbing = false
-@export var deathBarrier: Node2D
+var friction := acceleration / speed
+#var velocity := Vector2()
+var isClimbing := false
 
-@onready var raycastLeft = $RayCast2D_Left
-@onready var raycastRight = $RayCast2D_Right
+@onready var raycastLeft := $RayCast2D_Left
+@onready var raycastLeftH: RayCast2D = $RayCast2D_LeftH
+@onready var raycastRight := $RayCast2D_Right
+@onready var raycastRightH: RayCast2D = $RayCast2D_RightH
 
 @onready var coinsCounter: RichTextLabel = $RichTextLabel3
-@onready var realTimer = $Timer
-@onready var idleChonk = $IdleChonky
-@onready var idleAnim = $IdleChonky/AnimationPlayer
-@onready var leftChonk = $ChonkyLeft
-@onready var leftChonkAnim = $ChonkyLeft/AnimationPlayer
-@onready var rightChonkAnim = $ChonkyRight/AnimationPlayer
-@onready var rightChonk = $ChonkyRight
-@onready var danceChonk = $DanceChonky
-@onready var backgroundSFX = $BackgroundMusic
-@onready var backgroundSFX2 = $BackgroundMusic2
-@onready var danceChonkAnim = $DanceChonky/AnimationPlayer
-@onready var deathCounter = $RichTextLabel
-@onready var transition = $ColorRect
-@onready var transitionText = $RichTextLabel2
-@onready var deathSFX = $Death
-@onready var danceSFX = $Dance
-@onready var danceSFX2 = $Dance2
-@onready var controlsNode = $MobileControls
-@onready var LeftButton = $MobileControls/Left
-@onready var RightButton = $MobileControls/Right
-@onready var UpButton = $MobileControls/Jump
-@onready var MenuNode = $Menu2
+@onready var realTimer := $Timer
+@onready var idleChonk := $IdleChonky
+@onready var idleAnim := $IdleChonky/AnimationPlayer
+@onready var leftChonk := $ChonkyLeft
+@onready var leftChonkAnim := $ChonkyLeft/AnimationPlayer
+@onready var rightChonkAnim := $ChonkyRight/AnimationPlayer
+@onready var rightChonk := $ChonkyRight
+@onready var danceChonk := $DanceChonky
+@onready var backgroundSFX := $BackgroundMusic
+@onready var backgroundSFX2 := $BackgroundMusic2
+@onready var danceChonkAnim := $DanceChonky/AnimationPlayer
+@onready var deathCounter := $RichTextLabel
+@onready var transition := $ColorRect
+@onready var transitionText := $RichTextLabel2
+@onready var deathSFX := $Death
+@onready var danceSFX := $Dance
+@onready var danceSFX2 := $Dance2
+@onready var controlsNode := $MobileControls
+@onready var LeftButton := $MobileControls/Left
+@onready var RightButton := $MobileControls/Right
+@onready var UpButton := $MobileControls/Jump
+@onready var MenuNode := $Menu2
 
 signal yoParentNode()
 signal characterDeath()
 
-var deaths = 0
-var fixedTimestep = 1.0/60.0
-var timer = 0.0
-var jumpTimer = 0.0
-var isDancing = false
-var backgroundTime = 0.0
-var onMobile = false
-var coins = 0
-var speedyBoi = false
-var speedTimer = 0.0
-var speedCanLast = 5.0
-var speedMultiplier = 1.5
-var canDoubleJump = false
-var inMenu = false
-var secretsClicked = 0
-var doneSecret = false
-var canClimb = false
+var deaths := 0
+var fixedTimestep := 1.0/60.0
+var timer := 0.0
+var jumpTimer := 0.0
+var isDancing := false
+var backgroundTime := 0.0
+var onMobile := false
+var onMobile2 :=  false
+var coins := 0
+var speedyBoi := false
+var speedTimer := 0.0
+var speedCanLast := 5.0
+var speedMultiplier := 1.0
+var canDoubleJump := false
+var inMenu := false
+var secretsClicked := 0
+var doneSecret := false
+var canClimb := false
 
 #Mobile controls
-var movingLeft = false
-var jumping = false
-var movingRight = false
+var movingLeft := false
+var jumping := false
+var movingRight := false
 
 func saveGame(dictToSave: Dictionary) -> void:
-	var gameFile = FileAccess.open("user://playerSave.json", FileAccess.WRITE)
+	var gameFile := FileAccess.open("user://playerSave.json", FileAccess.WRITE)
 	
-	var jsonString = JSON.stringify(dictToSave)
+	var jsonString := JSON.stringify(dictToSave)
 	gameFile.store_line(jsonString)
 
 func loadGame() -> Dictionary:
-	var loadedData
+	var loadedData: Dictionary 
 	if not FileAccess.file_exists("user://playerSave.json"): 
-		var save_dict = {
+		var save_dict := {
 			"deaths": 0,
 			"coins": 0
 		}
 		return save_dict
 	else:
-		var gameSave = FileAccess.get_file_as_string("user://playerSave.json")
+		var gameSave := FileAccess.get_file_as_string("user://playerSave.json")
 
 		loadedData = JSON.parse_string(gameSave)
 
 	
 	return loadedData
 
-var data = loadGame()
+var data := loadGame()
 
 func giveCoin(amount: int) -> void:
 	coins += 1
@@ -106,23 +111,27 @@ func _ready() -> void:
 	coinsCounter.text = "Coins: %s" % coins
 	raycastLeft.enabled = true
 	raycastRight.enabled = true
+	raycastLeftH.enabled = true
+	raycastRightH.enabled = true
 	match OS.get_name():
 		"Android":
 			controlsNode.visible=true
+			onMobile2 = true
 		"iOS":
 			controlsNode.visible=true
+			onMobile2 = true
 		"Web":
 			$Menu2/Quit.visible=false
 			onMobile = JavaScriptBridge.eval("/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)", true)
 			if onMobile:
 				controlsNode.visible=true
 
-func show_transition():
+func show_transition() -> void:
 	transition.visible=true
 	transitionText.visible=true
 	gravity=0
 
-func hide_transition():
+func hide_transition() -> void:
 	transition.visible=false
 	transitionText.visible=false
 	position.y = -350
@@ -139,13 +148,13 @@ func Death(newPos: Vector2) -> void:
 		data["deaths"] = deaths
 		saveGame(data)
 	
-func addPoint():
+func addPoint() -> void:
 	secretsClicked+=1
 
-func addJump():
+func addJump() -> void:
 	canDoubleJump = true
 
-func addSpeed(length: float = 5, speedAmount: float = 1.5):
+func addSpeed(length: float = 5, speedAmount: float = 1.5) -> void:
 	speedTimer = 0
 	speedCanLast = length
 	speedMultiplier = speedAmount
@@ -156,6 +165,7 @@ func addSpeed(length: float = 5, speedAmount: float = 1.5):
 	speedyBoi = true
 
 
+var collider: StaticBody2D
 func  step() -> void:
 	if !is_on_floor():
 		if not isClimbing:
@@ -172,13 +182,23 @@ func  step() -> void:
 			$Menu2/Resume.grab_focus()
 
 	if raycastLeft.is_colliding():
-		var collider = raycastLeft.get_collider()
-		var colliderName = collider.name.rstrip("0123456789")
+		collider = raycastLeft.get_collider()
+		var colliderName := collider.name.rstrip("0123456789")
 		if collider and colliderName == "Climbable":
 			canClimb = true
 	elif raycastRight.is_colliding():
-		var collider = raycastRight.get_collider()
-		var colliderName = collider.name.rstrip("0123456789")
+		collider = raycastRight.get_collider()
+		var colliderName := collider.name.rstrip("0123456789")
+		if collider and colliderName  == "Climbable":
+			canClimb = true
+	elif raycastLeftH.is_colliding():
+		collider = raycastLeftH.get_collider()
+		var colliderName := collider.name.rstrip("0123456789")
+		if collider and colliderName  == "Climbable":
+			canClimb = true
+	elif raycastRightH.is_colliding():
+		collider = raycastRightH.get_collider()
+		var colliderName := collider.name.rstrip("0123456789")
 		if collider and colliderName  == "Climbable":
 			canClimb = true
 	else:
@@ -195,7 +215,7 @@ func  step() -> void:
 		else:
 			isClimbing=false
 
-func _physics_process(delta):
+func _physics_process(delta: float) -> void:
 	timer += delta
 	if timer>= fixedTimestep:
 		timer=0
@@ -214,6 +234,7 @@ func _physics_process(delta):
 	if speedTimer >= speedCanLast:
 		speedyBoi=false
 		speedTimer=0
+		speedMultiplier = 1.0
 		rightChonkAnim.speed_scale = 1
 		leftChonkAnim.speed_scale = 1
 		danceChonkAnim.speed_scale = 1
@@ -230,17 +251,12 @@ func _physics_process(delta):
 			jumpTimer = 0.0
 			velocity.y = -jumpForce
 			canDoubleJump=false
-	
-		var hDirection = Input.get_axis("move_left", "move_right") 
 		
-		if not speedyBoi:
-			velocity.x = speed * hDirection
-		else:
-			velocity.x = speed * hDirection * speedMultiplier
+		applyTraction(delta)
+		applyFriction(delta)
 	
 		move_and_slide()
 		
-
 		if Input.is_action_pressed("move_right") && Input.is_action_pressed("move_left"):
 			if not idleAnim.is_playing() and not isDancing:
 				idleAnim.play("idle")
@@ -306,6 +322,21 @@ func _physics_process(delta):
 					rightChonk.visible=false
 					leftChonk.visible=false
 
+func applyTraction(delta: float) -> void:
+	var traction := Vector2()
+	
+	if Input.is_action_pressed("move_right"):
+		traction.x += 1
+	if Input.is_action_pressed("move_left"):
+		traction.x -= 1
+		
+	traction = traction.normalized()
+	
+	velocity.x += traction.x * acceleration * delta * speedMultiplier
+
+func applyFriction(delta: float) -> void:
+	velocity.x -= velocity.x * friction * delta
+
 func _on_jump_pressed() -> void:
 	Input.action_press("jump")
 
@@ -324,26 +355,31 @@ func _on_left_pressed() -> void:
 func _on_left_released() -> void:
 	Input.action_release("move_left")
 
+var actionEvent: InputEventAction
+
 func _on_interact_pressed() -> void:
 	Input.action_press("click")
-	Input.action_press("start_dialogue")
-	Input.action_press("advance_dialogue")
+	actionEvent = InputEventAction.new()
+	actionEvent.action = "advance_dialogue"
+	actionEvent.pressed = true
+	Input.parse_input_event(actionEvent)
 
 func _on_interact_released() -> void:
 	Input.action_release("click")
-	Input.action_release("start_dialogue")
+	actionEvent.pressed = false
 	Input.action_release("advance_dialogue")
 
-func _on_menu_pressed():
+func _on_menu_pressed() -> void:
 	Input.action_press("pause")
 
-func _on_menu_released():
+func _on_menu_released() -> void:
 	Input.action_release("pause")
 
 func _on_resume_pressed() -> void:
-	MenuNode.visible=false
-	get_tree().paused = false
-	inMenu = false
+	if not onMobile2:
+		MenuNode.visible=false
+		get_tree().paused = false
+		inMenu = false
 
 func _on_dance_pressed() -> void:
 	Input.action_press("dance")
@@ -364,8 +400,10 @@ func _on_down_released() -> void:
 	Input.action_release("move_down")
 
 func _on_return_pressed() -> void:
-	yoParentNode.emit("Return")
-	get_tree().paused = false
+	if not onMobile2:
+		yoParentNode.emit("Return")
+		DialougeManager.clearDialogue()
+		get_tree().paused = false
 
 func _on_quit_pressed() -> void:
 	get_tree().quit()
@@ -376,9 +414,16 @@ func _on_quit_mobile_pressed() -> void:
 
 func _on_return_mobile_pressed() -> void:
 	yoParentNode.emit("Return")
+	DialougeManager.clearDialogue()
 	get_tree().paused = false
 
 func _on_resume_mobile_pressed() -> void:
 	MenuNode.visible=false
 	get_tree().paused = false
 	inMenu = false
+
+func _on_dialog_pressed() -> void:
+	Input.action_press("start_dialogue")
+
+func _on_dialog_released() -> void:
+	Input.action_release("start_dialogue")

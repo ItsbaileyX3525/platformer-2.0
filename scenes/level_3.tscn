@@ -52,7 +52,7 @@ func playerDied() -> void:
 	if not firstDeath:
 		firstDeath = true
 	else:
-		var random_number := get_random_number(1, 15)
+		var random_number := get_random_number(1,15)
 		if random_number == 12:
 			pastChonkySpawned = true
 			pastChonky.visible=true
@@ -156,7 +156,7 @@ func _on_coin_5_body_entered(body: Node2D) -> void:
 size = Vector2(175.699, 24.4259)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_ht7jr"]
-size = Vector2(67.5664, 24.617)
+size = Vector2(67.5664, 24.7811)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_lidwy"]
 size = Vector2(11, 254)
@@ -362,7 +362,7 @@ region_enabled = true
 region_rect = Rect2(0.085022, 0, 192.186, 30)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="AfterFlag/Floor4"]
-position = Vector2(-8.60892, 0.131302)
+position = Vector2(-8.60904, 0.0492249)
 shape = SubResource("RectangleShape2D_ht7jr")
 
 [node name="Floor6" type="StaticBody2D" parent="AfterFlag"]

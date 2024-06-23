@@ -30,9 +30,7 @@ func displayText(textToShow: String,speechSfx) -> void:
 	label.text = textToShow
 	if typeof(speechSfx) == TYPE_BOOL:
 		isSpeech = false
-		print(\"No has speech\")
 	else:
-		print(\"Has speech\")
 		speak.stream = speechSfx
 		isSpeech = true
 	await resized

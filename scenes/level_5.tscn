@@ -1,4 +1,4 @@
-[gd_scene load_steps=31 format=3 uid="uid://ct6a86d1x442c"]
+[gd_scene load_steps=33 format=3 uid="uid://ct6a86d1x442c"]
 
 [ext_resource type="Texture2D" uid="uid://cshf2fo6eg1mk" path="res://assets/blocks/grass_dirt.png" id="1_yekdx"]
 [ext_resource type="PackedScene" uid="uid://c5qrmndxldf7i" path="res://scenes/button.tscn" id="2_0gk1p"]
@@ -55,7 +55,7 @@ func playerDied() -> void:
 	if not firstDeath:
 		firstDeath = true
 	else:
-		var random_number := 12
+		var random_number := get_random_number(1,15)
 		if random_number == 12:
 			pastChonkySpawned = true
 			pastChonky.visible=true
@@ -275,6 +275,9 @@ size = Vector2(36.2179, 24.7045)
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_isp5m"]
 size = Vector2(62.2187, 24.42)
 
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_e0dir"]
+size = Vector2(298.441, 12.8665)
+
 [sub_resource type="Animation" id="Animation_lxdv5"]
 resource_name = "move_right"
 length = 2.0
@@ -353,6 +356,9 @@ size = Vector2(18.1156, 148.551)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_lhvfa"]
 size = Vector2(5.73673, 395.833)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_yicid"]
+size = Vector2(1.20772, 227.657)
 
 [node name="Level5" type="Node2D"]
 scale = Vector2(1.656, 1.656)
@@ -554,11 +560,11 @@ scale = Vector2(0.351344, 0.815)
 texture = ExtResource("1_yekdx")
 centered = false
 region_enabled = true
-region_rect = Rect2(0.085022, -0.157852, 176.972, 30.1579)
+region_rect = Rect2(0.085022, -0.157852, 849.444, 30.1579)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Floor10"]
-position = Vector2(-11.2829, 0.393883)
-shape = SubResource("RectangleShape2D_isp5m")
+position = Vector2(106.828, -5.1189)
+shape = SubResource("RectangleShape2D_e0dir")
 
 [node name="Button" parent="." instance=ExtResource("2_0gk1p")]
 position = Vector2(410.628, 535.628)
@@ -677,6 +683,13 @@ position = Vector2(-18.1159, 71.8599)
 position = Vector2(15.8514, -157.458)
 shape = SubResource("RectangleShape2D_lhvfa")
 
+[node name="Barrier4" type="StaticBody2D" parent="."]
+position = Vector2(1473.43, -39.2512)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Barrier4"]
+position = Vector2(17.5121, -73.9734)
+shape = SubResource("RectangleShape2D_yicid")
+
 [node name="FinishFlag" parent="." instance=ExtResource("9_u2eci")]
 position = Vector2(1911.23, 379.831)
 
@@ -725,14 +738,14 @@ theme_override_font_sizes/normal_font_size = 400
 text = "When you press it, go down here."
 
 [node name="RichTextLabel4" type="RichTextLabel" parent="."]
-offset_left = 2703.5
-offset_top = 995.169
-offset_right = 7363.5
-offset_bottom = 3135.17
+offset_left = 2638.0
+offset_top = 1057.0
+offset_right = 8759.0
+offset_bottom = 3197.0
 scale = Vector2(0.05, 0.05)
 theme_override_colors/default_color = Color(0, 0, 0, 1)
 theme_override_font_sizes/normal_font_size = 400
-text = "Merp, I lied, sorry. Go the otherway."
+text = "Merp, I lied, sorry. Go the otherway. You can have a coin on the house though"
 
 [node name="PastChonky" parent="." instance=ExtResource("9_aof04")]
 visible = false

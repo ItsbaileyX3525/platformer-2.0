@@ -1,10 +1,13 @@
 extends CharacterBody2D
 
-@export var speed := 300
+@export var speed := 350.0
 @export var gravity := 30
 @export var jumpForce := 600
 @export var climbSpeed := 300
+@export var acceleration := 3500.0
 @export var invinc := false
+var friction := acceleration / speed
+#var velocity := Vector2()
 var isClimbing := false
 
 @onready var raycastLeft := $RayCast2D_Left
@@ -46,11 +49,12 @@ var jumpTimer := 0.0
 var isDancing := false
 var backgroundTime := 0.0
 var onMobile := false
+var onMobile2 :=  false
 var coins := 0
 var speedyBoi := false
 var speedTimer := 0.0
 var speedCanLast := 5.0
-var speedMultiplier := 1.5
+var speedMultiplier := 1.0
 var canDoubleJump := false
 var inMenu := false
 var secretsClicked := 0
@@ -112,8 +116,10 @@ func _ready() -> void:
 	match OS.get_name():
 		"Android":
 			controlsNode.visible=true
+			onMobile2 = true
 		"iOS":
 			controlsNode.visible=true
+			onMobile2 = true
 		"Web":
 			$Menu2/Quit.visible=false
 			onMobile = JavaScriptBridge.eval("/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)", true)
@@ -228,6 +234,7 @@ func _physics_process(delta: float) -> void:
 	if speedTimer >= speedCanLast:
 		speedyBoi=false
 		speedTimer=0
+		speedMultiplier = 1.0
 		rightChonkAnim.speed_scale = 1
 		leftChonkAnim.speed_scale = 1
 		danceChonkAnim.speed_scale = 1
@@ -244,13 +251,9 @@ func _physics_process(delta: float) -> void:
 			jumpTimer = 0.0
 			velocity.y = -jumpForce
 			canDoubleJump=false
-	
-		var hDirection := Input.get_axis("move_left", "move_right") 
 		
-		if not speedyBoi:
-			velocity.x = speed * hDirection
-		else:
-			velocity.x = speed * hDirection * speedMultiplier
+		applyTraction(delta)
+		applyFriction(delta)
 	
 		move_and_slide()
 		
@@ -319,6 +322,21 @@ func _physics_process(delta: float) -> void:
 					rightChonk.visible=false
 					leftChonk.visible=false
 
+func applyTraction(delta: float) -> void:
+	var traction := Vector2()
+	
+	if Input.is_action_pressed("move_right"):
+		traction.x += 1
+	if Input.is_action_pressed("move_left"):
+		traction.x -= 1
+		
+	traction = traction.normalized()
+	
+	velocity.x += traction.x * acceleration * delta * speedMultiplier
+
+func applyFriction(delta: float) -> void:
+	velocity.x -= velocity.x * friction * delta
+
 func _on_jump_pressed() -> void:
 	Input.action_press("jump")
 
@@ -337,12 +355,18 @@ func _on_left_pressed() -> void:
 func _on_left_released() -> void:
 	Input.action_release("move_left")
 
+var actionEvent: InputEventAction
+
 func _on_interact_pressed() -> void:
 	Input.action_press("click")
-	Input.action_press("advance_dialogue")
+	actionEvent = InputEventAction.new()
+	actionEvent.action = "advance_dialogue"
+	actionEvent.pressed = true
+	Input.parse_input_event(actionEvent)
 
 func _on_interact_released() -> void:
 	Input.action_release("click")
+	actionEvent.pressed = false
 	Input.action_release("advance_dialogue")
 
 func _on_menu_pressed() -> void:
@@ -352,9 +376,10 @@ func _on_menu_released() -> void:
 	Input.action_release("pause")
 
 func _on_resume_pressed() -> void:
-	MenuNode.visible=false
-	get_tree().paused = false
-	inMenu = false
+	if not onMobile2:
+		MenuNode.visible=false
+		get_tree().paused = false
+		inMenu = false
 
 func _on_dance_pressed() -> void:
 	Input.action_press("dance")
@@ -375,8 +400,10 @@ func _on_down_released() -> void:
 	Input.action_release("move_down")
 
 func _on_return_pressed() -> void:
-	yoParentNode.emit("Return")
-	get_tree().paused = false
+	if not onMobile2:
+		yoParentNode.emit("Return")
+		DialougeManager.clearDialogue()
+		get_tree().paused = false
 
 func _on_quit_pressed() -> void:
 	get_tree().quit()
@@ -387,6 +414,7 @@ func _on_quit_mobile_pressed() -> void:
 
 func _on_return_mobile_pressed() -> void:
 	yoParentNode.emit("Return")
+	DialougeManager.clearDialogue()
 	get_tree().paused = false
 
 func _on_resume_mobile_pressed() -> void:

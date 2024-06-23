@@ -7,9 +7,6 @@ const Intro = preload("res://scenes/intro.tscn")
 @onready var levelCompleteSFX := $LevelComplete
 @onready var levelCompleteSFX2 := $"LevelComplete?"
 @onready var PlayerLayer := $Player
-@onready var background := $Background
-@onready var backgroundSprite1 := $Background/Normal
-@onready var backgroundSprite2 := $Background/YeaNotSoNormal
 
 @export var levelToLoad: int = 0
 
@@ -52,6 +49,7 @@ var levels := {
 }
 
 func loadNextLevel(level: int) -> void:
+	DialougeManager.clearDialogue()
 	if level == 99999:
 		Player.addPoint()
 	else:
@@ -86,8 +84,6 @@ func getReadyForIt(event: String) -> void:
 		Player.show_transition()
 		levelTimer.start()
 		levelCompleteSFX2.play()
-		backgroundSprite1.visible=false
-		backgroundSprite2.visible=true
 		await levelTimer.timeout
 		child_instance.queue_free()
 		child_instance = levels["End"].instantiate()
@@ -127,9 +123,3 @@ func _ready() -> void:
 		child_instance = levels[levelToLoad].instantiate()
 		add_child(child_instance)
 		child_instance.nextLevel.connect(loadNextLevel)
-	
-		
-func _process(_delta: float) -> void:
-	if Player and playerExists:
-		background.position.x = Player.position.x
-		background.position.y = Player.position.y - 310
