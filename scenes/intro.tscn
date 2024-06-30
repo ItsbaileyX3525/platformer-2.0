@@ -979,7 +979,12 @@ offset_bottom = 360.0
 scale = Vector2(4.12, 3.6)
 theme = SubResource("Theme_ip3f1")
 bbcode_enabled = true
-text = "[font=res://assets/Helvetica.ttf]Version 1.2
+text = "[font=res://assets/Helvetica.ttf]Version 1.3[font_size=13]
+
+• Added level loading so the game doesn't feel unresponsive
+
+[/font_size]
+Version 1.2
 [font_size=13]
 • Added a \"parallax\" background so that the background feels more realistic.
 
@@ -1398,7 +1403,7 @@ scale = Vector2(0.129999, 0.12547)
 theme_override_colors/font_shadow_color = Color(0, 0, 0, 1)
 theme_override_constants/shadow_outline_size = 100
 theme_override_font_sizes/normal_font_size = 600
-text = "   Version: 1.2"
+text = "   Version: 1.3"
 
 [node name="TextureRect" type="TextureRect" parent="."]
 offset_right = 40.0
