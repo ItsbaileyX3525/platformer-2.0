@@ -1,11 +1,13 @@
-[gd_scene load_steps=26 format=3 uid="uid://dqy88vwfqyhr0"]
+[gd_scene load_steps=30 format=3 uid="uid://dqy88vwfqyhr0"]
 
 [ext_resource type="PackedScene" uid="uid://bxyoisbqmd8r8" path="res://scenes/MovingPlatform.tscn" id="1_8m30w"]
 [ext_resource type="Texture2D" uid="uid://cshf2fo6eg1mk" path="res://assets/blocks/grass_dirt.png" id="1_di205"]
+[ext_resource type="Texture2D" uid="uid://c7a60iy62nb6n" path="res://assets/blocks/dirt.png" id="2_34hs8"]
 [ext_resource type="PackedScene" uid="uid://ctmlu238spt3j" path="res://scenes/lever.tscn" id="3_l0aws"]
+[ext_resource type="Texture2D" uid="uid://dqc5a3o4ccaef" path="res://assets/graphics/EorX.png" id="5_31hs3"]
 [ext_resource type="Texture2D" uid="uid://c3vg56nocjuvq" path="res://assets/graphics/PointDown.png" id="7_2uc5h"]
-[ext_resource type="Texture2D" uid="uid://dnd4hm520cijq" path="res://assets/graphics/MouseAndXButton.png" id="8_mbxru"]
 [ext_resource type="PackedScene" uid="uid://buv6650ugxxq5" path="res://scenes/finish_flag.tscn" id="8_s7lp5"]
+[ext_resource type="Shader" path="res://scenes/void.gdshader" id="9_65tum"]
 [ext_resource type="PackedScene" uid="uid://d1oq0dg07l082" path="res://scenes/coin.tscn" id="10_5s87g"]
 
 [sub_resource type="GDScript" id="GDScript_ifgnb"]
@@ -124,7 +126,19 @@ func _on_finish_flag_body_entered(body: Node2D) -> void:
 "
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_cyw15"]
-size = Vector2(175.872, 24.4259)
+size = Vector2(175.872, 197.509)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_2lru6"]
+size = Vector2(83.8114, 166.76)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_3s044"]
+size = Vector2(83.8115, 271.542)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_8bjjk"]
+size = Vector2(115.26, 182.8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_v6gkd"]
+size = Vector2(114.99, 185.689)
 
 [sub_resource type="Animation" id="Animation_15pr0"]
 length = 0.001
@@ -163,9 +177,6 @@ _data = {
 "RESET": SubResource("Animation_15pr0"),
 "move_loop": SubResource("Animation_yxei7")
 }
-
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_2lru6"]
-size = Vector2(83.8114, 24.423)
 
 [sub_resource type="Animation" id="Animation_d64r4"]
 length = 0.001
@@ -243,12 +254,6 @@ _data = {
 "move_right": SubResource("Animation_tb3lx")
 }
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_8bjjk"]
-size = Vector2(115.26, 24.4259)
-
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_v6gkd"]
-size = Vector2(114.99, 24.4259)
-
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_mtdvr"]
 size = Vector2(40.9414, 39.6993)
 
@@ -288,6 +293,9 @@ _data = {
 "drop": SubResource("Animation_30o6b")
 }
 
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_2pnd7"]
+shader = ExtResource("9_65tum")
+
 [node name="Level1" type="Node2D"]
 scale = Vector2(1.6556, 1.6556)
 script = SubResource("GDScript_ifgnb")
@@ -305,19 +313,18 @@ centered = false
 region_enabled = true
 region_rect = Rect2(0.085022, 0, 500.457, 30)
 
+[node name="Sprite2D2" type="Sprite2D" parent="Floor1"]
+texture_repeat = 2
+position = Vector2(-42.4024, 12.3443)
+scale = Vector2(0.351344, 0.815)
+texture = ExtResource("2_34hs8")
+centered = false
+region_enabled = true
+region_rect = Rect2(0.085022, 0, 500.457, 463)
+
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Floor1"]
-position = Vector2(45.5337, 0.131317)
+position = Vector2(45.5337, 86.6725)
 shape = SubResource("RectangleShape2D_cyw15")
-
-[node name="Side1" parent="." instance=ExtResource("1_8m30w")]
-position = Vector2(910, 620)
-
-[node name="AnimationPlayer" type="AnimationPlayer" parent="Side1"]
-libraries = {
-"": SubResource("AnimationLibrary_p4utt")
-}
-autoplay = "move_loop"
-speed_scale = 0.25
 
 [node name="Floor2" type="StaticBody2D" parent="."]
 position = Vector2(1572.84, 581.058)
@@ -332,9 +339,106 @@ centered = false
 region_enabled = true
 region_rect = Rect2(0, 0, 30, 30)
 
+[node name="Sprite2D2" type="Sprite2D" parent="Floor2"]
+texture_repeat = 2
+position = Vector2(-41.9056, 12.0803)
+scale = Vector2(2.80135, 0.815)
+texture = ExtResource("2_34hs8")
+centered = false
+region_enabled = true
+region_rect = Rect2(-0.0236977, -0.0151793, 30.0237, 524.06)
+
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Floor2"]
-position = Vector2(-0.000244141, -0.131302)
+position = Vector2(0, 71.037)
 shape = SubResource("RectangleShape2D_2lru6")
+
+[node name="Floor3" type="StaticBody2D" parent="."]
+position = Vector2(2490.94, 382.339)
+scale = Vector2(0.691851, 2.3)
+
+[node name="Sprite2D" type="Sprite2D" parent="Floor3"]
+texture_repeat = 2
+position = Vector2(-41.9056, -12.3428)
+scale = Vector2(2.80135, 0.815)
+texture = ExtResource("1_di205")
+centered = false
+region_enabled = true
+region_rect = Rect2(0, 0, 30, 30)
+
+[node name="Sprite2D2" type="Sprite2D" parent="Floor3"]
+texture_repeat = 2
+position = Vector2(-41.9056, 12.0801)
+scale = Vector2(2.80135, 0.815)
+texture = ExtResource("2_34hs8")
+centered = false
+region_enabled = true
+region_rect = Rect2(0, 0, 30, 651.279)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Floor3"]
+position = Vector2(-0.000244141, 123.428)
+shape = SubResource("RectangleShape2D_3s044")
+
+[node name="Floor4" type="StaticBody2D" parent="."]
+position = Vector2(2722.28, 608.239)
+scale = Vector2(2.23766, 2.29973)
+
+[node name="Sprite2D" type="Sprite2D" parent="Floor4"]
+texture_repeat = 2
+position = Vector2(-43.1885, -12.0816)
+scale = Vector2(0.858806, 0.815)
+texture = ExtResource("1_di205")
+centered = false
+region_enabled = true
+region_rect = Rect2(0.0258293, 0, 134.13, 30)
+
+[node name="Sprite2D2" type="Sprite2D" parent="Floor4"]
+texture_repeat = 2
+position = Vector2(-43.1885, 12.3441)
+scale = Vector2(0.858806, 0.815)
+texture = ExtResource("2_34hs8")
+centered = false
+region_enabled = true
+region_rect = Rect2(0.0258293, 0, 134.13, 528.9)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Floor4"]
+position = Vector2(14.4396, 79.3185)
+shape = SubResource("RectangleShape2D_8bjjk")
+
+[node name="Floor5" type="StaticBody2D" parent="."]
+position = Vector2(3203.07, 608.239)
+scale = Vector2(2.23766, 2.29973)
+
+[node name="Sprite2D" type="Sprite2D" parent="Floor5"]
+texture_repeat = 2
+position = Vector2(-43.1885, -12.0816)
+scale = Vector2(0.858806, 0.815)
+texture = ExtResource("1_di205")
+centered = false
+region_enabled = true
+region_rect = Rect2(0.0258293, 0, 134.13, 30)
+
+[node name="Sprite2D2" type="Sprite2D" parent="Floor5"]
+texture_repeat = 2
+position = Vector2(-43.1885, 12.3441)
+scale = Vector2(0.858806, 0.815)
+texture = ExtResource("2_34hs8")
+centered = false
+region_enabled = true
+region_rect = Rect2(0.0258293, 0, 134.13, 521.579)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Floor5"]
+position = Vector2(14.3044, 80.7629)
+shape = SubResource("RectangleShape2D_v6gkd")
+
+[node name="Side1" parent="." instance=ExtResource("1_8m30w")]
+position = Vector2(910, 620)
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="Side1"]
+libraries = {
+"": SubResource("AnimationLibrary_p4utt")
+}
+autoplay = "move_loop"
+speed_scale = 0.25
 
 [node name="Up1" parent="." instance=ExtResource("1_8m30w")]
 position = Vector2(1692.44, 301.401)
@@ -355,57 +459,6 @@ libraries = {
 }
 autoplay = "move_right"
 speed_scale = 0.7
-
-[node name="Floor3" type="StaticBody2D" parent="."]
-position = Vector2(2490.94, 382.339)
-scale = Vector2(0.691851, 2.3)
-
-[node name="Sprite2D" type="Sprite2D" parent="Floor3"]
-texture_repeat = 2
-position = Vector2(-41.9056, -12.3428)
-scale = Vector2(2.80135, 0.815)
-texture = ExtResource("1_di205")
-centered = false
-region_enabled = true
-region_rect = Rect2(0, 0, 30, 30)
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Floor3"]
-position = Vector2(-0.000244141, -0.131302)
-shape = SubResource("RectangleShape2D_2lru6")
-
-[node name="Floor4" type="StaticBody2D" parent="."]
-position = Vector2(2722.28, 608.239)
-scale = Vector2(2.23766, 2.29973)
-
-[node name="Sprite2D" type="Sprite2D" parent="Floor4"]
-texture_repeat = 2
-position = Vector2(-43.1885, -12.0816)
-scale = Vector2(0.858806, 0.815)
-texture = ExtResource("1_di205")
-centered = false
-region_enabled = true
-region_rect = Rect2(0.0258293, 0, 134.13, 30)
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Floor4"]
-position = Vector2(14.4395, 0.131317)
-shape = SubResource("RectangleShape2D_8bjjk")
-
-[node name="Floor5" type="StaticBody2D" parent="."]
-position = Vector2(3203.07, 608.239)
-scale = Vector2(2.23766, 2.29973)
-
-[node name="Sprite2D" type="Sprite2D" parent="Floor5"]
-texture_repeat = 2
-position = Vector2(-43.1885, -12.0816)
-scale = Vector2(0.858806, 0.815)
-texture = ExtResource("1_di205")
-centered = false
-region_enabled = true
-region_rect = Rect2(0.0258293, 0, 134.13, 30)
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Floor5"]
-position = Vector2(14.3044, 0.131165)
-shape = SubResource("RectangleShape2D_v6gkd")
 
 [node name="StaticBody2D" type="StaticBody2D" parent="."]
 position = Vector2(3106.43, 580.454)
@@ -443,7 +496,7 @@ offset_top = 254.893
 offset_right = 3131.53
 offset_bottom = 1014.89
 scale = Vector2(0.05, 0.05)
-theme_override_colors/default_color = Color(0, 0, 0, 1)
+theme_override_colors/default_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/normal_font_size = 600
 text = "Level 1"
 scroll_active = false
@@ -454,7 +507,7 @@ offset_top = 521.261
 offset_right = 2695.88
 offset_bottom = 937.261
 scale = Vector2(0.05, 0.05)
-theme_override_colors/default_color = Color(0, 0, 0, 1)
+theme_override_colors/default_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/normal_font_size = 300
 text = ":P"
 scroll_active = false
@@ -462,7 +515,7 @@ scroll_active = false
 [node name="Sprite2D2" type="Sprite2D" parent="."]
 position = Vector2(2847.91, 483.813)
 scale = Vector2(1.43489, 1.43489)
-texture = ExtResource("8_mbxru")
+texture = ExtResource("5_31hs3")
 
 [node name="FinishFlag" parent="." instance=ExtResource("8_s7lp5")]
 position = Vector2(3345.01, 559.918)
@@ -473,7 +526,7 @@ offset_top = 451.8
 offset_right = 2957.42
 offset_bottom = 867.8
 scale = Vector2(0.05, 0.05)
-theme_override_colors/default_color = Color(0, 0, 0, 1)
+theme_override_colors/default_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/normal_font_size = 300
 text = "1"
 scroll_active = false
@@ -494,6 +547,14 @@ position = Vector2(2411.81, 501.329)
 
 [node name="Coin5" parent="Coins" instance=ExtResource("10_5s87g")]
 position = Vector2(1692.44, 207.176)
+
+[node name="Void" type="Sprite2D" parent="."]
+material = SubResource("ShaderMaterial_2pnd7")
+position = Vector2(-1504.59, 749.396)
+texture = ExtResource("1_di205")
+centered = false
+region_enabled = true
+region_rect = Rect2(-6488.41, 0, 6519.17, 1132.05)
 
 [connection signal="Activated" from="Lever" to="." method="_on_lever_activated"]
 [connection signal="body_entered" from="FinishFlag" to="." method="_on_finish_flag_body_entered"]

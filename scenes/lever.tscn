@@ -13,6 +13,8 @@ script/source = "extends Area2D
 
 signal Activated(type: bool)
 
+@export var canFlip: bool = true
+
 @export var state := false
 
 func _process(delta: float) -> void:
@@ -27,7 +29,7 @@ func _physics_process(delta: float) -> void:
 	var bodies := get_overlapping_bodies()
 	for body: Node2D in bodies:
 		if body.name == \"Player\":
-			if Input.is_action_just_pressed(\"click\"):
+			if Input.is_action_just_pressed(\"click\") and canFlip:
 				state = not state
 				clickAudio.play()
 				Activated.emit(state)

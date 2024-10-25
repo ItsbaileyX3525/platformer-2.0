@@ -1,8 +1,9 @@
-[gd_scene load_steps=32 format=3 uid="uid://p68kt5qg1wov"]
+[gd_scene load_steps=38 format=3 uid="uid://p68kt5qg1wov"]
 
 [ext_resource type="PackedScene" uid="uid://0dgvic7mnuer" path="res://scenes/laser.tscn" id="1_tjh6n"]
 [ext_resource type="Texture2D" uid="uid://cshf2fo6eg1mk" path="res://assets/blocks/grass_dirt.png" id="2_kwdu8"]
 [ext_resource type="PackedScene" uid="uid://luhq538oii37" path="res://scenes/past_chonky.tscn" id="3_0xk1c"]
+[ext_resource type="Texture2D" uid="uid://c7a60iy62nb6n" path="res://assets/blocks/dirt.png" id="3_cqlhc"]
 [ext_resource type="Texture2D" uid="uid://bto3v3ivg4q27" path="res://assets/NPC/Callum.png" id="4_tremm"]
 [ext_resource type="PackedScene" uid="uid://bmxa5jr8r3jma" path="res://scenes/double_jump.tscn" id="4_x2mxr"]
 [ext_resource type="AudioStream" uid="uid://7066obv0f3b3" path="res://assets/audio/NPC/MorshuSorry.ogg" id="5_0cu83"]
@@ -14,6 +15,7 @@
 [ext_resource type="PackedScene" uid="uid://buv6650ugxxq5" path="res://scenes/finish_flag.tscn" id="12_k0vb8"]
 [ext_resource type="AudioStream" uid="uid://b50qppscpwis2" path="res://assets/audio/MenuButtonClick.ogg" id="12_ugkt3"]
 [ext_resource type="PackedScene" uid="uid://d1oq0dg07l082" path="res://scenes/coin.tscn" id="13_vh7b0"]
+[ext_resource type="Shader" path="res://scenes/void.gdshader" id="16_n2ey7"]
 
 [sub_resource type="GDScript" id="GDScript_tv3cl"]
 script/source = "extends Node2D
@@ -34,7 +36,10 @@ func loadGame() -> Dictionary:
 	var loadedData: Dictionary
 	var gameSave := FileAccess.get_file_as_string(\"user://coin.json\")
 
-	loadedData = JSON.parse_string(gameSave)
+	if not FileAccess.file_exists(\"user://coin.json\"):
+		loadedData = {}
+	else:
+		loadedData = JSON.parse_string(gameSave)
 
 	
 	return loadedData
@@ -181,14 +186,23 @@ _data = {
 "skidaddle": SubResource("Animation_f3x58")
 }
 
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_6s4eo"]
+size = Vector2(175.699, 48.8428)
+
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_wfui7"]
 size = Vector2(175.699, 24.4259)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_ivu61"]
+size = Vector2(73.0447, 48.8397)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_73e35"]
 size = Vector2(73.0447, 24.42)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_wgc12"]
 size = Vector2(52.1749, 24.42)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_jogfi"]
+size = Vector2(52.1749, 260.217)
 
 [sub_resource type="GDScript" id="GDScript_r4b8f"]
 script/source = "extends Area2D
@@ -362,6 +376,9 @@ func _on_lever_4_activated(type: bool) -> void:
 	
 "
 
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_trx01"]
+shader = ExtResource("16_n2ey7")
+
 [node name="Level4" type="Node2D"]
 position = Vector2(-13, 0)
 scale = Vector2(1.656, 1.656)
@@ -419,9 +436,18 @@ centered = false
 region_enabled = true
 region_rect = Rect2(0.085022, 0, 500.457, 30)
 
+[node name="Sprite2D2" type="Sprite2D" parent="Floor1"]
+texture_repeat = 2
+position = Vector2(-42.4024, 12.3412)
+scale = Vector2(0.351344, 0.815)
+texture = ExtResource("3_cqlhc")
+centered = false
+region_enabled = true
+region_rect = Rect2(0.085022, 0, 500.457, 30)
+
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Floor1"]
-position = Vector2(45.3416, 0.131317)
-shape = SubResource("RectangleShape2D_wfui7")
+position = Vector2(45.3416, 12.3398)
+shape = SubResource("RectangleShape2D_6s4eo")
 
 [node name="Floor2" type="StaticBody2D" parent="."]
 position = Vector2(545.29, 290.459)
@@ -453,9 +479,18 @@ centered = false
 region_enabled = true
 region_rect = Rect2(0.085022, 0, 207.915, 30)
 
+[node name="Sprite2D2" type="Sprite2D" parent="Floor3"]
+texture_repeat = 2
+position = Vector2(-42.4024, 12.3412)
+scale = Vector2(0.351344, 0.815)
+texture = ExtResource("3_cqlhc")
+centered = false
+region_enabled = true
+region_rect = Rect2(0.085022, 0, 207.915, 30)
+
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Floor3"]
-position = Vector2(-5.86978, 0.131348)
-shape = SubResource("RectangleShape2D_73e35")
+position = Vector2(-5.86978, 12.3413)
+shape = SubResource("RectangleShape2D_ivu61")
 
 [node name="Floor4" type="StaticBody2D" parent="."]
 position = Vector2(463.164, 950.483)
@@ -504,9 +539,18 @@ centered = false
 region_enabled = true
 region_rect = Rect2(0.085022, 0, 148.695, 30)
 
+[node name="Sprite2D2" type="Sprite2D" parent="Floor6"]
+texture_repeat = 2
+position = Vector2(-42.4024, 12.3412)
+scale = Vector2(0.351344, 0.815)
+texture = ExtResource("3_cqlhc")
+centered = false
+region_enabled = true
+region_rect = Rect2(0.085022, 0, 148.695, 315.807)
+
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Floor6"]
-position = Vector2(-16.3046, 0.131271)
-shape = SubResource("RectangleShape2D_wgc12")
+position = Vector2(-16.3046, 118.03)
+shape = SubResource("RectangleShape2D_jogfi")
 
 [node name="PastChonky" parent="." instance=ExtResource("3_0xk1c")]
 position = Vector2(610.507, 552.536)
@@ -618,7 +662,7 @@ offset_top = 445.048
 offset_right = 5653.96
 offset_bottom = 2585.05
 scale = Vector2(0.05, 0.05)
-theme_override_colors/default_color = Color(0, 0, 0, 1)
+theme_override_colors/default_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/normal_font_size = 400
 text = "Spikes, Youch, I'd avoid them."
 
@@ -628,9 +672,9 @@ offset_top = 344.0
 offset_right = 3304.0
 offset_bottom = 3520.0
 scale = Vector2(0.05, 0.05)
-theme_override_colors/default_color = Color(0, 0, 0, 1)
+theme_override_colors/default_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/normal_font_size = 400
-text = "Why does it feel like there is something here?"
+text = "Is there something here?"
 
 [node name="FinishFlag" parent="." instance=ExtResource("12_k0vb8")]
 position = Vector2(1829.71, 576.087)
@@ -659,7 +703,7 @@ offset_top = 591.184
 offset_right = 4226.07
 offset_bottom = 3767.18
 scale = Vector2(0.05, 0.05)
-theme_override_colors/default_color = Color(0, 0, 0, 1)
+theme_override_colors/default_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/normal_font_size = 400
 text = "Hmmmm, I think there is stuff under here."
 
@@ -669,10 +713,18 @@ offset_top = 254.893
 offset_right = 3131.53
 offset_bottom = 1014.89
 scale = Vector2(0.05, 0.05)
-theme_override_colors/default_color = Color(0, 0, 0, 1)
+theme_override_colors/default_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/normal_font_size = 600
 text = "Level 4"
 scroll_active = false
+
+[node name="Void" type="Sprite2D" parent="."]
+material = SubResource("ShaderMaterial_trx01")
+position = Vector2(-1117.75, 1065.22)
+texture = ExtResource("2_kwdu8")
+centered = false
+region_enabled = true
+region_rect = Rect2(-4567.6, 0, 4598.36, 1132.05)
 
 [connection signal="body_entered" from="Spikes" to="." method="_on_spikes_body_entered"]
 [connection signal="Activated" from="Lever" to="." method="_on_lever_activated"]

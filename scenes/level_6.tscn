@@ -1,15 +1,55 @@
-[gd_scene load_steps=3 format=3 uid="uid://bhy1wcjdyhriq"]
+[gd_scene load_steps=30 format=3 uid="uid://bhy1wcjdyhriq"]
 
 [ext_resource type="PackedScene" uid="uid://d1oq0dg07l082" path="res://scenes/coin.tscn" id="1_fleth"]
+[ext_resource type="Texture2D" uid="uid://cshf2fo6eg1mk" path="res://assets/blocks/grass_dirt.png" id="1_jypfx"]
+[ext_resource type="PackedScene" uid="uid://ctmlu238spt3j" path="res://scenes/lever.tscn" id="2_1begr"]
+[ext_resource type="Texture2D" uid="uid://c7a60iy62nb6n" path="res://assets/blocks/dirt.png" id="2_ecp6j"]
+[ext_resource type="PackedScene" uid="uid://luhq538oii37" path="res://scenes/past_chonky.tscn" id="3_fc3ha"]
+[ext_resource type="PackedScene" uid="uid://buv6650ugxxq5" path="res://scenes/finish_flag.tscn" id="4_jy4pw"]
+[ext_resource type="AudioStream" uid="uid://cgh3ua1nsmncq" path="res://assets/audio/levels/Fix.ogg" id="5_ofqju"]
+[ext_resource type="Texture2D" uid="uid://65x1nrk8q4vo" path="res://assets/blocks/vine.png" id="5_or6jh"]
+[ext_resource type="AudioStream" uid="uid://dutipilnet2ye" path="res://assets/audio/levels/Pop.ogg" id="8_nfrb1"]
+[ext_resource type="Texture2D" uid="uid://byesse881jghd" path="res://assets/blocks/powerups/hammer.png" id="8_oc77e"]
+[ext_resource type="Shader" path="res://scenes/void.gdshader" id="9_7fmip"]
 
 [sub_resource type="GDScript" id="GDScript_ix4g0"]
 script/source = "extends Node2D
 
 signal nextLevel(level: int)
 @onready var pastChonky: Area2D = $PastChonky
-@onready var callum: Area2D = $Callum
-var pastChonkySpawned := false
-var firstDeath := false
+@onready var lever1: Area2D = $Lever
+@onready var interactiveText: RichTextLabel = $RichTextLabel1
+@onready var fixSFX: AudioStreamPlayer2D = $Fix
+@onready var interactiveText2: RichTextLabel = $RichTextLabel2
+@onready var interactiveText3: RichTextLabel = $RichTextLabel3
+@onready var interactiveText4: RichTextLabel = $RichTextLabel4
+@onready var interactiveText5: RichTextLabel = $RichTextLabel5
+@onready var lever2: Area2D = $Lever2
+@onready var finishFlag: Area2D = $FinishFlag
+@onready var barrier: StaticBody2D = $Barrier
+@onready var barrier2: StaticBody2D = $Barrier2
+@onready var barrier3: StaticBody2D = $Barrier3
+@onready var climbable: StaticBody2D = $Climbable
+@onready var floorSprite: Sprite2D = $Floor1/Sprite2D
+@onready var floorSprite2: Sprite2D = $Floor1/Sprite2D2
+@onready var fakeFloorCollsion: CollisionShape2D = $Floor5/CollisionShape2D
+@onready var floorCollision: CollisionShape2D = $Floor1/CollisionShape2D
+@onready var area2d: Area2D = $Area2D
+@onready var area2d2: Area2D = $Area2D2
+@onready var area2d3: Area2D = $Area2D3
+@onready var floorAnim: AnimationPlayer = $Floor5/AnimationPlayer
+@onready var popSFX: AudioStreamPlayer2D = $Pop
+
+var Player: CharacterBody2D
+
+var pastChonkySpawned: bool = false
+var firstDeath: bool = false
+var applyCustomDeath: bool = false
+var allowedToContinue: bool = false
+var spokeOnce: bool = false
+var canFlipLever: bool = false
+var enteredOnce2: bool = false
+var enteredOnce3: bool = false
 
 func saveGame(dictToSave: Dictionary) -> void:
 	var gameFile := FileAccess.open(\"user://coin.json\", FileAccess.WRITE)
@@ -21,7 +61,10 @@ func loadGame() -> Dictionary:
 	var loadedData: Dictionary
 	var gameSave := FileAccess.get_file_as_string(\"user://coin.json\")
 
-	loadedData = JSON.parse_string(gameSave)
+	if not FileAccess.file_exists(\"user://coin.json\"):
+		loadedData = {}
+	else:
+		loadedData = JSON.parse_string(gameSave)
 
 	
 	return loadedData
@@ -29,7 +72,7 @@ func loadGame() -> Dictionary:
 var data := loadGame()
 
 func nextScene() -> void:
-	nextLevel.emit(5)
+	nextLevel.emit(7)
 
 func get_random_number(min_value: int, max_value: int) -> int:
 	randomize()
@@ -46,7 +89,9 @@ func playerDied() -> void:
 			pastChonky.visible=true
 
 func _ready() -> void:
-	get_parent().get_node(\"Player\").get_node(\"Player\").characterDeath.connect(playerDied)
+	Player = get_parent().get_node(\"Player\").get_node(\"Player\")
+	Player.deathPOS = 1900
+	Player.characterDeath.connect(playerDied)
 	pastChonky.visible=false
 	var coins := [
 			$Coins/Coin,
@@ -74,18 +119,14 @@ func _ready() -> void:
 
 
 var lines:  Array[String] = [
-	\"What is this? Level 4? And you've died how many times to get here?\",
-	\"You know it's been so many years, trapped here...\",
-	\"You're not the only one who dies here over and over.\",
-	\"There have been various differnt people that have came here.\",
-	\"They have all killed us so many times.\",
-	\"It's torture, if only there was an escape...\",
-	\"I guess there is one.\",
-	\"But, until next time.\",
-	\"But, until next time.\",
-	\"But, until next time.\",
-	\"But, until next time.\",
-	\"Find them.\"
+	\"The more I think about it, it may not be all that hard to find the buttons\",
+	\"But even if you do find them all and free our souls...\",
+	\"What would we gain from it?\",
+	\"Freedom, sure but then what?\",
+	\"What if once we are free that's, we stop existing...\",
+	'''We don't explicitly know what \"Freedom\" is...''',
+	\"So, if you do... What will happen?\",
+	\"I'm having second thoughts.\"
 ]
 
 var talkedOnce := false
@@ -101,19 +142,48 @@ func _process(_delta: float) -> void:
 					realPos.y -= 70
 					DialougeManager.startDialogue(realPos,lines,speechSound)
 					talkedOnce =  true
+	if applyCustomDeath:
+		if Player.position.y > 2400:
+			Player.position = Vector2(4792,250)
+			Player.deathPOS = 1900
+			Player.position = Vector2(4792,250)
 
 
-func _on_spikes_body_entered(body: Node2D) -> void:
-	if body.name == \"Player\":
-		body.Death(Vector2(0,0))
+#func _on_spikes_body_entered(body: Node2D) -> void:
+	#if body.name == \"Player\":
+		#body.Death(Vector2(0,0))
 
-
-func _on_lever_activated(type: bool) -> void:
-	$Platform/AnimationPlayer.play(\"move_left\")
 
 func _on_finish_flag_body_entered(body: Node2D) -> void:
-	if callum.purchased:
+	if allowedToContinue:
 		nextScene()
+	elif not allowedToContinue and finishFlag.visible and not spokeOnce:
+		spokeOnce = true
+		await get_tree().create_timer(1.5).timeout
+		interactiveText2.text = \"WHY IS NOTHING WORKING!\"
+		tween = create_tween()
+		tween.tween_property(interactiveText2, \"visible_ratio\", 1.0, 1.8).from(0.0)
+		await get_tree().create_timer(2.6).timeout
+		interactiveText2.text = \"Well. I guess this is it. The end.\"
+		tween = create_tween()
+		tween.tween_property(interactiveText2, \"visible_ratio\", 1.0, 2).from(0.0)
+		await get_tree().create_timer(6).timeout
+		interactiveText2.text = \"... Thought something would've happened.\"
+		tween = create_tween()
+		tween.tween_property(interactiveText2, \"visible_ratio\", 1.0, 2.2).from(0.0)
+		await get_tree().create_timer(3.6).timeout
+		interactiveText2.text = \"Hmmm, there are some level parts hidden around... 1 sec.\"
+		tween = create_tween()
+		tween.tween_property(interactiveText2, \"visible_ratio\", 1.0, 2.5).from(0.0)
+		await get_tree().create_timer(4.7).timeout
+		interactiveText2.text = \"All I have is this toppled over vine...\"
+		tween = create_tween()
+		tween.tween_property(interactiveText2, \"visible_ratio\", 1.0, 1.8).from(0.0)
+		await get_tree().create_timer(2.3).timeout
+		climbable.visible = true
+		barrier2.set_collision_layer_value(1, false)
+		barrier2.set_collision_mask_value(1, false)
+		$Climbable/CollisionShape2D.disabled = false
 		
 func _on_coin_5_body_entered(body: Node2D) -> void:
 	if data.has(\"Level6\"):
@@ -139,26 +209,649 @@ func _on_coin_2_body_entered(body: Node2D) -> void:
 	if data.has(\"Level6\"):
 		data[\"Level6\"][\"2\"] = true
 		saveGame(data)
+
+
+var tween: Tween
+var flipState: int = 0 
+func _on_lever_activated(type: bool) -> void:
+	if flipState == 0:
+		lever1.canFlip = false
+		await get_tree().create_timer(2).timeout
+		interactiveText.text = \"Well that didn't work...\"
+		tween = create_tween()
+		tween.tween_property(interactiveText, \"visible_ratio\", 1.0, 1.8).from(0.0)
+		await get_tree().create_timer(3).timeout
+		interactiveText.text = \"Try flipping the lever again.\"
+		tween = create_tween()
+		tween.tween_property(interactiveText, \"visible_ratio\", 1.0, 1.8).from(0.0)
+		lever1.canFlip = true
+		flipState = 1
+	elif flipState == 1:
+		lever1.canFlip = false
+		await get_tree().create_timer(3).timeout
+		interactiveText.text = \"Well this is curious.\"
+		tween = create_tween()
+		tween.tween_property(interactiveText, \"visible_ratio\", 1.0, 1.8).from(0.0)
+		await get_tree().create_timer(3).timeout
+		interactiveText.text = \"I guess just keep trying, something will work.\"
+		tween = create_tween()
+		tween.tween_property(interactiveText, \"visible_ratio\", 1.0, 2.5).from(0.0)
+		await get_tree().create_timer(2.5).timeout
+		lever1.canFlip = true
+		flipState = 2
+	elif flipState > 1 and flipState < 15:
+		flipState += 1
+	elif flipState == 15:
+		lever1.canFlip = false
+		interactiveText.text = \"Ok. It's not working. Let me try fix it.\"
+		tween = create_tween()
+		tween.tween_property(interactiveText, \"visible_ratio\", 1.0, 2.5).from(0.0)
+		await get_tree().create_timer(2.5).timeout
+		fixSFX.play()
+		await get_tree().create_timer(2.6).timeout
+		interactiveText.text = \"Righty, that should do the trick.\"
+		tween = create_tween()
+		tween.tween_property(interactiveText, \"visible_ratio\", 1.0, 1.8).from(0.0)
+		await get_tree().create_timer(3).timeout
+		lever1.canFlip = true
+		flipState += 1
+	elif flipState == 16:
+		flipState+=1
+		lever1.canFlip = false
+		Player.deathPOS = 3000
+		applyCustomDeath=true
+		floorSprite2.visible=false
+		floorSprite.visible = false
+		interactiveText.text = \"Uh oh.\"
+		tween = create_tween()
+		tween.tween_property(interactiveText, \"visible_ratio\", 1.0, .8).from(0.0)
+		await get_tree().create_timer(1.5).timeout
+		floorCollision.disabled = true
+
+
+func _on_area_2d_body_entered(body: Node2D) -> void:
+	if body.name == \"Player\":
+		area2d.set_collision_layer_value(1, false)
+		area2d.set_collision_mask_value(1, false)
+		Player.respawnPOS = Vector2(4792,250)
+		await get_tree().create_timer(3).timeout
+		interactiveText2.text = \"Well, I don't know what to do from here...\"
+		tween = create_tween()
+		tween.tween_property(interactiveText2, \"visible_ratio\", 1.0, 2.2).from(0.0)
+		await get_tree().create_timer(5).timeout
+		interactiveText2.text = \"I guess you can just go to the next level.\"
+		tween = create_tween()
+		tween.tween_property(interactiveText2, \"visible_ratio\", 1.0, 2.2).from(0.0)
+		await get_tree().create_timer(2.5).timeout
+		finishFlag.visible=true
+
+
+func _on_area_2d_2_body_entered(body: Node2D) -> void:
+	if not enteredOnce2:
+		if body.name == \"Player\":
+			enteredOnce2 = true
+			interactiveText2.visible = false
+			interactiveText3.visible = true
+			tween = create_tween()
+			tween.tween_property(interactiveText3, \"visible_ratio\", 1.0, 2.2).from(0.0)
+			await get_tree().create_timer(2.5).timeout
+
+func _on_hammer_collected() -> void:
+	lever2.visible = true
+	lever2.canFlip = true
+	canFlipLever = true
+	interactiveText2.position = Vector2(1000,8000)
+	$RichTextLabel6.visible = true
+	interactiveText4.text = \"I thought those we're lost to time!\"
+	tween = create_tween()
+	tween.tween_property(interactiveText4, \"visible_ratio\", 1.0, 2.2).from(0.0)
+	barrier3.set_collision_layer_value(1, true)
+	barrier3.set_collision_mask_value(1, true)
+	await get_tree().create_timer(3).timeout
+	interactiveText4.text = \"The hammer upgrade...\"
+	tween = create_tween()
+	tween.tween_property(interactiveText4, \"visible_ratio\", 1.0, 1.6).from(0.0)
+	await get_tree().create_timer(2.4).timeout
+	interactiveText4.text = \"It makes any level harder.\"
+	tween = create_tween()
+	tween.tween_property(interactiveText4, \"visible_ratio\", 1.0, 1.6).from(0.0)
+	await get_tree().create_timer(2.4).timeout
+	interactiveText4.text = \"For challange purposes...\"
+	tween = create_tween()
+	tween.tween_property(interactiveText4, \"visible_ratio\", 1.0, 1.6).from(0.0)
+	await get_tree().create_timer(2.5).timeout
+	interactiveText4.text = \"But this should fix the level!\"
+	tween = create_tween()
+	tween.tween_property(interactiveText4, \"visible_ratio\", 1.0, 1.9).from(0.0)
+	await get_tree().create_timer(1.9).timeout
+	barrier3.set_collision_layer_value(1, false)
+	barrier3.set_collision_mask_value(1, false)
+
+func _on_area_2d_3_body_entered(body: Node2D) -> void:
+	if not enteredOnce3:
+		if body.name == \"Player\":
+			enteredOnce3 = true
+			interactiveText3.visible = false
+			interactiveText4.visible = true
+			tween = create_tween()
+			tween.tween_property(interactiveText4, \"visible_ratio\", 1.0, 1).from(0.0)
+
+func _on_area_2d_4_body_entered(body: Node2D) -> void:
+	if body.name == \"Player\":
+		floorAnim.play(\"troll\")
+
+
+func _on_lever_2_activated(type: bool) -> void:
+	if canFlipLever:
+		Player.position = Vector2(13500,295)
+		Player.respawnPOS = Vector2(13500,295)
+		tween = create_tween()
+		tween.tween_property(interactiveText5, \"visible_ratio\", 1.0, 2).from(0.0)
+		finishFlag.visible = false
+		finishFlag.position = Vector2(8966,574)
+
+func _on_area_2d_5_body_entered(body: Node2D) -> void:
+	if body.name == \"Player\":
+		fakeFloorCollsion.position = Vector2(-20.87,84.42)
+		interactiveText5.text = \"Well that wasn't very nice.\"
+		tween = create_tween()
+		tween.tween_property(interactiveText5, \"visible_ratio\", 1.0, 1.7).from(0.0)
+		await get_tree().create_timer(2.8).timeout
+		interactiveText5.text = \"I'll bring it back and then you can complete the level!\"
+		tween = create_tween()
+		tween.tween_property(interactiveText5, \"visible_ratio\", 1.0, 2.5).from(0.0)
+		await get_tree().create_timer(2.8).timeout
+		floorAnim.speed_scale = -1
+		floorAnim.play(\"troll\")
+		await get_tree().create_timer(.3).timeout
+		finishFlag.position = Vector2(8967,574)
+		finishFlag.visible = true
+		allowedToContinue = true
+		popSFX.play()
+		
 "
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_q7vvg"]
+size = Vector2(65.2042, 194.312)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_bq3es"]
+size = Vector2(65.2042, 156.501)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_7di1b"]
+size = Vector2(119.09, 201.925)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_vgf1b"]
+size = Vector2(119.09, 190.634)
+
+[sub_resource type="Animation" id="Animation_nr0mg"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector2(8983.7, 622.585)]
+}
+
+[sub_resource type="Animation" id="Animation_p3xga"]
+resource_name = "troll"
+length = 0.17
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.166667),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Vector2(8983.7, 622.585), Vector2(9225.24, 622.585)]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_k6gjl"]
+_data = {
+"RESET": SubResource("Animation_nr0mg"),
+"troll": SubResource("Animation_p3xga")
+}
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_hgs0a"]
+size = Vector2(43.0444, 192.472)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_wljin"]
+size = Vector2(17.4868, 20)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_a7m4m"]
+size = Vector2(20, 243.358)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_afupo"]
+size = Vector2(20, 333.937)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_4it5l"]
+size = Vector2(10.0475, 111.495)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_dgug5"]
+size = Vector2(20, 940.217)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_osoc7"]
+size = Vector2(20, 940.217)
+
+[sub_resource type="GDScript" id="GDScript_o7pmj"]
+script/source = "extends Area2D
+
+var canCollect := true
+var regenActive := false
+var tweenUp: Tween
+var tweenDown: Tween
+var defaultPositionX := 0.0
+var defaultPositionY := 0.0
+var moveUpTween := false
+var timer := 0.0
+
+signal collected
+
+func upTween() -> void:
+	tweenUp = create_tween()
+	tweenUp.tween_property(self, \"position\", Vector2(defaultPositionX,defaultPositionY-20), 1.0)
+	await tweenUp.finished
+	downTween()
+	
+func downTween() -> void:
+	tweenDown = create_tween()
+	tweenDown.tween_property(self, \"position\", Vector2(defaultPositionX,defaultPositionY), 1.0)
+	await tweenDown.finished
+	upTween()
+
+func _ready() -> void:
+	defaultPositionX = position.x
+	defaultPositionY = position.y
+	upTween()
+		
+func _on_body_entered(body: Node2D) -> void:
+	if body.name == \"Player\":
+		collected.emit()
+		queue_free()
+"
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_2b8hs"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_f3m8y"]
+shader = ExtResource("9_7fmip")
 
 [node name="Level6" type="Node2D"]
 scale = Vector2(1.656, 1.656)
 script = SubResource("GDScript_ix4g0")
 
+[node name="Floor1" type="StaticBody2D" parent="."]
+position = Vector2(196.86, 622.585)
+scale = Vector2(4.62954, 2.29973)
+
+[node name="Sprite2D" type="Sprite2D" parent="Floor1"]
+texture_repeat = 2
+position = Vector2(-42.4024, -12.0816)
+scale = Vector2(0.351344, 0.815)
+texture = ExtResource("1_jypfx")
+centered = false
+region_enabled = true
+region_rect = Rect2(0.085022, -0.157852, 185.55, 30.1579)
+
+[node name="Sprite2D2" type="Sprite2D" parent="Floor1"]
+texture_repeat = 2
+position = Vector2(-42.4024, 12.3411)
+scale = Vector2(0.351344, 0.815)
+texture = ExtResource("2_ecp6j")
+centered = false
+region_enabled = true
+region_rect = Rect2(0.085022, -0.157852, 185.55, 201.76)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Floor1"]
+position = Vector2(-9.90601, 85.0746)
+shape = SubResource("RectangleShape2D_q7vvg")
+
+[node name="Floor2" type="StaticBody2D" parent="."]
+position = Vector2(3055.56, 622.585)
+scale = Vector2(4.62954, 2.29973)
+
+[node name="Sprite2D" type="Sprite2D" parent="Floor2"]
+texture_repeat = 2
+position = Vector2(-42.4024, -12.0816)
+scale = Vector2(0.351344, 0.815)
+texture = ExtResource("1_jypfx")
+centered = false
+region_enabled = true
+region_rect = Rect2(0.085022, -0.157852, 185.55, 30.1579)
+
+[node name="Sprite2D2" type="Sprite2D" parent="Floor2"]
+texture_repeat = 2
+position = Vector2(-42.4024, 12.3411)
+scale = Vector2(0.351344, 0.815)
+texture = ExtResource("2_ecp6j")
+centered = false
+region_enabled = true
+region_rect = Rect2(0.085022, -0.157852, 185.55, 229.58)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Floor2"]
+position = Vector2(-9.90594, 66.1688)
+shape = SubResource("RectangleShape2D_bq3es")
+
+[node name="Floor3" type="StaticBody2D" parent="."]
+position = Vector2(3976.45, 622.585)
+scale = Vector2(4.62954, 2.29973)
+
+[node name="Sprite2D" type="Sprite2D" parent="Floor3"]
+texture_repeat = 2
+position = Vector2(-42.4024, -12.0816)
+scale = Vector2(0.351344, 0.815)
+texture = ExtResource("1_jypfx")
+centered = false
+region_enabled = true
+region_rect = Rect2(0.085022, -0.157852, 338.851, 30.1579)
+
+[node name="Sprite2D2" type="Sprite2D" parent="Floor3"]
+texture_repeat = 2
+position = Vector2(-42.4024, 12.3411)
+scale = Vector2(0.351344, 0.815)
+texture = ExtResource("2_ecp6j")
+centered = false
+region_enabled = true
+region_rect = Rect2(0.085022, -0.157852, 338.851, 318.79)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Floor3"]
+position = Vector2(17.1522, 89.4085)
+shape = SubResource("RectangleShape2D_7di1b")
+
+[node name="Floor4" type="StaticBody2D" parent="."]
+position = Vector2(8336.35, 622.585)
+scale = Vector2(4.62954, 2.29973)
+
+[node name="Sprite2D" type="Sprite2D" parent="Floor4"]
+texture_repeat = 2
+position = Vector2(-42.4024, -12.0816)
+scale = Vector2(0.351344, 0.815)
+texture = ExtResource("1_jypfx")
+centered = false
+region_enabled = true
+region_rect = Rect2(0.085022, -0.157852, 338.851, 30.1579)
+
+[node name="Sprite2D2" type="Sprite2D" parent="Floor4"]
+texture_repeat = 2
+position = Vector2(-42.4024, 12.3411)
+scale = Vector2(0.351344, 0.815)
+texture = ExtResource("2_ecp6j")
+centered = false
+region_enabled = true
+region_rect = Rect2(0.085022, -0.157852, 338.851, 251.109)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Floor4"]
+position = Vector2(17.1522, 83.5004)
+shape = SubResource("RectangleShape2D_vgf1b")
+
+[node name="Floor5" type="StaticBody2D" parent="."]
+position = Vector2(8983.7, 622.585)
+scale = Vector2(4.62954, 2.29973)
+
+[node name="Sprite2D" type="Sprite2D" parent="Floor5"]
+texture_repeat = 2
+position = Vector2(-42.4024, -12.0816)
+scale = Vector2(0.351344, 0.815)
+texture = ExtResource("1_jypfx")
+centered = false
+region_enabled = true
+region_rect = Rect2(0.085022, -0.157852, 122.383, 30.1579)
+
+[node name="Sprite2D2" type="Sprite2D" parent="Floor5"]
+texture_repeat = 2
+position = Vector2(-42.4024, 12.3411)
+scale = Vector2(0.351344, 0.815)
+texture = ExtResource("2_ecp6j")
+centered = false
+region_enabled = true
+region_rect = Rect2(0.085022, -0.157852, 122.383, 265.55)
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="Floor5"]
+libraries = {
+"": SubResource("AnimationLibrary_k6gjl")
+}
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Floor5"]
+position = Vector2(-20.87, 300)
+scale = Vector2(0.999999, 0.999999)
+shape = SubResource("RectangleShape2D_hgs0a")
+
+[node name="Lever" parent="." instance=ExtResource("2_1begr")]
+position = Vector2(250, 541.063)
+
+[node name="Lever2" parent="." instance=ExtResource("2_1begr")]
+visible = false
+position = Vector2(3009.66, 535.628)
+
+[node name="Area2D" type="Area2D" parent="."]
+position = Vector2(3009.66, 423.913)
+scale = Vector2(21.8937, 0.565217)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D"]
+position = Vector2(-0.413651, 0)
+shape = SubResource("RectangleShape2D_wljin")
+
+[node name="Area2D2" type="Area2D" parent="."]
+position = Vector2(3250.6, 478.865)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D2"]
+position = Vector2(-24.1546, 42.4034)
+shape = SubResource("RectangleShape2D_a7m4m")
+
+[node name="Area2D3" type="Area2D" parent="."]
+position = Vector2(3936.59, 426.328)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D3"]
+position = Vector2(-24.1546, 42.4034)
+shape = SubResource("RectangleShape2D_a7m4m")
+
+[node name="Area2D4" type="Area2D" parent="."]
+position = Vector2(8765.1, 481.28)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D4"]
+position = Vector2(-24.1543, -26.8719)
+shape = SubResource("RectangleShape2D_a7m4m")
+
+[node name="Area2D5" type="Area2D" parent="."]
+position = Vector2(8788.04, 871.981)
+rotation = 1.57079
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D5"]
+position = Vector2(-24.1543, -72.1611)
+shape = SubResource("RectangleShape2D_afupo")
+
+[node name="PastChonky" parent="." instance=ExtResource("3_fc3ha")]
+position = Vector2(2894.32, 549.517)
+
+[node name="RichTextLabel1" type="RichTextLabel" parent="."]
+offset_left = 40.4589
+offset_top = 465.58
+offset_right = 4700.45
+offset_bottom = 2605.58
+scale = Vector2(0.05, 0.05)
+theme_override_colors/default_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/normal_font_size = 400
+text = "Lets go back to the basics, flip this lever -->"
+
+[node name="RichTextLabel2" type="RichTextLabel" parent="."]
+offset_left = 2942.63
+offset_top = 465.58
+offset_right = 7602.63
+offset_bottom = 2605.58
+scale = Vector2(0.05, 0.05)
+theme_override_colors/default_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/normal_font_size = 400
+text = "Woah that was close! But I caught you."
+
+[node name="RichTextLabel3" type="RichTextLabel" parent="."]
+visible = false
+offset_left = 3228.26
+offset_top = 470.411
+offset_right = 7888.26
+offset_bottom = 2610.41
+scale = Vector2(0.05, 0.05)
+theme_override_colors/default_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/normal_font_size = 400
+text = "Oh that's pretty smart!"
+
+[node name="RichTextLabel4" type="RichTextLabel" parent="."]
+visible = false
+offset_left = 3944.44
+offset_top = 470.411
+offset_right = 8604.44
+offset_bottom = 2610.41
+scale = Vector2(0.05, 0.05)
+theme_override_colors/default_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/normal_font_size = 400
+text = "COULD IT BE!!!"
+
+[node name="RichTextLabel5" type="RichTextLabel" parent="."]
+offset_left = 8263.0
+offset_top = 470.0
+offset_right = 13468.0
+offset_bottom = 2610.0
+scale = Vector2(0.05, 0.05)
+theme_override_colors/default_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/normal_font_size = 400
+text = "Well you fixed it! Kinda expected the level to look harder though..."
+
+[node name="RichTextLabel6" type="RichTextLabel" parent="."]
+visible = false
+offset_left = 3001.81
+offset_top = 481.28
+offset_right = 8206.81
+offset_bottom = 2621.28
+scale = Vector2(0.05, 0.05)
+theme_override_colors/default_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/normal_font_size = 400
+bbcode_enabled = true
+text = "⬇ A lever has[center]appeared..."
+
+[node name="FinishFlag" parent="." instance=ExtResource("4_jy4pw")]
+visible = false
+position = Vector2(3139.49, 574.275)
+
+[node name="Climbable" type="StaticBody2D" parent="."]
+visible = false
+position = Vector2(3205.31, 438.406)
+rotation = 1.57079
+scale = Vector2(5.58937, 5.58937)
+
+[node name="Sprite2D" type="Sprite2D" parent="Climbable"]
+texture_repeat = 2
+position = Vector2(4.96972, 4.96976)
+rotation = 3.14159
+texture = ExtResource("5_or6jh")
+centered = false
+region_enabled = true
+region_rect = Rect2(0, -101.39, 10, 111.488)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Climbable"]
+position = Vector2(-0.0540771, -50.7778)
+shape = SubResource("RectangleShape2D_4it5l")
+disabled = true
+
+[node name="LevelName" type="RichTextLabel" parent="."]
+offset_left = 49.5289
+offset_top = 254.893
+offset_right = 3131.53
+offset_bottom = 1014.89
+scale = Vector2(0.05, 0.05)
+theme_override_colors/default_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/normal_font_size = 600
+text = "Level 6"
+scroll_active = false
+
+[node name="Fix" type="AudioStreamPlayer2D" parent="."]
+position = Vector2(250.604, 542.271)
+stream = ExtResource("5_ofqju")
+volume_db = 5.0
+
+[node name="Pop" type="AudioStreamPlayer2D" parent="."]
+position = Vector2(250.604, 542.271)
+stream = ExtResource("8_nfrb1")
+volume_db = 5.0
+
+[node name="Barrier" type="StaticBody2D" parent="."]
+position = Vector2(2794.08, 150.362)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Barrier"]
+position = Vector2(0, 39.5532)
+shape = SubResource("RectangleShape2D_dgug5")
+
+[node name="Barrier2" type="StaticBody2D" parent="."]
+position = Vector2(3207.73, 150.362)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Barrier2"]
+position = Vector2(0, 37.138)
+shape = SubResource("RectangleShape2D_osoc7")
+
+[node name="Barrier3" type="StaticBody2D" parent="."]
+position = Vector2(3827.29, 109.903)
+collision_layer = 0
+collision_mask = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Barrier3"]
+position = Vector2(0, 37.138)
+shape = SubResource("RectangleShape2D_osoc7")
+
+[node name="Hammer" type="Area2D" parent="."]
+position = Vector2(4297.1, 549.517)
+scale = Vector2(2.32, 2.32)
+script = SubResource("GDScript_o7pmj")
+
+[node name="Sprite2D" type="Sprite2D" parent="Hammer"]
+texture = ExtResource("8_oc77e")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Hammer"]
+scale = Vector2(1.01724, 1.05172)
+shape = SubResource("CircleShape2D_2b8hs")
+
 [node name="Coins" type="Node2D" parent="."]
 position = Vector2(0.603865, 0)
 
 [node name="Coin" parent="Coins" instance=ExtResource("1_fleth")]
-position = Vector2(611.111, 562.198)
+position = Vector2(2894.93, 347.222)
 
 [node name="Coin2" parent="Coins" instance=ExtResource("1_fleth")]
-position = Vector2(1169.08, 516.304)
+position = Vector2(390.7, 623.188)
 
 [node name="Coin3" parent="Coins" instance=ExtResource("1_fleth")]
-position = Vector2(593.599, 192.029)
+position = Vector2(3474.64, 513.285)
 
 [node name="Coin4" parent="Coins" instance=ExtResource("1_fleth")]
-position = Vector2(1388.29, 950.483)
+position = Vector2(4054.95, 564.614)
 
 [node name="Coin5" parent="Coins" instance=ExtResource("1_fleth")]
-position = Vector2(1829.11, 513.285)
+position = Vector2(8617.75, 547.101)
+
+[node name="Void" type="Sprite2D" parent="."]
+material = SubResource("ShaderMaterial_f3m8y")
+position = Vector2(-1117.75, 903.986)
+texture = ExtResource("1_jypfx")
+centered = false
+region_enabled = true
+region_rect = Rect2(-4567.6, 0, 13065.7, 1132.05)
+
+[connection signal="Activated" from="Lever" to="." method="_on_lever_activated"]
+[connection signal="Activated" from="Lever2" to="." method="_on_lever_2_activated"]
+[connection signal="body_entered" from="Area2D" to="." method="_on_area_2d_body_entered"]
+[connection signal="body_entered" from="Area2D2" to="." method="_on_area_2d_2_body_entered"]
+[connection signal="body_entered" from="Area2D3" to="." method="_on_area_2d_3_body_entered"]
+[connection signal="body_entered" from="Area2D4" to="." method="_on_area_2d_4_body_entered"]
+[connection signal="body_entered" from="Area2D5" to="." method="_on_area_2d_5_body_entered"]
+[connection signal="body_entered" from="FinishFlag" to="." method="_on_finish_flag_body_entered"]
+[connection signal="body_entered" from="Hammer" to="Hammer" method="_on_body_entered"]
+[connection signal="collected" from="Hammer" to="." method="_on_hammer_collected"]
+[connection signal="body_entered" from="Coins/Coin" to="." method="_on_coin_body_entered"]
+[connection signal="body_entered" from="Coins/Coin2" to="." method="_on_coin_2_body_entered"]
+[connection signal="body_entered" from="Coins/Coin3" to="." method="_on_coin_3_body_entered"]
+[connection signal="body_entered" from="Coins/Coin4" to="." method="_on_coin_4_body_entered"]
+[connection signal="body_entered" from="Coins/Coin5" to="." method="_on_coin_5_body_entered"]

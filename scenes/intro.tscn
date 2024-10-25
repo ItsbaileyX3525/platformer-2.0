@@ -54,24 +54,24 @@ func _ready() -> void:
 	else:
 		levelsCompleted = 0
 	if \"fullscreen\" in gameData:
-		var isFullscreen: String = gameData[\"fullscreen\"]
+		var isFullscreen: String = str(gameData[\"fullscreen\"])
 		if isFullscreen == \"true\":
 			DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN)
 		else:
 			DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED)
 	if Input.get_connected_joypads().size() >= 1:
 		$Main/MarginContainer/VBoxContainer/Start.grab_focus()
-	var onWeb := OS.get_name()
-	if onWeb == \"Web\":
+	var device := OS.get_name()
+	if device == \"Web\":
 		quit.visible=false
-	if onWeb == \"Android\" or onWeb == \"iOS\":
+	if device == \"Android\" or device == \"iOS\":
 		onMobile=true
 
 func loadGame() -> Dictionary:
 	var data: Dictionary
 	if not FileAccess.file_exists(\"user://saveLevel.json\"): 
 		var save_dict := {
-			\"levelsCompleted\": 1
+			\"levelsCompleted\": 0
 		}
 		return save_dict
 	else:
@@ -156,7 +156,6 @@ func loadBasicScene() -> void:
 		levelScene.visible=false
 		creditsScene.visible=false
 		settingsScene.visible=false
-
 "
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_wjxpd"]
@@ -629,14 +628,24 @@ script/source = "extends Node2D
 @onready var fpsCounter: RichTextLabel = $FPSCounter
 
 var onMobile := false
-var isVsync: bool
+var isVsync: bool = true
 var fpsLimit := 60
-var isFullscreen: bool
+var isFullscreen: bool = true
+var changesMadeFPS: bool = false
+var changesMadeVolume: bool = false
+var changesMadeFullscreen: bool = false
+var changesMadeVsync: bool = false
+var setVolume: int = 0
+
+var defaultValues: Dictionary = {}
 
 func loadGame() -> Dictionary:
 	var data: Dictionary
 	var gameSave := FileAccess.get_file_as_string(\"user://saveLevel.json\")
-	data = JSON.parse_string(gameSave)
+	if typeof(JSON.parse_string(gameSave)) == TYPE_NIL:
+		data = {}
+	else:
+		data = JSON.parse_string(gameSave)
 	return data
 
 func saveGame(dictToSave: Dictionary) -> void:
@@ -660,6 +669,13 @@ func _ready() -> void:
 		fullscreenCheckbox.disabled = true
 		onMobile = true
 	
+	defaultValues = {
+		\"fpsLimit\" : fpsLimit,
+		\"volume\" : setVolume,
+		\"vsync\": \"true\",
+		\"fullscreen\": \"true\",
+	}
+	
 	if \"fpsLimit\" in gameData:
 		fpsLimit = gameData[\"fpsLimit\"]
 		fpsSlider.value = fpsLimit
@@ -676,28 +692,43 @@ func _ready() -> void:
 		var tempIsVsync: String = gameData[\"vsync\"]
 		if tempIsVsync == \"true\":
 			isVsync = true
+			Engine.max_fps = 999
 		else:
 			isVsync = false
+			Engine.max_fps = fpsLimit
+		if isVsync:
+			DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_ENABLED)
+		else:
+			DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_DISABLED)
+			Engine.max_fps = fpsLimit
 		vsyncCheckbox.button_pressed = isVsync
 	if \"volume\" in gameData:
-		var volume := float(gameData[\"volume\"])
-		masterVolumeText.text = \"[center]MASTER VOLUME:%s[/center]\" % str(remap_value(volume, -80, 20, 0, 100))
-		volumeSlider.value = int(volume)
-		AudioServer.set_bus_volume_db(AudioServer.get_bus_index(\"Master\"), int(volume)) 
+		setVolume = float(gameData[\"volume\"])
+		masterVolumeText.text = \"[center]MASTER VOLUME:%s[/center]\" % str(remap_value(setVolume, -80, 20, 0, 100))
+		volumeSlider.value = int(setVolume)
+		AudioServer.set_bus_volume_db(AudioServer.get_bus_index(\"Master\"), int(setVolume)) 
 
+	defaultValues[\"fullscreen\"] = str(isFullscreen)
 
 	if not isVsync:
+		DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_DISABLED)
 		Engine.max_fps = fpsLimit
-
+		
 func _on_fullscreen_checkbox_toggled(toggled_on: bool) -> void:
+	var defaultFullscreen: bool
 	if toggled_on:
 		gameData[\"fullscreen\"] = \"true\"
-		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN)
 	else:
 		gameData[\"fullscreen\"] = \"false\"
-		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED)
-
-var saveSoundVolume := 0
+	if str(defaultValues[\"fullscreen\"]) == \"true\":
+		defaultFullscreen = true
+	else:
+		defaultFullscreen = false
+	if defaultFullscreen != toggled_on:
+		changesMadeFullscreen = true
+	else:
+		changesMadeFullscreen = false
+	isFullscreen = toggled_on
 
 func _on_h_slider_value_changed(value: float) -> void:
 	masterVolumeText.text = \"[center]MASTER VOLUME:%s[/center]\" % str(remap_value(value, -80, 20, 0, 100))
@@ -705,43 +736,168 @@ func _on_h_slider_value_changed(value: float) -> void:
 		value /= 4
 		
 	AudioServer.set_bus_volume_db(AudioServer.get_bus_index(\"Master\"), value)
-	saveSoundVolume = int(value)
+	setVolume = int(value)
 
 func _on_h_slider_drag_ended(value_changed: bool) -> void:
-	gameData[\"volume\"] = saveSoundVolume
+	gameData[\"volume\"] = setVolume
+	if defaultValues[\"volume\"] != setVolume:
+		changesMadeVolume = true
+	else:
+		changesMadeVolume = false
 
 func _on_return_mobile_pressed() -> void:
 	menuClick.play()
-	settingsNode.visible = false
-	mainNode.visible=true
-	saveGame(gameData)
+	if changesMadeFPS or changesMadeFullscreen or changesMadeVolume or changesMadeVsync:
+		$\"SaveGame?\".visible=true
+	else:
+		settingsNode.visible = false
+		mainNode.visible=true
 
 func _on_return_pressed() -> void:
 	menuClick.play()
 	if not onMobile:
-		settingsNode.visible = false
-		mainNode.visible=true
-		saveGame(gameData)
-
+		if changesMadeFPS or changesMadeFullscreen or changesMadeVolume or changesMadeVsync:
+			$\"SaveGame?\".visible=true
+		else:
+			settingsNode.visible = false
+			mainNode.visible=true
+	
 func _on_vsync_checkbox_toggled(toggled_on: bool) -> void:
+	var defaultVsync: bool
 	if toggled_on:
+		isVsync = true
 		gameData[\"vsync\"] = \"true\"
-		DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_ENABLED)
 	else:
+		isVsync = false
 		gameData[\"vsync\"] = \"false\"
-		DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_DISABLED)
-
-func _on_fps_slider_value_changed(value: float) -> void:
-	fpsLimit = int(value)
-	fpsLimitText.text = \"[center]FPS LIMIT: %s[/center]\" % str(value)
+	if str(defaultValues[\"vsync\"]) == \"true\":
+		defaultVsync = true
+	else:
+		defaultVsync = false
+	if defaultVsync != isVsync:
+		changesMadeVsync = true
+	else:
+		changesMadeVsync = false
 
 func _on_fps_slider_drag_ended(value_changed: bool) -> void:
 	if not isVsync:
-		Engine.max_fps = fpsLimit
+		fpsLimit = int($FPSLimit/FPSSlider.value)
+		fpsLimitText.text = \"[center]FPS LIMIT: %s[/center]\" % str(fpsLimit)
 		gameData[\"fpsLimit\"] = fpsLimit
+		if defaultValues[\"fpsLimit\"] != fpsLimit:
+			changesMadeFPS = true
+		else:
+			changesMadeFPS = false
+
+var canSave: bool = true
+
+func _on_apply_settings_pressed() -> void:
+	saveGame(gameData)
+	if bool(isFullscreen):
+		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN)
+	else:
+		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED)
+	if bool(isVsync):
+		Engine.max_fps = 999
+		DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_ENABLED)
+	else:
+		DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_DISABLED)
+		Engine.max_fps = fpsLimit
+
+	defaultValues[\"fpsLimit\"] = fpsLimit
+	defaultValues[\"volume\"] = setVolume
+	defaultValues[\"vsync\"] = str(isVsync)
+	defaultValues[\"fullscreen\"] = str(isFullscreen)
+
+	changesMadeFPS = false
+	changesMadeFullscreen = false
+	changesMadeVolume = false
+	changesMadeVsync = false
+
+func _on_no_pressed() -> void:
+	mainNode.visible=true
+	$\"SaveGame?\".visible = false
+	fpsLimit = defaultValues[\"fpsLimit\"]
+	var tempVsync: String = defaultValues[\"vsync\"]
+	if tempVsync == \"true\":
+		isVsync = true
+	else:
+		isVsync = false
+	var tempFullscreen: String = defaultValues[\"fullscreen\"]
+	if tempFullscreen == \"true\":
+		isFullscreen = true
+	else:
+		isFullscreen = false
+	setVolume = defaultValues[\"volume\"]
+	if isFullscreen:
+		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN)
+	else:
+		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED)
+	AudioServer.set_bus_volume_db(AudioServer.get_bus_index(\"Master\"), setVolume)
+	$Volume/HSlider.value = setVolume
+	var tempVol := setVolume
+	if tempVol > 0:
+		tempVol *= 4
+	masterVolumeText.text = \"[center]MASTER VOLUME:%s[/center]\" % str(remap_value(tempVol, -80, 20, 0, 100))
+	DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_DISABLED)
+	Engine.max_fps = fpsLimit
+	if bool(isVsync):
+		Engine.max_fps = 999
+		DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_ENABLED)
+	else:
+		DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_DISABLED)
+		Engine.max_fps = fpsLimit
+	
+	fpsLimitText.text = \"[center]FPS LIMIT: %s[/center]\" % str(fpsLimit)
+	$FPSLimit/FPSSlider.value = fpsLimit
+	
+	changesMadeFPS = false
+	changesMadeFullscreen = false
+	changesMadeVolume = false
+	changesMadeVsync = false
+	
+	vsyncCheckbox.button_pressed = isVsync
+	fullscreenCheckbox.button_pressed = isFullscreen
+	
+	settingsNode.visible = false
+	
+func _on_yes_pressed() -> void:
+	mainNode.visible=true
+	$\"SaveGame?\".visible = false
+	saveGame(gameData)
+	if bool(isFullscreen):
+		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN)
+	else:
+		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED)
+
+	if bool(isVsync):
+		Engine.max_fps = 999
+		DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_ENABLED)
+	else:
+		DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_DISABLED)
+		Engine.max_fps = fpsLimit
+	
+	changesMadeFPS = false
+	changesMadeFullscreen = false
+	changesMadeVolume = false
+	changesMadeVsync = false
+	settingsNode.visible = false
+
+func _on_visibility_changed() -> void:
+	defaultValues = {
+		\"fpsLimit\" : int(fpsLimit),
+		\"volume\" : int(setVolume),
+		\"vsync\": str(isVsync),
+		\"fullscreen\": str(isFullscreen),
+	}
+
+
+func _on_fps_slider_value_changed(value: float) -> void:
+	$FPSLimit/FPSLimitText.text = \"[center]FPS LIMIT: %s[/center]\" % value
 "
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_7tr5h"]
+size = Vector2(23, 20)
 
 [sub_resource type="GDScript" id="GDScript_v3prl"]
 script/source = "extends Node2D
@@ -792,7 +948,7 @@ script = SubResource("GDScript_q7wxx")
 texture_repeat = 2
 material = SubResource("ShaderMaterial_wjxpd")
 position = Vector2(-1, 0)
-scale = Vector2(5.4, 5.4)
+scale = Vector2(5.4, 5.31863)
 texture = ExtResource("1_ubjrg")
 centered = false
 region_enabled = true
@@ -812,10 +968,10 @@ theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_colors/icon_disabled_color = Color(1, 1, 1, 1)
 theme_override_constants/outline_size = 180
 theme_override_font_sizes/font_size = 1200
-theme_override_styles/normal = ExtResource("4_nuuxl")
+theme_override_styles/focus = ExtResource("4_af6qx")
 theme_override_styles/hover = ExtResource("4_af6qx")
 theme_override_styles/pressed = ExtResource("4_af6qx")
-theme_override_styles/focus = ExtResource("4_af6qx")
+theme_override_styles/normal = ExtResource("4_nuuxl")
 text = "CHANGELOG"
 
 [node name="ChangelogMobile" type="TouchScreenButton" parent="Main"]
@@ -834,10 +990,10 @@ theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_colors/icon_disabled_color = Color(1, 1, 1, 1)
 theme_override_constants/outline_size = 180
 theme_override_font_sizes/font_size = 1200
-theme_override_styles/normal = ExtResource("4_nuuxl")
+theme_override_styles/focus = ExtResource("4_af6qx")
 theme_override_styles/hover = ExtResource("4_af6qx")
 theme_override_styles/pressed = ExtResource("4_af6qx")
-theme_override_styles/focus = ExtResource("4_af6qx")
+theme_override_styles/normal = ExtResource("4_nuuxl")
 text = "SETTINGS"
 
 [node name="SettingsMobile" type="TouchScreenButton" parent="Main"]
@@ -877,7 +1033,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 offset_left = 741.0
 offset_top = 391.0
-offset_right = 10349.0
+offset_right = 10661.0
 offset_bottom = 11166.0
 grow_horizontal = 0
 grow_vertical = 0
@@ -894,10 +1050,10 @@ focus_neighbor_bottom = NodePath("../Select")
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 180
 theme_override_font_sizes/font_size = 1200
-theme_override_styles/normal = ExtResource("4_nuuxl")
+theme_override_styles/focus = ExtResource("4_af6qx")
 theme_override_styles/hover = ExtResource("4_af6qx")
 theme_override_styles/pressed = ExtResource("4_af6qx")
-theme_override_styles/focus = ExtResource("4_af6qx")
+theme_override_styles/normal = ExtResource("4_nuuxl")
 text = "START GAME"
 
 [node name="Select" type="Button" parent="Main/MarginContainer/VBoxContainer"]
@@ -907,10 +1063,10 @@ focus_neighbor_bottom = NodePath("../Credits")
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 180
 theme_override_font_sizes/font_size = 1200
-theme_override_styles/normal = ExtResource("4_nuuxl")
+theme_override_styles/focus = ExtResource("4_af6qx")
 theme_override_styles/hover = ExtResource("4_af6qx")
 theme_override_styles/pressed = ExtResource("4_af6qx")
-theme_override_styles/focus = ExtResource("4_af6qx")
+theme_override_styles/normal = ExtResource("4_nuuxl")
 text = "SELECT LEVEL"
 
 [node name="Credits" type="Button" parent="Main/MarginContainer/VBoxContainer"]
@@ -920,10 +1076,10 @@ focus_neighbor_bottom = NodePath("../Quit")
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 180
 theme_override_font_sizes/font_size = 1200
-theme_override_styles/normal = ExtResource("4_nuuxl")
+theme_override_styles/focus = ExtResource("4_af6qx")
 theme_override_styles/hover = ExtResource("4_af6qx")
 theme_override_styles/pressed = ExtResource("4_af6qx")
-theme_override_styles/focus = ExtResource("4_af6qx")
+theme_override_styles/normal = ExtResource("4_nuuxl")
 text = "CREDITS"
 
 [node name="Quit" type="Button" parent="Main/MarginContainer/VBoxContainer"]
@@ -932,32 +1088,32 @@ focus_neighbor_top = NodePath("../Credits")
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 180
 theme_override_font_sizes/font_size = 1200
-theme_override_styles/normal = ExtResource("4_nuuxl")
+theme_override_styles/focus = ExtResource("4_af6qx")
 theme_override_styles/hover = ExtResource("4_af6qx")
 theme_override_styles/pressed = ExtResource("4_af6qx")
-theme_override_styles/focus = ExtResource("4_af6qx")
+theme_override_styles/normal = ExtResource("4_nuuxl")
 text = "QUIT"
 
 [node name="Mobile" type="Node2D" parent="Main"]
 
 [node name="StartMobile" type="TouchScreenButton" parent="Main/Mobile"]
-position = Vector2(981, 428)
-scale = Vector2(23.92, 3.68)
+position = Vector2(990, 431)
+scale = Vector2(24.56, 3.68)
 shape = SubResource("RectangleShape2D_hrfmj")
 
 [node name="SelectMobile" type="TouchScreenButton" parent="Main/Mobile"]
-position = Vector2(981, 583)
-scale = Vector2(23.92, 3.68)
+position = Vector2(990, 583)
+scale = Vector2(24.6, 3.68)
 shape = SubResource("RectangleShape2D_hrfmj")
 
 [node name="CreditsMobile" type="TouchScreenButton" parent="Main/Mobile"]
-position = Vector2(981, 738)
-scale = Vector2(23.92, 3.68)
+position = Vector2(990, 738)
+scale = Vector2(24.6, 3.68)
 shape = SubResource("RectangleShape2D_hrfmj")
 
 [node name="QuitMobile" type="TouchScreenButton" parent="Main/Mobile"]
-position = Vector2(981, 891)
-scale = Vector2(23.92, 3.68)
+position = Vector2(990, 891)
+scale = Vector2(24.4, 3.68)
 shape = SubResource("RectangleShape2D_hrfmj")
 
 [node name="ChangelogMenu" type="Node2D" parent="Main"]
@@ -1096,7 +1252,7 @@ speed_scale = 1.5
 [node name="PC" type="Node2D" parent="Levels"]
 
 [node name="Return" type="Button" parent="Levels/PC"]
-offset_right = 6000.0
+offset_right = 6400.0
 offset_bottom = 1834.0
 scale = Vector2(0.05, 0.05)
 focus_neighbor_bottom = NodePath("../Previous")
@@ -1104,10 +1260,10 @@ theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 200
 theme_override_font_sizes/font_size = 1500
-theme_override_styles/normal = ExtResource("4_nuuxl")
+theme_override_styles/focus = ExtResource("4_af6qx")
 theme_override_styles/hover = ExtResource("4_af6qx")
 theme_override_styles/pressed = ExtResource("4_af6qx")
-theme_override_styles/focus = ExtResource("4_af6qx")
+theme_override_styles/normal = ExtResource("4_nuuxl")
 text = "RETURN"
 
 [node name="Next" type="Button" parent="Levels/PC"]
@@ -1123,10 +1279,10 @@ theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 200
 theme_override_font_sizes/font_size = 1500
-theme_override_styles/normal = ExtResource("9_m1fa6")
+theme_override_styles/focus = ExtResource("9_2xds1")
 theme_override_styles/hover = ExtResource("9_2xds1")
 theme_override_styles/pressed = ExtResource("13_cwk5e")
-theme_override_styles/focus = ExtResource("9_2xds1")
+theme_override_styles/normal = ExtResource("9_m1fa6")
 icon = ExtResource("6_gt04h")
 
 [node name="Previous" type="Button" parent="Levels/PC"]
@@ -1142,16 +1298,16 @@ theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 200
 theme_override_font_sizes/font_size = 1500
-theme_override_styles/normal = ExtResource("9_m1fa6")
+theme_override_styles/focus = ExtResource("9_2xds1")
 theme_override_styles/hover = ExtResource("9_2xds1")
 theme_override_styles/pressed = ExtResource("13_cwk5e")
-theme_override_styles/focus = ExtResource("9_2xds1")
+theme_override_styles/normal = ExtResource("9_m1fa6")
 icon = ExtResource("7_7dege")
 
 [node name="StartGame" type="Button" parent="Levels/PC"]
-offset_left = 707.0
+offset_left = 692.0
 offset_top = 970.0
-offset_right = 10707.0
+offset_right = 11272.0
 offset_bottom = 2804.0
 scale = Vector2(0.05, 0.05)
 focus_neighbor_left = NodePath("../Previous")
@@ -1161,17 +1317,17 @@ theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 200
 theme_override_font_sizes/font_size = 1500
-theme_override_styles/normal = ExtResource("4_nuuxl")
+theme_override_styles/focus = ExtResource("4_af6qx")
 theme_override_styles/hover = ExtResource("4_af6qx")
 theme_override_styles/pressed = ExtResource("4_af6qx")
-theme_override_styles/focus = ExtResource("4_af6qx")
+theme_override_styles/normal = ExtResource("4_nuuxl")
 text = "START GAME"
 
 [node name="Mobile" type="Node2D" parent="Levels"]
 
 [node name="ReturnMobile" type="TouchScreenButton" parent="Levels/Mobile"]
-position = Vector2(148, 46)
-scale = Vector2(15.2, 4.56)
+position = Vector2(159, 46)
+scale = Vector2(16.2, 4.56)
 shape = SubResource("RectangleShape2D_f4ijp")
 
 [node name="PreviousMobile" type="TouchScreenButton" parent="Levels/Mobile"]
@@ -1186,7 +1342,7 @@ shape = SubResource("RectangleShape2D_f4ijp")
 
 [node name="StartGameMobile" type="TouchScreenButton" parent="Levels/Mobile"]
 position = Vector2(954, 1016)
-scale = Vector2(25.04, 4.6)
+scale = Vector2(26.1993, 4.6)
 shape = SubResource("RectangleShape2D_f4ijp")
 
 [node name="Settings" type="Node2D" parent="."]
@@ -1218,21 +1374,21 @@ bbcode_enabled = true
 text = " FPS: 1200000"
 
 [node name="Return" type="Button" parent="Settings"]
-offset_right = 4800.0
+offset_right = 5560.0
 offset_bottom = 1467.0
 scale = Vector2(0.05, 0.05)
 focus_neighbor_bottom = NodePath("../Select")
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 180
 theme_override_font_sizes/font_size = 1200
-theme_override_styles/normal = ExtResource("4_nuuxl")
+theme_override_styles/focus = ExtResource("4_af6qx")
 theme_override_styles/hover = ExtResource("4_af6qx")
 theme_override_styles/pressed = ExtResource("4_af6qx")
-theme_override_styles/focus = ExtResource("4_af6qx")
+theme_override_styles/normal = ExtResource("4_nuuxl")
 text = "RETURN"
 
 [node name="ReturnMobile" type="TouchScreenButton" parent="Settings"]
-position = Vector2(115, 38)
+position = Vector2(137, 38)
 scale = Vector2(12.2, 4.13636)
 shape = SubResource("RectangleShape2D_7tr5h")
 
@@ -1257,13 +1413,13 @@ offset_top = 192.0
 offset_right = 353.0
 offset_bottom = 214.0
 scale = Vector2(3.08, 3.08)
-theme_override_icons/checked = ExtResource("14_sqmd8")
-theme_override_icons/checked_disabled = ExtResource("16_3cv78")
-theme_override_icons/unchecked = ExtResource("15_3qdf7")
-theme_override_icons/unchecked_disabled = ExtResource("16_3cv78")
-theme_override_styles/normal = ExtResource("20_2pa6y")
-theme_override_styles/pressed = ExtResource("21_ae3bi")
 theme_override_styles/focus = ExtResource("22_amb8m")
+theme_override_styles/pressed = ExtResource("21_ae3bi")
+theme_override_styles/normal = ExtResource("20_2pa6y")
+theme_override_icons/checked = ExtResource("14_sqmd8")
+theme_override_icons/unchecked = ExtResource("15_3qdf7")
+theme_override_icons/checked_disabled = ExtResource("16_3cv78")
+theme_override_icons/unchecked_disabled = ExtResource("16_3cv78")
 button_pressed = true
 
 [node name="Volume" type="Node2D" parent="Settings"]
@@ -1313,13 +1469,13 @@ offset_top = 464.0
 offset_right = 236.0
 offset_bottom = 486.0
 scale = Vector2(3.08, 3.08)
-theme_override_icons/checked = ExtResource("14_sqmd8")
-theme_override_icons/checked_disabled = ExtResource("16_3cv78")
-theme_override_icons/unchecked = ExtResource("15_3qdf7")
-theme_override_icons/unchecked_disabled = ExtResource("16_3cv78")
-theme_override_styles/normal = ExtResource("20_2pa6y")
-theme_override_styles/pressed = ExtResource("21_ae3bi")
 theme_override_styles/focus = ExtResource("22_amb8m")
+theme_override_styles/pressed = ExtResource("21_ae3bi")
+theme_override_styles/normal = ExtResource("20_2pa6y")
+theme_override_icons/checked = ExtResource("14_sqmd8")
+theme_override_icons/unchecked = ExtResource("15_3qdf7")
+theme_override_icons/checked_disabled = ExtResource("16_3cv78")
+theme_override_icons/unchecked_disabled = ExtResource("16_3cv78")
 button_pressed = true
 
 [node name="FPSLimit" type="Node2D" parent="Settings"]
@@ -1350,6 +1506,84 @@ theme_override_font_sizes/normal_font_size = 200
 theme_override_styles/normal = ExtResource("14_jwh3c")
 bbcode_enabled = true
 text = "[center]FPS LIMIT: 60[/center]"
+
+[node name="AppliedText" type="RichTextLabel" parent="Settings"]
+visible = false
+offset_left = 620.0
+offset_top = 774.0
+offset_right = 3058.0
+offset_bottom = 1042.0
+scale = Vector2(0.303617, 0.391703)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 33
+theme_override_font_sizes/normal_font_size = 200
+theme_override_styles/normal = ExtResource("14_jwh3c")
+bbcode_enabled = true
+text = "[center]APPLIED![/center]"
+
+[node name="ApplySettings" type="Button" parent="Settings"]
+offset_left = 1661.0
+offset_top = 991.0
+offset_right = 6461.0
+offset_bottom = 2458.0
+scale = Vector2(0.05, 0.05)
+focus_neighbor_bottom = NodePath("../Select")
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 180
+theme_override_font_sizes/font_size = 1200
+theme_override_styles/focus = ExtResource("4_af6qx")
+theme_override_styles/hover = ExtResource("4_af6qx")
+theme_override_styles/pressed = ExtResource("4_af6qx")
+theme_override_styles/normal = ExtResource("4_nuuxl")
+text = "APPLY"
+
+[node name="SaveGame?" type="Node2D" parent="Settings"]
+visible = false
+
+[node name="SaveGameText" type="RichTextLabel" parent="Settings/SaveGame?"]
+offset_left = 602.0
+offset_top = 321.0
+offset_right = 4087.0
+offset_bottom = 1158.0
+scale = Vector2(0.303617, 0.391703)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 33
+theme_override_font_sizes/normal_font_size = 200
+theme_override_styles/normal = ExtResource("14_jwh3c")
+bbcode_enabled = true
+text = "[center]You have unsaved changes, would you like to save them?[/center]"
+
+[node name="Yes" type="Button" parent="Settings/SaveGame?"]
+offset_left = 707.0
+offset_top = 669.0
+offset_right = 5507.0
+offset_bottom = 2136.0
+scale = Vector2(0.05, 0.05)
+focus_neighbor_bottom = NodePath("../Select")
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 180
+theme_override_font_sizes/font_size = 1200
+theme_override_styles/focus = ExtResource("4_af6qx")
+theme_override_styles/hover = ExtResource("4_af6qx")
+theme_override_styles/pressed = ExtResource("4_af6qx")
+theme_override_styles/normal = ExtResource("4_nuuxl")
+text = "YES"
+
+[node name="No" type="Button" parent="Settings/SaveGame?"]
+offset_left = 1322.0
+offset_top = 668.0
+offset_right = 6122.0
+offset_bottom = 2135.0
+scale = Vector2(0.05, 0.05)
+focus_neighbor_bottom = NodePath("../Select")
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 180
+theme_override_font_sizes/font_size = 1200
+theme_override_styles/focus = ExtResource("4_af6qx")
+theme_override_styles/hover = ExtResource("4_af6qx")
+theme_override_styles/pressed = ExtResource("4_af6qx")
+theme_override_styles/normal = ExtResource("4_nuuxl")
+text = "NO"
 
 [node name="Credits" type="Node2D" parent="."]
 visible = false
@@ -1383,10 +1617,10 @@ focus_neighbor_bottom = NodePath("../Select")
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 180
 theme_override_font_sizes/font_size = 1200
-theme_override_styles/normal = ExtResource("4_nuuxl")
+theme_override_styles/focus = ExtResource("4_af6qx")
 theme_override_styles/hover = ExtResource("4_af6qx")
 theme_override_styles/pressed = ExtResource("4_af6qx")
-theme_override_styles/focus = ExtResource("4_af6qx")
+theme_override_styles/normal = ExtResource("4_nuuxl")
 text = "RETURN"
 
 [node name="ReturnMobile" type="TouchScreenButton" parent="Credits"]
@@ -1403,7 +1637,7 @@ scale = Vector2(0.129999, 0.12547)
 theme_override_colors/font_shadow_color = Color(0, 0, 0, 1)
 theme_override_constants/shadow_outline_size = 100
 theme_override_font_sizes/normal_font_size = 600
-text = "   Version: 1.3"
+text = "   Version: 1.4"
 
 [node name="TextureRect" type="TextureRect" parent="."]
 offset_right = 40.0
@@ -1431,6 +1665,7 @@ offset_bottom = 40.0
 [connection signal="pressed" from="Levels/Mobile/PreviousMobile" to="Levels" method="_on_previous_mobile_pressed"]
 [connection signal="pressed" from="Levels/Mobile/NextMobile" to="Levels" method="_on_next_mobile_pressed"]
 [connection signal="pressed" from="Levels/Mobile/StartGameMobile" to="Levels" method="_on_start_game_mobile_pressed"]
+[connection signal="visibility_changed" from="Settings" to="Settings" method="_on_visibility_changed"]
 [connection signal="pressed" from="Settings/Return" to="Settings" method="_on_return_pressed"]
 [connection signal="pressed" from="Settings/ReturnMobile" to="Settings" method="_on_return_mobile_pressed"]
 [connection signal="toggled" from="Settings/Fullscreen/fullscreenCheckbox" to="Settings" method="_on_fullscreen_checkbox_toggled"]
@@ -1439,5 +1674,8 @@ offset_bottom = 40.0
 [connection signal="toggled" from="Settings/Vsync/VsyncCheckbox" to="Settings" method="_on_vsync_checkbox_toggled"]
 [connection signal="drag_ended" from="Settings/FPSLimit/FPSSlider" to="Settings" method="_on_fps_slider_drag_ended"]
 [connection signal="value_changed" from="Settings/FPSLimit/FPSSlider" to="Settings" method="_on_fps_slider_value_changed"]
+[connection signal="pressed" from="Settings/ApplySettings" to="Settings" method="_on_apply_settings_pressed"]
+[connection signal="pressed" from="Settings/SaveGame?/Yes" to="Settings" method="_on_yes_pressed"]
+[connection signal="pressed" from="Settings/SaveGame?/No" to="Settings" method="_on_no_pressed"]
 [connection signal="pressed" from="Credits/Return" to="Credits" method="_on_return_pressed"]
 [connection signal="pressed" from="Credits/ReturnMobile" to="Credits" method="_on_return_mobile_pressed"]

@@ -1,10 +1,11 @@
-[gd_scene load_steps=35 format=3 uid="uid://h3i5gc0ryenh"]
+[gd_scene load_steps=40 format=3 uid="uid://h3i5gc0ryenh"]
 
 [ext_resource type="Script" path="res://scripts/player.gd" id="1_8bgxb"]
 [ext_resource type="Texture2D" uid="uid://ds24jidhoytug" path="res://assets/player/chonky-left.png" id="2_uva7f"]
 [ext_resource type="Texture2D" uid="uid://5jbxda6i1gr1" path="res://assets/player/chonky-right.png" id="3_badim"]
 [ext_resource type="Texture2D" uid="uid://da2ohsntu2lc6" path="res://assets/player/idle.png" id="4_bnms7"]
 [ext_resource type="Texture2D" uid="uid://dhc2f2a0ivlq5" path="res://assets/player/chonky-dance.png" id="5_kd4lg"]
+[ext_resource type="Texture2D" uid="uid://n3whl37nj8fn" path="res://assets/player/chonkyClimb.png" id="6_5dcb5"]
 [ext_resource type="AudioStream" uid="uid://cxdqfu1fwifmf" path="res://assets/audio/EpikMoosic.ogg" id="6_32d6w"]
 [ext_resource type="AudioStream" uid="uid://bd44gnoawbsl1" path="res://assets/audio/DanceDanceRevloution.ogg" id="7_071do"]
 [ext_resource type="AudioStream" uid="uid://cefkyi3vdwqes" path="res://assets/audio/background/Elevator.ogg" id="8_1wv2j"]
@@ -12,15 +13,16 @@
 [ext_resource type="AudioStream" uid="uid://bmrl84eny86y1" path="res://assets/audio/background/NormalBG.ogg" id="9_s5naw"]
 [ext_resource type="Texture2D" uid="uid://c2arlclb0kqa6" path="res://assets/controls/RightArrow.png" id="10_2ugt7"]
 [ext_resource type="AudioStream" uid="uid://fulen6fb0odo" path="res://assets/audio/Death.ogg" id="10_aor2r"]
-[ext_resource type="Texture2D" uid="uid://cxftyuvnmuvcc" path="res://assets/graphics/AButton.png" id="11_y41yq"]
-[ext_resource type="Texture2D" uid="uid://drltavv2gvjwh" path="res://assets/graphics/XButton.png" id="12_fqutd"]
+[ext_resource type="Texture2D" uid="uid://ba7wv7q30fk5g" path="res://assets/graphics/AButton.png" id="11_y41yq"]
+[ext_resource type="Texture2D" uid="uid://dwu6j6a6fqums" path="res://assets/graphics/XButton.png" id="12_fqutd"]
 [ext_resource type="Texture2D" uid="uid://bac88jqg1upis" path="res://assets/Menu.png" id="13_n4pk7"]
-[ext_resource type="Texture2D" uid="uid://cw10b0hgrl8yx" path="res://assets/graphics/YButton.png" id="14_lkvpf"]
+[ext_resource type="Texture2D" uid="uid://3a31p4kodog" path="res://assets/graphics/YButton.png" id="14_lkvpf"]
 [ext_resource type="Texture2D" uid="uid://os56x15agqbt" path="res://assets/controls/UpArrow.png" id="17_xyxhs"]
 [ext_resource type="Texture2D" uid="uid://kk23a5ju4qet" path="res://assets/controls/DownArrow.png" id="18_ircvx"]
-[ext_resource type="Texture2D" uid="uid://dth6k4cv3rx8x" path="res://assets/graphics/BButton.png" id="19_g0tti"]
+[ext_resource type="Texture2D" uid="uid://nd4txoqt548f" path="res://assets/graphics/BButton.png" id="19_g0tti"]
 [ext_resource type="StyleBox" uid="uid://c7doboqhbf41q" path="res://Styles/Normal.tres" id="19_okrwj"]
 [ext_resource type="StyleBox" uid="uid://bq3kuqasu1v87" path="res://Styles/focus.tres" id="20_8g3gr"]
+[ext_resource type="PackedScene" uid="uid://cl0ve1l30diqj" path="res://scenes/timestop.tscn" id="23_tykk5"]
 
 [sub_resource type="Animation" id="Animation_c4pcb"]
 length = 0.001
@@ -158,6 +160,44 @@ _data = {
 "dance": SubResource("Animation_822ld")
 }
 
+[sub_resource type="Animation" id="Animation_sjaw3"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [0]
+}
+
+[sub_resource type="Animation" id="Animation_0juod"]
+resource_name = "climb"
+length = 0.7
+loop_mode = 1
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.0666667, 0.133333, 0.2, 0.266667, 0.333333, 0.4, 0.466667, 0.533333, 0.6, 0.666667),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1),
+"update": 1,
+"values": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_rx44v"]
+_data = {
+"RESET": SubResource("Animation_sjaw3"),
+"climb": SubResource("Animation_0juod")
+}
+
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_p1rha"]
 size = Vector2(36, 85.3659)
 
@@ -231,6 +271,17 @@ libraries = {
 "": SubResource("AnimationLibrary_nngno")
 }
 
+[node name="ClimbChonky" type="Sprite2D" parent="."]
+position = Vector2(1, -63)
+scale = Vector2(1.998, 2.997)
+texture = ExtResource("6_5dcb5")
+hframes = 12
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="ClimbChonky"]
+libraries = {
+"": SubResource("AnimationLibrary_rx44v")
+}
+
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 position = Vector2(1, -62.1951)
 shape = SubResource("RectangleShape2D_p1rha")
@@ -284,23 +335,23 @@ position = Vector2(-564.024, 40.8537)
 scale = Vector2(3.29269, 3.29269)
 
 [node name="Left" type="TouchScreenButton" parent="MobileControls"]
-position = Vector2(-0.000124395, -13.7037)
+position = Vector2(-0.370494, -18.1482)
 scale = Vector2(2.62222, 2.62222)
 texture_normal = ExtResource("9_j76um")
 
 [node name="Right" type="TouchScreenButton" parent="MobileControls"]
-position = Vector2(44.9998, -13.7037)
+position = Vector2(44.6294, -18.1482)
 scale = Vector2(2.62248, 2.62248)
 texture_normal = ExtResource("10_2ugt7")
 
 [node name="Jump" type="TouchScreenButton" parent="MobileControls"]
-position = Vector2(292.962, -8.14814)
-scale = Vector2(0.859522, 0.859522)
+position = Vector2(292.407, -9.44444)
+scale = Vector2(0.987653, 0.978834)
 texture_normal = ExtResource("11_y41yq")
 
 [node name="Interact" type="TouchScreenButton" parent="MobileControls"]
-position = Vector2(269.073, -30.7407)
-scale = Vector2(0.518519, 0.518519)
+position = Vector2(269.999, -32.5925)
+scale = Vector2(0.996471, 0.970016)
 texture_normal = ExtResource("12_fqutd")
 
 [node name="Menu" type="TouchScreenButton" parent="MobileControls"]
@@ -309,23 +360,23 @@ scale = Vector2(6.3111, 4.2814)
 texture_normal = ExtResource("13_n4pk7")
 
 [node name="Dance" type="TouchScreenButton" parent="MobileControls"]
-position = Vector2(316.296, -30.7407)
-scale = Vector2(0.407411, 0.407411)
+position = Vector2(292.407, -57.0369)
+scale = Vector2(1.00529, 0.970016)
 texture_normal = ExtResource("14_lkvpf")
 
 [node name="Up" type="TouchScreenButton" parent="MobileControls"]
-position = Vector2(24.0739, -36.111)
-scale = Vector2(2.62222, 2.62222)
+position = Vector2(23.7035, -40.5555)
+scale = Vector2(2.653, 2.59949)
 texture_normal = ExtResource("17_xyxhs")
 
 [node name="Down" type="TouchScreenButton" parent="MobileControls"]
-position = Vector2(24.0739, 4.81479)
+position = Vector2(23.7035, 0.370308)
 scale = Vector2(2.62248, 2.62248)
 texture_normal = ExtResource("18_ircvx")
 
 [node name="Dialog" type="TouchScreenButton" parent="MobileControls"]
-position = Vector2(293.147, -53.3332)
-scale = Vector2(0.518519, 0.518519)
+position = Vector2(314.073, -32.5925)
+scale = Vector2(0.987651, 0.978834)
 texture_normal = ExtResource("19_g0tti")
 
 [node name="Menu2" type="Node2D" parent="."]
@@ -362,10 +413,10 @@ focus_neighbor_bottom = NodePath("../Return")
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 180
 theme_override_font_sizes/font_size = 1200
-theme_override_styles/normal = ExtResource("19_okrwj")
+theme_override_styles/focus = ExtResource("20_8g3gr")
 theme_override_styles/hover = ExtResource("20_8g3gr")
 theme_override_styles/pressed = ExtResource("20_8g3gr")
-theme_override_styles/focus = ExtResource("20_8g3gr")
+theme_override_styles/normal = ExtResource("19_okrwj")
 text = "RESUME"
 
 [node name="Return" type="Button" parent="Menu2"]
@@ -379,10 +430,10 @@ focus_neighbor_bottom = NodePath("../Quit")
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 180
 theme_override_font_sizes/font_size = 1200
-theme_override_styles/normal = ExtResource("19_okrwj")
+theme_override_styles/focus = ExtResource("20_8g3gr")
 theme_override_styles/hover = ExtResource("20_8g3gr")
 theme_override_styles/pressed = ExtResource("20_8g3gr")
-theme_override_styles/focus = ExtResource("20_8g3gr")
+theme_override_styles/normal = ExtResource("19_okrwj")
 text = "MAIN MENU"
 
 [node name="Quit" type="Button" parent="Menu2"]
@@ -395,10 +446,10 @@ focus_neighbor_top = NodePath("../Return")
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 180
 theme_override_font_sizes/font_size = 1200
-theme_override_styles/normal = ExtResource("19_okrwj")
+theme_override_styles/focus = ExtResource("20_8g3gr")
 theme_override_styles/hover = ExtResource("20_8g3gr")
 theme_override_styles/pressed = ExtResource("20_8g3gr")
-theme_override_styles/focus = ExtResource("20_8g3gr")
+theme_override_styles/normal = ExtResource("19_okrwj")
 text = "QUIT"
 
 [node name="ResumeMobile" type="TouchScreenButton" parent="Menu2"]
@@ -419,9 +470,16 @@ shape = SubResource("RectangleShape2D_u0xf6")
 [node name="Timer" type="Timer" parent="."]
 wait_time = 2.5
 
+[node name="RaycastUpTimer" type="Timer" parent="."]
+wait_time = 0.2
+
 [node name="RayCast2D_Right" type="RayCast2D" parent="."]
 position = Vector2(0, -18.9024)
 target_position = Vector2(20.122, 0)
+
+[node name="RayCast2D_Up" type="RayCast2D" parent="."]
+position = Vector2(0.609756, -89.6341)
+target_position = Vector2(0, -16.4634)
 
 [node name="RayCast2D_Left" type="RayCast2D" parent="."]
 position = Vector2(0, -18.9024)
@@ -434,6 +492,10 @@ target_position = Vector2(20.122, 0)
 [node name="RayCast2D_LeftH" type="RayCast2D" parent="."]
 position = Vector2(0, -67.6829)
 target_position = Vector2(-18.2927, 0)
+
+[node name="The world" parent="." instance=ExtResource("23_tykk5")]
+position = Vector2(-54.2683, -116.463)
+scale = Vector2(2.25951, 2.25951)
 
 [connection signal="pressed" from="MobileControls/Left" to="." method="_on_left_pressed"]
 [connection signal="released" from="MobileControls/Left" to="." method="_on_left_released"]
@@ -459,3 +521,4 @@ target_position = Vector2(-18.2927, 0)
 [connection signal="pressed" from="Menu2/ResumeMobile" to="." method="_on_resume_mobile_pressed"]
 [connection signal="pressed" from="Menu2/ReturnMobile" to="." method="_on_return_mobile_pressed"]
 [connection signal="pressed" from="Menu2/QuitMobile" to="." method="_on_quit_mobile_pressed"]
+[connection signal="timeout" from="RaycastUpTimer" to="." method="_on_raycast_up_timer_timeout"]

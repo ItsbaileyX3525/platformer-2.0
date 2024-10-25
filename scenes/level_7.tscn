@@ -1,0 +1,247 @@
+[gd_scene load_steps=10 format=3 uid="uid://ddfe151afcnvy"]
+
+[ext_resource type="Texture2D" uid="uid://cshf2fo6eg1mk" path="res://assets/blocks/grass_dirt.png" id="1_fhiml"]
+[ext_resource type="PackedScene" uid="uid://d1oq0dg07l082" path="res://scenes/coin.tscn" id="1_nn5ef"]
+[ext_resource type="PackedScene" uid="uid://c5qrmndxldf7i" path="res://scenes/button.tscn" id="2_kw54s"]
+[ext_resource type="Texture2D" uid="uid://cax48qkttfa3e" path="res://assets/blocks/spike.png" id="3_aafr8"]
+[ext_resource type="PackedScene" uid="uid://luhq538oii37" path="res://scenes/past_chonky.tscn" id="5_y06ed"]
+
+[sub_resource type="GDScript" id="GDScript_7kh70"]
+script/source = "extends Node2D
+
+signal nextLevel(level: int)
+@onready var pastChonky: Area2D = $PastChonky
+var pastChonkySpawned := false
+var firstDeath := false
+
+func saveGame(dictToSave: Dictionary) -> void:
+	var gameFile := FileAccess.open(\"user://coin.json\", FileAccess.WRITE)
+	
+	var jsonString := JSON.stringify(dictToSave)
+	gameFile.store_line(jsonString)
+
+func loadGame() -> Dictionary:
+	var loadedData: Dictionary
+	var gameSave := FileAccess.get_file_as_string(\"user://coin.json\")
+
+	if not FileAccess.file_exists(\"user://coin.json\"):
+		loadedData = {}
+	else:
+		loadedData = JSON.parse_string(gameSave)
+
+	
+	return loadedData
+
+var data := loadGame()
+
+func nextScene() -> void:
+	nextLevel.emit(8)
+
+func get_random_number(min_value: int, max_value: int) -> int:
+	randomize()
+	return randi_range(min_value, max_value)
+
+
+func playerDied() -> void:
+	if not firstDeath:
+		firstDeath = true
+	else:
+		var random_number := get_random_number(1, 15)
+		if random_number == 12:
+			pastChonkySpawned = true
+			pastChonky.visible=true
+
+func _ready() -> void:
+	get_parent().get_node(\"Player\").get_node(\"Player\").characterDeath.connect(playerDied)
+	pastChonky.visible=false
+	var coins := [
+			$Coins/Coin,
+			$Coins/Coin2,
+			$Coins/Coin3,
+			$Coins/Coin4,
+			$Coins/Coin5
+		]
+	var index := 0
+	if data.has(\"Level7\"):
+		for e: bool in data[\"Level7\"].values():
+			index+=1
+			if e == true: 
+				coins[index-1].visible=false 
+				coins[index-1].get_node(\"CollisionShape2D\").disabled=true
+	else:
+		data[\"Level6\"] = {
+				\"1\":false,
+				\"2\":false,
+				\"3\":false,
+				\"4\":false,
+				\"5\":false
+			}
+		saveGame(data)
+
+
+var lines:  Array[String] = [
+	\"Insert potential lore here\",
+]
+
+var talkedOnce := false
+@onready var speechSound := preload(\"res://assets/audio/speaking.ogg\")
+
+func _process(_delta: float) -> void:
+	if pastChonkySpawned:
+		var bodies: Array = pastChonky.get_overlapping_bodies()
+		for body: Node2D in bodies:
+			if body.name == \"Player\":
+				if Input.is_action_just_pressed(\"start_dialogue\") and not talkedOnce:
+					var realPos: Vector2 = pastChonky.global_position
+					realPos.y -= 70
+					DialougeManager.startDialogue(realPos,lines,speechSound)
+					talkedOnce =  true
+
+
+func _on_finish_flag_body_entered(body: Node2D) -> void:
+	nextScene()
+		
+func _on_coin_5_body_entered(body: Node2D) -> void:
+	if data.has(\"Level7\"):
+		data[\"Level7\"][\"5\"] = true
+		saveGame(data)
+
+func _on_coin_4_body_entered(body: Node2D) -> void:
+	if data.has(\"Level7\"):
+		data[\"Level7\"][\"4\"] = true
+		saveGame(data)
+
+func _on_coin_3_body_entered(body: Node2D) -> void:
+	if data.has(\"Level7\"):
+		data[\"Level7\"][\"3\"] = true
+		saveGame(data)
+
+func _on_coin_body_entered(body: Node2D) -> void:
+	if data.has(\"Level7\"):
+		data[\"Level7\"][\"1\"] = true
+		saveGame(data)
+
+func _on_coin_2_body_entered(body: Node2D) -> void:
+	if data.has(\"Level7\"):
+		data[\"Level7\"][\"2\"] = true
+		saveGame(data)
+
+
+func _on_spikes_body_entered(body: Node2D) -> void:
+	if body.name == \"Player\":
+		body.Death(Vector2(0,0))
+"
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_3awd1"]
+size = Vector2(518.88, 24.4259)
+
+[sub_resource type="GDScript" id="GDScript_bexu0"]
+script/source = "extends Area2D
+
+
+# Called when the node enters the scene tree for the first time.
+func _ready() -> void:
+	pass # Replace with function body.
+
+
+# Called every frame. 'delta' is the elapsed time since the previous frame.
+func _process(delta: float) -> void:
+	pass
+
+
+func _on_button_activated() -> void:
+	pass # Replace with function body.
+"
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_ccrq0"]
+size = Vector2(1034.06, 12.6659)
+
+[node name="Level7" type="Node2D"]
+scale = Vector2(1.656, 1.656)
+script = SubResource("GDScript_7kh70")
+
+[node name="Floor1" type="StaticBody2D" parent="."]
+position = Vector2(197.511, 625.151)
+scale = Vector2(4.62954, 2.29973)
+
+[node name="Sprite2D" type="Sprite2D" parent="Floor1"]
+texture_repeat = 2
+position = Vector2(-42.4024, -12.0816)
+scale = Vector2(0.351344, 0.815)
+texture = ExtResource("1_fhiml")
+centered = false
+region_enabled = true
+region_rect = Rect2(0.085022, 0, 1476.62, 30)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Floor1"]
+position = Vector2(217.037, 0.131317)
+shape = SubResource("RectangleShape2D_3awd1")
+
+[node name="Button" parent="." instance=ExtResource("2_kw54s")]
+position = Vector2(254.831, 545.894)
+
+[node name="Warning2" type="RichTextLabel" parent="."]
+offset_left = 42.8743
+offset_top = 408.816
+offset_right = 7581.87
+offset_bottom = 2488.82
+scale = Vector2(0.05, 0.05)
+theme_override_colors/default_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/normal_font_size = 600
+text = "Speed time! Goodluck!"
+scroll_active = false
+
+[node name="LevelName" type="RichTextLabel" parent="."]
+offset_left = 49.5289
+offset_top = 254.893
+offset_right = 3131.53
+offset_bottom = 1014.89
+scale = Vector2(0.05, 0.05)
+theme_override_colors/default_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/normal_font_size = 600
+text = "Level 7"
+scroll_active = false
+
+[node name="Spikes" type="Area2D" parent="."]
+position = Vector2(313.406, 576.691)
+scale = Vector2(2.03865, 2.03865)
+script = SubResource("GDScript_bexu0")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Spikes"]
+position = Vector2(507.256, 5.14801)
+shape = SubResource("RectangleShape2D_ccrq0")
+
+[node name="Sprite2D" type="Sprite2D" parent="Spikes"]
+texture_repeat = 2
+position = Vector2(-10.0711, -7.40525)
+scale = Vector2(2.90821, 2.90821)
+texture = ExtResource("3_aafr8")
+centered = false
+region_enabled = true
+region_rect = Rect2(0, 0, 355.663, 6.13854)
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="Spikes"]
+
+[node name="Coins" type="Node2D" parent="."]
+position = Vector2(0.603865, 0)
+
+[node name="Coin" parent="Coins" instance=ExtResource("1_nn5ef")]
+position = Vector2(-59.7826, 679.348)
+
+[node name="Coin2" parent="Coins" instance=ExtResource("1_nn5ef")]
+position = Vector2(1169.08, 516.304)
+
+[node name="Coin3" parent="Coins" instance=ExtResource("1_nn5ef")]
+position = Vector2(593.599, 192.029)
+
+[node name="Coin4" parent="Coins" instance=ExtResource("1_nn5ef")]
+position = Vector2(1388.29, 950.483)
+
+[node name="Coin5" parent="Coins" instance=ExtResource("1_nn5ef")]
+position = Vector2(1829.11, 513.285)
+
+[node name="PastChonky" parent="." instance=ExtResource("5_y06ed")]
+position = Vector2(2894.32, 549.517)
+
+[connection signal="Activated" from="Button" to="Spikes" method="_on_button_activated"]
+[connection signal="body_entered" from="Spikes" to="." method="_on_spikes_body_entered"]

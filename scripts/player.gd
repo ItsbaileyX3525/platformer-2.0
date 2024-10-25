@@ -1,29 +1,32 @@
 extends CharacterBody2D
 
-@export var speed := 350.0
-@export var gravity := 30
-@export var jumpForce := 600
-@export var climbSpeed := 300
-@export var acceleration := 3500.0
-@export var invinc := false
-var friction := acceleration / speed
-#var velocity := Vector2()
-var isClimbing := false
+@export var speed: float = 350.0
+@export var gravity: int = 30
+@export var jumpForce: int = 600
+@export var climbSpeed: int = 300
+@export var acceleration: float = 3500.0
+@export var invinc: bool = false
+var friction:float = acceleration / speed
+var isClimbing: bool = false
+var roofStuck: bool = false
 
 @onready var raycastLeft := $RayCast2D_Left
 @onready var raycastLeftH: RayCast2D = $RayCast2D_LeftH
 @onready var raycastRight := $RayCast2D_Right
 @onready var raycastRightH: RayCast2D = $RayCast2D_RightH
+@onready var raycastUp: RayCast2D = $RayCast2D_Up
 
 @onready var coinsCounter: RichTextLabel = $RichTextLabel3
 @onready var realTimer := $Timer
 @onready var idleChonk := $IdleChonky
 @onready var idleAnim := $IdleChonky/AnimationPlayer
+@onready var climbAnim: AnimationPlayer = $ClimbChonky/AnimationPlayer
 @onready var leftChonk := $ChonkyLeft
 @onready var leftChonkAnim := $ChonkyLeft/AnimationPlayer
 @onready var rightChonkAnim := $ChonkyRight/AnimationPlayer
 @onready var rightChonk := $ChonkyRight
 @onready var danceChonk := $DanceChonky
+@onready var climbChonk: Sprite2D = $ClimbChonky
 @onready var backgroundSFX := $BackgroundMusic
 @onready var backgroundSFX2 := $BackgroundMusic2
 @onready var danceChonkAnim := $DanceChonky/AnimationPlayer
@@ -42,29 +45,31 @@ var isClimbing := false
 signal yoParentNode()
 signal characterDeath()
 
-var deaths := 0
-var fixedTimestep := 1.0/60.0
-var timer := 0.0
-var jumpTimer := 0.0
-var isDancing := false
-var backgroundTime := 0.0
-var onMobile := false
-var onMobile2 :=  false
-var coins := 0
-var speedyBoi := false
-var speedTimer := 0.0
-var speedCanLast := 5.0
-var speedMultiplier := 1.0
-var canDoubleJump := false
-var inMenu := false
-var secretsClicked := 0
-var doneSecret := false
-var canClimb := false
+var deaths: int = 0
+var fixedTimestep: float = 1.0/60.0
+var timer: float = 0.0
+var jumpTimer: float = 0.0
+var isDancing: bool = false
+var backgroundTime: float = 0.0
+var onMobile: bool = false
+var onMobile2: bool =  false
+var coins: int = 0
+var speedyBoi: bool= false
+var speedTimer: float = 0.0
+var speedCanLast: float = 5.0
+var speedMultiplier: float = 1.0
+var canDoubleJump: bool = false
+var inMenu: bool = false
+var secretsClicked: int = 0
+var doneSecret: bool = false
+var canClimb: bool = false
+var deathPOS: int = 1900
+@export var respawnPOS: Vector2 = Vector2(0,250)
 
 #Mobile controls
-var movingLeft := false
-var jumping := false
-var movingRight := false
+var movingLeft: bool = false
+var jumping: bool = false
+var movingRight: bool = false
 
 func saveGame(dictToSave: Dictionary) -> void:
 	var gameFile := FileAccess.open("user://playerSave.json", FileAccess.WRITE)
@@ -113,6 +118,7 @@ func _ready() -> void:
 	raycastRight.enabled = true
 	raycastLeftH.enabled = true
 	raycastRightH.enabled = true
+	raycastUp.enabled = true
 	match OS.get_name():
 		"Android":
 			controlsNode.visible=true
@@ -125,6 +131,7 @@ func _ready() -> void:
 			onMobile = JavaScriptBridge.eval("/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)", true)
 			if onMobile:
 				controlsNode.visible=true
+				onMobile2 = true
 
 func show_transition() -> void:
 	transition.visible=true
@@ -162,6 +169,7 @@ func addSpeed(length: float = 5, speedAmount: float = 1.5) -> void:
 	leftChonkAnim.speed_scale = speedAmount
 	danceChonkAnim.speed_scale = speedAmount
 	idleAnim.speed_scale = speedAmount
+	climbAnim.speed_scale = speedAmount
 	speedyBoi = true
 
 
@@ -172,8 +180,8 @@ func  step() -> void:
 			velocity.y += gravity
 		if velocity.y > 750:
 			velocity.y = 750
-	if position.y > 1900:
-		Death(Vector2(0,250))
+	if position.y > deathPOS:
+		Death(respawnPOS)
 	if Input.is_action_just_pressed("pause"):
 		MenuNode.visible= not MenuNode.visible
 		inMenu = not inMenu
@@ -201,9 +209,16 @@ func  step() -> void:
 		var colliderName := collider.name.rstrip("0123456789")
 		if collider and colliderName  == "Climbable":
 			canClimb = true
+	elif raycastUp.is_colliding():
+		collider = raycastUp.get_collider()
+		var colliderName := collider.name.rstrip("0123456789")
+		if collider and colliderName == "Climbable":
+			canClimb = true
+			roofStuck = true
 	else:
 		canClimb = false
 		isClimbing = false
+		roofStuck = false
 
 	if canClimb:
 		if Input.is_action_pressed("move_up"):
@@ -214,6 +229,20 @@ func  step() -> void:
 			velocity.y = climbSpeed
 		else:
 			isClimbing=false
+
+	if roofStuck:
+		velocity.y = 0
+		if not climbAnim.is_playing():
+			climbAnim.play("climb")
+			leftChonkAnim.stop()
+			danceChonkAnim.stop()
+			idleAnim.stop()
+			rightChonkAnim.stop()
+			idleChonk.visible = false
+			climbChonk.visible=true
+			rightChonk.visible=false
+			leftChonk.visible=false
+			danceChonk.visible=false
 
 func _physics_process(delta: float) -> void:
 	timer += delta
@@ -239,10 +268,15 @@ func _physics_process(delta: float) -> void:
 		leftChonkAnim.speed_scale = 1
 		danceChonkAnim.speed_scale = 1
 		idleAnim.speed_scale = 1
+		climbAnim.speed_scale = 1
 	
 	if not inMenu:
 		if Input.is_action_just_pressed("jump"):
 			jumpTimer = 0.1
+			if roofStuck:
+				roofStuck = false
+				raycastUp.enabled = false
+				$RaycastUpTimer.start()
 		jumpTimer-=delta
 		if jumpTimer > 0 and is_on_floor():
 			jumpTimer = 0.0
@@ -251,28 +285,36 @@ func _physics_process(delta: float) -> void:
 			jumpTimer = 0.0
 			velocity.y = -jumpForce
 			canDoubleJump=false
-		
+			if roofStuck:
+				roofStuck = false
+				raycastUp.enabled = false
+				$RaycastUpTimer.start()
+
 		applyTraction(delta)
 		applyFriction(delta)
 	
 		move_and_slide()
 		
 		if Input.is_action_pressed("move_right") && Input.is_action_pressed("move_left"):
-			if not idleAnim.is_playing() and not isDancing:
+			if not idleAnim.is_playing() and not isDancing and not roofStuck:
 				idleAnim.play("idle")
 				leftChonkAnim.stop()
 				rightChonkAnim.stop()
+				climbAnim.stop()
 				idleChonk.visible = true
+				climbChonk.visible=false
 				rightChonk.visible=false
 				leftChonk.visible=false
 				danceChonk.visible=false
 		elif Input.is_action_pressed("move_left"):
-			if not leftChonkAnim.is_playing():
+			if not leftChonkAnim.is_playing() and not roofStuck:
 				idleAnim.stop()
 				leftChonk.visible = true
 				leftChonkAnim.play("move_left")
 				rightChonkAnim.stop()
+				climbAnim.stop()
 				rightChonk.visible = false
+				climbChonk.visible=false
 				idleChonk.visible = false
 				danceChonk.visible=false
 				danceSFX.stop()
@@ -281,12 +323,14 @@ func _physics_process(delta: float) -> void:
 					backgroundSFX.play()
 					backgroundSFX.seek(backgroundTime)
 		elif Input.is_action_pressed("move_right"):
-			if not rightChonkAnim.is_playing():
+			if not rightChonkAnim.is_playing() and not roofStuck:
 				idleAnim.stop()
 				leftChonk.visible = false
 				leftChonkAnim.stop()
+				climbAnim.stop()
 				rightChonkAnim.play("move_right")
 				rightChonk.visible = true
+				climbChonk.visible=false
 				danceSFX.stop()
 				idleChonk.visible = false
 				danceChonk.visible=false
@@ -295,18 +339,20 @@ func _physics_process(delta: float) -> void:
 					backgroundSFX.play()
 					backgroundSFX.seek(backgroundTime)
 		else:
-			if not idleAnim.is_playing() and not isDancing:
+			if not idleAnim.is_playing() and not isDancing and not roofStuck:
 				idleAnim.play("idle")
 				leftChonkAnim.stop()
+				climbAnim.stop()
 				rightChonkAnim.stop()
 				idleChonk.visible = true
+				climbChonk.visible=false
 				rightChonk.visible=false
 				leftChonk.visible=false
 				danceChonk.visible=false
 
 		if Input.is_action_just_pressed("dance"):
 			if not Input.is_action_pressed("move_right") and not Input.is_action_pressed("move_left"):
-				if not danceChonkAnim.is_playing():
+				if not danceChonkAnim.is_playing() and not roofStuck:
 					danceChonk.visible=true
 					danceChonkAnim.play("dance")
 					if doneSecret:
@@ -319,11 +365,12 @@ func _physics_process(delta: float) -> void:
 						backgroundSFX.stop()
 					
 					idleChonk.visible=false
+					climbAnim.stop()
 					rightChonk.visible=false
 					leftChonk.visible=false
 
 func applyTraction(delta: float) -> void:
-	var traction := Vector2()
+	var traction: Vector2 = Vector2()
 	
 	if Input.is_action_pressed("move_right"):
 		traction.x += 1
@@ -408,15 +455,15 @@ func _on_return_pressed() -> void:
 
 func _on_quit_pressed() -> void:
 	get_tree().quit()
-
-
+ 
 func _on_quit_mobile_pressed() -> void:
 	get_tree().quit()
 
 func _on_return_mobile_pressed() -> void:
-	yoParentNode.emit("Return")
 	DialougeManager.clearDialogue()
 	get_tree().paused = false
+	LoadLevel.isLoadingLevel = false
+	LoadLevel.changeLevel("res://scenes/intro.tscn")
 
 func _on_resume_mobile_pressed() -> void:
 	MenuNode.visible=false
@@ -428,3 +475,6 @@ func _on_dialog_pressed() -> void:
 
 func _on_dialog_released() -> void:
 	Input.action_release("start_dialogue")
+
+func _on_raycast_up_timer_timeout() -> void:
+	raycastUp.enabled = true

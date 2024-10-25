@@ -14,6 +14,7 @@ func _ready() -> void:
 
 var dialogueLines: Array[String] = []
 var SFX
+var volume: int
 var currentLineIndex := 0
 var isSpeech: bool = false
 
@@ -23,11 +24,12 @@ var textBoxPos: Vector2
 var isdialogueActive := false
 var canAdvanceLine := false
 
-func startDialogue(position: Vector2, lines: Array[String], speechSfx) -> void:
+func startDialogue(position: Vector2, lines: Array[String], speechSfx, sfxVolume: int = 0) -> void:
 	if isdialogueActive:
 		return
 	if not typeof(speechSfx) == TYPE_BOOL:
 		SFX = speechSfx
+		volume = sfxVolume
 		isSpeech = true
 	else:
 		isSpeech=false
@@ -45,7 +47,7 @@ func _showTextBox() -> void:
 	textBox.finishedDisplaying.connect(_onTextBoxFinishedDisplaying)
 	get_tree().root.add_child(textBox)
 	textBox.global_position = textBoxPos
-	textBox.displayText(dialogueLines[currentLineIndex],SFX)
+	textBox.displayText(dialogueLines[currentLineIndex],SFX, volume)
 	canAdvanceLine = false
 	textBox.letterTime = 0.09
 	textBox.spaceTime = 0.09

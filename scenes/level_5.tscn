@@ -1,8 +1,9 @@
-[gd_scene load_steps=33 format=3 uid="uid://ct6a86d1x442c"]
+[gd_scene load_steps=42 format=3 uid="uid://ct6a86d1x442c"]
 
 [ext_resource type="Texture2D" uid="uid://cshf2fo6eg1mk" path="res://assets/blocks/grass_dirt.png" id="1_yekdx"]
 [ext_resource type="PackedScene" uid="uid://c5qrmndxldf7i" path="res://scenes/button.tscn" id="2_0gk1p"]
 [ext_resource type="Texture2D" uid="uid://cax48qkttfa3e" path="res://assets/blocks/spike.png" id="2_cangs"]
+[ext_resource type="Texture2D" uid="uid://c7a60iy62nb6n" path="res://assets/blocks/dirt.png" id="2_ircpm"]
 [ext_resource type="PackedScene" uid="uid://d1oq0dg07l082" path="res://scenes/coin.tscn" id="3_ma8m6"]
 [ext_resource type="PackedScene" uid="uid://ctmlu238spt3j" path="res://scenes/lever.tscn" id="4_kjx76"]
 [ext_resource type="PackedScene" uid="uid://bxyoisbqmd8r8" path="res://scenes/MovingPlatform.tscn" id="5_3cfgu"]
@@ -10,6 +11,7 @@
 [ext_resource type="PackedScene" uid="uid://0dgvic7mnuer" path="res://scenes/laser.tscn" id="7_yuj4p"]
 [ext_resource type="PackedScene" uid="uid://luhq538oii37" path="res://scenes/past_chonky.tscn" id="9_aof04"]
 [ext_resource type="PackedScene" uid="uid://buv6650ugxxq5" path="res://scenes/finish_flag.tscn" id="9_u2eci"]
+[ext_resource type="Shader" path="res://scenes/void.gdshader" id="12_jx2oo"]
 
 [sub_resource type="GDScript" id="GDScript_5fvfh"]
 script/source = "extends Node2D
@@ -37,7 +39,10 @@ func loadGame() -> Dictionary:
 	var loadedData: Dictionary
 	var gameSave := FileAccess.get_file_as_string(\"user://coin.json\")
 
-	loadedData = JSON.parse_string(gameSave)
+	if not FileAccess.file_exists(\"user://coin.json\"):
+		loadedData = {}
+	else:
+		loadedData = JSON.parse_string(gameSave)
 
 	
 	return loadedData
@@ -63,6 +68,7 @@ func playerDied() -> void:
 func _ready() -> void:
 	get_parent().get_node(\"Player\").get_node(\"Player\").characterDeath.connect(playerDied)
 	#pastChonky.visible=false
+	get_parent().get_node(\"Player\").get_node(\"Player\").deathPOS = 2300
 	var coins := [
 			$Coins/Coin,
 			$Coins/Coin2,
@@ -211,6 +217,9 @@ func _on_finish_flag_body_entered(body: Node2D) -> void:
 	nextScene()
 "
 
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_l383f"]
+size = Vector2(104.466, 344.246)
+
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_tx1cn"]
 size = Vector2(104.466, 24.6855)
 
@@ -246,6 +255,9 @@ _data = {
 "move_down": SubResource("Animation_3i5v5")
 }
 
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_w4oey"]
+size = Vector2(104.466, 316.147)
+
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_tqdi3"]
 size = Vector2(82.0497, 11.5521)
 
@@ -269,11 +281,23 @@ _data = {
 "hide": SubResource("Animation_xpu3e")
 }
 
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_mq0qh"]
+size = Vector2(36.2179, 346.366)
+
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_oq1rd"]
-size = Vector2(36.2179, 24.7045)
+size = Vector2(36.2179, 326.409)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_isp5m"]
 size = Vector2(62.2187, 24.42)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_jlw00"]
+size = Vector2(62.2187, 284.112)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_xxy1p"]
+size = Vector2(62.2187, 280.436)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_qahxu"]
+size = Vector2(62.2187, 198.511)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_e0dir"]
 size = Vector2(298.441, 12.8665)
@@ -360,6 +384,9 @@ size = Vector2(5.73673, 395.833)
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_yicid"]
 size = Vector2(1.20772, 227.657)
 
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_vjhce"]
+shader = ExtResource("12_jx2oo")
+
 [node name="Level5" type="Node2D"]
 scale = Vector2(1.656, 1.656)
 script = SubResource("GDScript_5fvfh")
@@ -377,9 +404,18 @@ centered = false
 region_enabled = true
 region_rect = Rect2(0.085022, -0.157852, 297.186, 30.1579)
 
+[node name="Sprite2D2" type="Sprite2D" parent="Floor1"]
+texture_repeat = 2
+position = Vector2(-42.3921, 12.3411)
+scale = Vector2(0.351344, 0.815)
+texture = ExtResource("2_ircpm")
+centered = false
+region_enabled = true
+region_rect = Rect2(0.085022, -0.157852, 297.186, 383.767)
+
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Floor1"]
-position = Vector2(9.7249, 0.261108)
-shape = SubResource("RectangleShape2D_tx1cn")
+position = Vector2(9.7249, 160.041)
+shape = SubResource("RectangleShape2D_l383f")
 
 [node name="Floor2" type="StaticBody2D" parent="."]
 position = Vector2(-27.1739, 308.575)
@@ -403,6 +439,23 @@ shape = SubResource("RectangleShape2D_tx1cn")
 libraries = {
 "": SubResource("AnimationLibrary_802cy")
 }
+
+[node name="Floor2_5" type="StaticBody2D" parent="."]
+position = Vector2(-285.628, 622.585)
+scale = Vector2(4.62954, 2.29973)
+
+[node name="Sprite2D" type="Sprite2D" parent="Floor2_5"]
+texture_repeat = 2
+position = Vector2(-42.4024, 12.6036)
+scale = Vector2(0.351344, 0.815)
+texture = ExtResource("2_ircpm")
+centered = false
+region_enabled = true
+region_rect = Rect2(0.085022, -0.157852, 297.186, 433.014)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Floor2_5"]
+position = Vector2(9.7249, 170.677)
+shape = SubResource("RectangleShape2D_w4oey")
 
 [node name="Spikes" type="Area2D" parent="."]
 position = Vector2(604.469, 586.353)
@@ -439,9 +492,18 @@ centered = false
 region_enabled = true
 region_rect = Rect2(0.085022, -0.157852, 103.393, 30.1579)
 
+[node name="Sprite2D2" type="Sprite2D" parent="Floor3"]
+texture_repeat = 2
+position = Vector2(-42.3921, 12.3411)
+scale = Vector2(0.351344, 0.815)
+texture = ExtResource("2_ircpm")
+centered = false
+region_enabled = true
+region_rect = Rect2(0.085022, -0.157852, 103.393, 427.69)
+
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Floor3"]
-position = Vector2(-24.2395, 0.251617)
-shape = SubResource("RectangleShape2D_oq1rd")
+position = Vector2(-24.2395, 161.082)
+shape = SubResource("RectangleShape2D_mq0qh")
 
 [node name="Floor4" type="StaticBody2D" parent="."]
 position = Vector2(991.546, 622.585)
@@ -456,8 +518,17 @@ centered = false
 region_enabled = true
 region_rect = Rect2(0.085022, -0.157852, 103.393, 30.1579)
 
+[node name="Sprite2D2" type="Sprite2D" parent="Floor4"]
+texture_repeat = 2
+position = Vector2(-42.4024, 12.3411)
+scale = Vector2(0.351344, 0.815)
+texture = ExtResource("2_ircpm")
+centered = false
+region_enabled = true
+region_rect = Rect2(0.085022, -0.157852, 103.393, 417.042)
+
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Floor4"]
-position = Vector2(-24.2395, 0.251617)
+position = Vector2(-24.2395, 151.104)
 shape = SubResource("RectangleShape2D_oq1rd")
 
 [node name="Floor5" type="StaticBody2D" parent="."]
@@ -511,9 +582,18 @@ centered = false
 region_enabled = true
 region_rect = Rect2(0.085022, -0.157852, 176.972, 30.1579)
 
+[node name="Sprite2D2" type="Sprite2D" parent="Floor7"]
+texture_repeat = 2
+position = Vector2(-42.3911, 12.604)
+scale = Vector2(0.351344, 0.815)
+texture = ExtResource("2_ircpm")
+centered = false
+region_enabled = true
+region_rect = Rect2(0.085022, -0.157852, 176.972, 317.217)
+
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Floor7"]
-position = Vector2(-11.2829, 0.393883)
-shape = SubResource("RectangleShape2D_isp5m")
+position = Vector2(-11.2829, 130.24)
+shape = SubResource("RectangleShape2D_jlw00")
 
 [node name="Floor8" type="StaticBody2D" parent="."]
 position = Vector2(2198.07, 427.536)
@@ -528,9 +608,18 @@ centered = false
 region_enabled = true
 region_rect = Rect2(0.085022, -0.157852, 176.972, 30.1579)
 
+[node name="Sprite2D2" type="Sprite2D" parent="Floor8"]
+texture_repeat = 2
+position = Vector2(-42.4024, 12.604)
+scale = Vector2(0.351344, 0.815)
+texture = ExtResource("2_ircpm")
+centered = false
+region_enabled = true
+region_rect = Rect2(0.085022, -0.157852, 176.972, 313.224)
+
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Floor8"]
-position = Vector2(-11.2829, 0.393883)
-shape = SubResource("RectangleShape2D_isp5m")
+position = Vector2(-11.2828, 128.402)
+shape = SubResource("RectangleShape2D_xxy1p")
 
 [node name="Floor9" type="StaticBody2D" parent="."]
 position = Vector2(2541.06, 613.527)
@@ -545,9 +634,18 @@ centered = false
 region_enabled = true
 region_rect = Rect2(0.085022, -0.157852, 176.972, 30.1579)
 
+[node name="Sprite2D2" type="Sprite2D" parent="Floor9"]
+texture_repeat = 2
+position = Vector2(-42.4024, 12.6037)
+scale = Vector2(0.351344, 0.815)
+texture = ExtResource("2_ircpm")
+centered = false
+region_enabled = true
+region_rect = Rect2(0.085022, -0.157852, 176.972, 213.399)
+
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Floor9"]
-position = Vector2(-11.2829, 0.393883)
-shape = SubResource("RectangleShape2D_isp5m")
+position = Vector2(-11.2829, 87.4392)
+shape = SubResource("RectangleShape2D_qahxu")
 
 [node name="Floor10" type="StaticBody2D" parent="."]
 position = Vector2(1848.43, 1253.62)
@@ -702,7 +800,7 @@ offset_top = 254.893
 offset_right = 3131.53
 offset_bottom = 1014.89
 scale = Vector2(0.05, 0.05)
-theme_override_colors/default_color = Color(0, 0, 0, 1)
+theme_override_colors/default_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/normal_font_size = 600
 text = "Level 5"
 scroll_active = false
@@ -713,7 +811,7 @@ offset_top = 458.937
 offset_right = 4960.72
 offset_bottom = 2598.94
 scale = Vector2(0.05, 0.05)
-theme_override_colors/default_color = Color(0, 0, 0, 1)
+theme_override_colors/default_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/normal_font_size = 400
 text = "Hmmm, a button?"
 
@@ -723,7 +821,7 @@ offset_top = 425.121
 offset_right = 8337.31
 offset_bottom = 2565.12
 scale = Vector2(0.05, 0.05)
-theme_override_colors/default_color = Color(0, 0, 0, 1)
+theme_override_colors/default_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/normal_font_size = 400
 text = "Seems like this one is a time trial... Better be fast! (Time to beat: 8.2 seconds)"
 
@@ -733,7 +831,7 @@ offset_top = 589.372
 offset_right = 7321.83
 offset_bottom = 2729.37
 scale = Vector2(0.05, 0.05)
-theme_override_colors/default_color = Color(0, 0, 0, 1)
+theme_override_colors/default_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/normal_font_size = 400
 text = "When you press it, go down here."
 
@@ -743,7 +841,7 @@ offset_top = 1057.0
 offset_right = 8759.0
 offset_bottom = 3197.0
 scale = Vector2(0.05, 0.05)
-theme_override_colors/default_color = Color(0, 0, 0, 1)
+theme_override_colors/default_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/normal_font_size = 400
 text = "Merp, I lied, sorry. Go the otherway. You can have a coin on the house though"
 
@@ -768,6 +866,14 @@ position = Vector2(-138.285, 490.338)
 
 [node name="Coin5" parent="Coins" instance=ExtResource("3_ma8m6")]
 position = Vector2(1905.8, 332.729)
+
+[node name="Void" type="Sprite2D" parent="."]
+material = SubResource("ShaderMaterial_vjhce")
+position = Vector2(-1117.75, 1272.34)
+texture = ExtResource("1_yekdx")
+centered = false
+region_enabled = true
+region_rect = Rect2(-4567.6, 0, 4598.36, 1132.05)
 
 [connection signal="body_entered" from="Spikes" to="." method="_on_spikes_body_entered"]
 [connection signal="Activated" from="Button" to="." method="_on_button_activated"]

@@ -1,0 +1,174 @@
+[gd_scene load_steps=14 format=3 uid="uid://cl0ve1l30diqj"]
+
+[ext_resource type="Texture2D" uid="uid://btp587wguskyb" path="res://assets/player/TS.png" id="1_527ll"]
+[ext_resource type="AudioStream" uid="uid://bg1iv50hd28kk" path="res://assets/audio/za warudo.ogg" id="2_58v2u"]
+[ext_resource type="AudioStream" uid="uid://b15t245p3qdf8" path="res://assets/audio/TsResume.ogg" id="3_7eo8q"]
+[ext_resource type="Texture2D" uid="uid://dh175wggttk6o" path="res://assets/player/TSeffect.png" id="3_y1484"]
+[ext_resource type="AudioStream" uid="uid://db4r1ycdhkum7" path="res://assets/audio/tick.ogg" id="4_noh5s"]
+[ext_resource type="AudioStream" uid="uid://bdnqf05ht4mf0" path="res://assets/audio/TsEffect.ogg" id="5_66j5v"]
+
+[sub_resource type="GDScript" id="GDScript_nvpcg"]
+script/source = "extends Sprite2D
+
+var canTS: bool = true
+var inTS: bool = false
+var rng: RandomNumberGenerator = RandomNumberGenerator.new()
+
+func _process(delta: float) -> void:
+	if Input.is_action_just_pressed(\"timestop\") and canTS:
+		var randomNum: int = rng.randi_range(1,50)
+		print(randomNum)
+		if randomNum == 49:
+			$\".\".visible=true
+			$AnimationPlayer.play(\"ts\")
+			$ts.play()
+			canTS = false
+			$effect.visible=true
+			$effect/AnimationPlayer.play(\"effect\")
+			$StopTime.start()
+	if inTS:
+		$\"..\"/BackgroundMusic.stop()
+
+func _on_stop_time_timeout() -> void:
+	
+	inTS = true
+	$effect.visible = false
+	get_parent().process_mode = Node.PROCESS_MODE_ALWAYS
+	$tsEffect.play()
+	await get_tree().create_timer(3).timeout
+	$\".\".visible = false
+	$tsTick.play()
+	get_tree().paused = true
+	await get_tree().create_timer(5.7).timeout
+	$tsR.play()
+	$tsTick.stop()
+	await get_tree().create_timer(1.5).timeout
+	inTS = false
+	get_tree().paused = false
+	$\"..\"/BackgroundMusic.play()
+	get_parent().process_mode = Node.PROCESS_MODE_INHERIT
+	await get_tree().create_timer(25).timeout
+	canTS = true
+	
+"
+
+[sub_resource type="Animation" id="Animation_q4pyd"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [0]
+}
+
+[sub_resource type="Animation" id="Animation_6n38d"]
+resource_name = "ts"
+length = 0.9
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.6),
+"transitions": PackedFloat32Array(1, 1),
+"update": 1,
+"values": [0, 1]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_ngcic"]
+_data = {
+"RESET": SubResource("Animation_q4pyd"),
+"ts": SubResource("Animation_6n38d")
+}
+
+[sub_resource type="Animation" id="Animation_e1emt"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [0]
+}
+
+[sub_resource type="Animation" id="Animation_e34qc"]
+resource_name = "effect"
+length = 0.68
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.0666667, 0.133333, 0.2, 0.266667, 0.333333, 0.4, 0.466667, 0.533333, 0.6, 0.666667),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1),
+"update": 1,
+"values": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_bk5br"]
+_data = {
+"RESET": SubResource("Animation_e1emt"),
+"effect": SubResource("Animation_e34qc")
+}
+
+[node name="The world" type="Sprite2D"]
+process_mode = 3
+visible = false
+position = Vector2(989, 516)
+scale = Vector2(2.32336, 2.32336)
+texture = ExtResource("1_527ll")
+hframes = 2
+script = SubResource("GDScript_nvpcg")
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
+libraries = {
+"": SubResource("AnimationLibrary_ngcic")
+}
+
+[node name="ts" type="AudioStreamPlayer2D" parent="."]
+stream = ExtResource("2_58v2u")
+
+[node name="tsR" type="AudioStreamPlayer2D" parent="."]
+stream = ExtResource("3_7eo8q")
+volume_db = 24.0
+
+[node name="tsTick" type="AudioStreamPlayer2D" parent="."]
+stream = ExtResource("4_noh5s")
+volume_db = 4.0
+
+[node name="tsEffect" type="AudioStreamPlayer2D" parent="."]
+stream = ExtResource("5_66j5v")
+volume_db = 4.0
+
+[node name="StopTime" type="Timer" parent="."]
+wait_time = 1.2
+one_shot = true
+
+[node name="effect" type="Sprite2D" parent="."]
+visible = false
+position = Vector2(-4.73452, -113.628)
+texture = ExtResource("3_y1484")
+hframes = 5
+vframes = 3
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="effect"]
+libraries = {
+"": SubResource("AnimationLibrary_bk5br")
+}
+
+[connection signal="timeout" from="StopTime" to="." method="_on_stop_time_timeout"]

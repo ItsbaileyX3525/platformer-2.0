@@ -1,6 +1,7 @@
-[gd_scene load_steps=19 format=3 uid="uid://d2bxknqwankoc"]
+[gd_scene load_steps=26 format=3 uid="uid://d2bxknqwankoc"]
 
 [ext_resource type="Texture2D" uid="uid://cshf2fo6eg1mk" path="res://assets/blocks/grass_dirt.png" id="1_t5px7"]
+[ext_resource type="Texture2D" uid="uid://c7a60iy62nb6n" path="res://assets/blocks/dirt.png" id="2_7dodp"]
 [ext_resource type="PackedScene" uid="uid://bmxa5jr8r3jma" path="res://scenes/double_jump.tscn" id="2_r68c1"]
 [ext_resource type="PackedScene" uid="uid://r48oqkn6cdpd" path="res://scenes/speed_boost.tscn" id="3_sci1r"]
 [ext_resource type="PackedScene" uid="uid://buv6650ugxxq5" path="res://scenes/finish_flag.tscn" id="4_wfdia"]
@@ -10,6 +11,7 @@
 [ext_resource type="PackedScene" uid="uid://bxyoisbqmd8r8" path="res://scenes/MovingPlatform.tscn" id="8_63lrg"]
 [ext_resource type="PackedScene" uid="uid://0dgvic7mnuer" path="res://scenes/laser.tscn" id="9_ll2y1"]
 [ext_resource type="PackedScene" uid="uid://luhq538oii37" path="res://scenes/past_chonky.tscn" id="9_xcwp2"]
+[ext_resource type="Shader" path="res://scenes/void.gdshader" id="12_wa4n5"]
 
 [sub_resource type="GDScript" id="GDScript_maqgp"]
 script/source = "extends Node2D
@@ -34,7 +36,10 @@ func loadGame() -> Dictionary:
 	var loadedData: Dictionary
 	var gameSave := FileAccess.get_file_as_string(\"user://coin.json\")
 
-	loadedData = JSON.parse_string(gameSave)
+	if not FileAccess.file_exists(\"user://coin.json\"):
+		loadedData = {}
+	else:
+		loadedData = JSON.parse_string(gameSave)
 
 	
 	return loadedData
@@ -153,10 +158,10 @@ func _on_coin_5_body_entered(body: Node2D) -> void:
 "
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_gvgkc"]
-size = Vector2(175.699, 24.4259)
+size = Vector2(175.699, 111.936)
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_ht7jr"]
-size = Vector2(67.5664, 24.7811)
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_nn0qs"]
+size = Vector2(67.4791, 105.295)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_lidwy"]
 size = Vector2(11, 254)
@@ -175,6 +180,18 @@ func _on_trigger_body_entered(body: Node2D) -> void:
 		tween = create_tween()
 		tween.tween_property(self, \"visible_ratio\", 1.0, 1.6).from(0.0)
 "
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_0yeux"]
+size = Vector2(67.5664, 114.075)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_uvngw"]
+size = Vector2(67.5664, 49.1846)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_ht7jr"]
+size = Vector2(67.5664, 24.7811)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_vkrbx"]
+size = Vector2(67.5664, 111.252)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_f1c4u"]
 size = Vector2(10.0475, 43.3233)
@@ -201,6 +218,9 @@ _data = {
 "move_down": SubResource("Animation_lv0tr")
 }
 
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_hnubx"]
+shader = ExtResource("12_wa4n5")
+
 [node name="Level3" type="Node2D"]
 scale = Vector2(1.656, 1.656)
 script = SubResource("GDScript_maqgp")
@@ -218,8 +238,17 @@ centered = false
 region_enabled = true
 region_rect = Rect2(0.085022, 0, 500.457, 30)
 
+[node name="Sprite2D2" type="Sprite2D" parent="Floor1"]
+texture_repeat = 2
+position = Vector2(-42.4024, 12.4149)
+scale = Vector2(0.351344, 0.815)
+texture = ExtResource("2_7dodp")
+centered = false
+region_enabled = true
+region_rect = Rect2(0.085022, 0, 500.457, 322.056)
+
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Floor1"]
-position = Vector2(45.3416, 0.131317)
+position = Vector2(45.3416, 43.8863)
 shape = SubResource("RectangleShape2D_gvgkc")
 
 [node name="Floor2" type="StaticBody2D" parent="."]
@@ -235,9 +264,18 @@ centered = false
 region_enabled = true
 region_rect = Rect2(0.085022, 0, 192.186, 30)
 
+[node name="Sprite2D2" type="Sprite2D" parent="Floor2"]
+texture_repeat = 2
+position = Vector2(-42.3932, 12.3413)
+scale = Vector2(0.351344, 0.815)
+texture = ExtResource("2_7dodp")
+centered = false
+region_enabled = true
+region_rect = Rect2(0.085022, 0, 192.186, 194.324)
+
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Floor2"]
-position = Vector2(-8.60892, 0.262634)
-shape = SubResource("RectangleShape2D_ht7jr")
+position = Vector2(-8.65366, 40.5687)
+shape = SubResource("RectangleShape2D_nn0qs")
 
 [node name="DoubleJump" parent="." instance=ExtResource("2_r68c1")]
 position = Vector2(387.879, 548.623)
@@ -253,7 +291,7 @@ offset_top = 378.623
 offset_right = 4899.88
 offset_bottom = 2518.62
 scale = Vector2(0.05, 0.05)
-theme_override_colors/default_color = Color(0, 0, 0, 1)
+theme_override_colors/default_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/normal_font_size = 400
 text = "This is a jump boost, it allows you to jump twice!"
 
@@ -263,7 +301,7 @@ offset_top = 378.623
 offset_right = 5167.88
 offset_bottom = 2518.62
 scale = Vector2(0.05, 0.05)
-theme_override_colors/default_color = Color(0, 0, 0, 1)
+theme_override_colors/default_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/normal_font_size = 400
 text = "This is a speed boost, it makes you go faster!"
 
@@ -295,7 +333,7 @@ offset_top = 682.971
 offset_right = 5427.51
 offset_bottom = 2822.97
 scale = Vector2(0.05, 0.05)
-theme_override_colors/default_color = Color(0, 0, 0, 1)
+theme_override_colors/default_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/normal_font_size = 400
 text = "4"
 
@@ -305,7 +343,7 @@ offset_top = 390.7
 offset_right = 6342.97
 offset_bottom = 2530.7
 scale = Vector2(0.05, 0.05)
-theme_override_colors/default_color = Color(0, 0, 0, 1)
+theme_override_colors/default_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/normal_font_size = 400
 text = "You can climb these walls."
 
@@ -327,9 +365,18 @@ centered = false
 region_enabled = true
 region_rect = Rect2(0.085022, 0, 192.186, 30)
 
+[node name="Sprite2D2" type="Sprite2D" parent="AfterFlag/Floor2"]
+texture_repeat = 2
+position = Vector2(-42.4024, 12.6039)
+scale = Vector2(0.351344, 0.815)
+texture = ExtResource("2_7dodp")
+centered = false
+region_enabled = true
+region_rect = Rect2(0.085022, 0, 192.186, 158.748)
+
 [node name="CollisionShape2D" type="CollisionShape2D" parent="AfterFlag/Floor2"]
-position = Vector2(-8.60898, 0.19696)
-shape = SubResource("RectangleShape2D_ht7jr")
+position = Vector2(-8.60904, 44.8438)
+shape = SubResource("RectangleShape2D_0yeux")
 
 [node name="Floor3" type="StaticBody2D" parent="AfterFlag"]
 position = Vector2(1615.34, 107.488)
@@ -344,9 +391,18 @@ centered = false
 region_enabled = true
 region_rect = Rect2(0.085022, 0, 192.186, 30)
 
+[node name="Sprite2D2" type="Sprite2D" parent="AfterFlag/Floor3"]
+texture_repeat = 2
+position = Vector2(-42.4024, 12.6038)
+scale = Vector2(0.351344, 0.815)
+texture = ExtResource("2_7dodp")
+centered = false
+region_enabled = true
+region_rect = Rect2(0.085022, 0, 192.186, 30)
+
 [node name="CollisionShape2D" type="CollisionShape2D" parent="AfterFlag/Floor3"]
-position = Vector2(-8.60892, 0.229813)
-shape = SubResource("RectangleShape2D_ht7jr")
+position = Vector2(-8.60898, 12.4316)
+shape = SubResource("RectangleShape2D_uvngw")
 
 [node name="Floor4" type="StaticBody2D" parent="AfterFlag"]
 position = Vector2(2150.36, 384.058)
@@ -378,9 +434,18 @@ centered = false
 region_enabled = true
 region_rect = Rect2(0.085022, 0, 192.186, 30)
 
+[node name="Sprite2D2" type="Sprite2D" parent="AfterFlag/Floor6"]
+texture_repeat = 2
+position = Vector2(-42.4024, 12.6039)
+scale = Vector2(0.351344, 0.815)
+texture = ExtResource("2_7dodp")
+centered = false
+region_enabled = true
+region_rect = Rect2(0.085022, 0, 192.186, 166.734)
+
 [node name="CollisionShape2D" type="CollisionShape2D" parent="AfterFlag/Floor6"]
-position = Vector2(-8.60892, 0.131302)
-shape = SubResource("RectangleShape2D_ht7jr")
+position = Vector2(-8.60901, 43.3668)
+shape = SubResource("RectangleShape2D_vkrbx")
 
 [node name="Climbable" type="StaticBody2D" parent="AfterFlag"]
 position = Vector2(1929.35, 570.048)
@@ -390,10 +455,11 @@ scale = Vector2(5.58937, 5.58937)
 texture_repeat = 2
 position = Vector2(4.96972, 4.96976)
 rotation = 3.14159
+scale = Vector2(0.625669, 1)
 texture = ExtResource("6_1xvav")
 centered = false
 region_enabled = true
-region_rect = Rect2(0, -33.2438, 10, 43.3422)
+region_rect = Rect2(0, -27.2195, 16.1117, 43.328)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="AfterFlag/Climbable"]
 position = Vector2(-0.0540466, -16.6918)
@@ -407,10 +473,11 @@ scale = Vector2(5.58937, 5.58937)
 texture_repeat = 2
 position = Vector2(4.96972, 4.96976)
 rotation = 3.14159
+scale = Vector2(0.634182, 1)
 texture = ExtResource("6_1xvav")
 centered = false
 region_enabled = true
-region_rect = Rect2(0, -33.2438, 10, 43.3422)
+region_rect = Rect2(0, -27.3344, 16.4819, 43.5007)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="AfterFlag/Climbable2"]
 position = Vector2(-0.0540466, -16.6918)
@@ -424,10 +491,11 @@ scale = Vector2(5.58937, 5.58937)
 texture_repeat = 2
 position = Vector2(4.96972, 4.96976)
 rotation = 3.14159
+scale = Vector2(0.636194, 1)
 texture = ExtResource("6_1xvav")
 centered = false
 region_enabled = true
-region_rect = Rect2(0, -33.2438, 10, 43.3422)
+region_rect = Rect2(0, -27.0217, 16.3095, 43.1301)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="AfterFlag/Climbable3"]
 position = Vector2(-0.0540466, -16.6918)
@@ -475,6 +543,14 @@ beamLast = 1.0
 
 [node name="PastChonky" parent="." instance=ExtResource("9_xcwp2")]
 position = Vector2(1801.93, 551.932)
+
+[node name="Void" type="Sprite2D" parent="."]
+material = SubResource("ShaderMaterial_hnubx")
+position = Vector2(-1117.75, 749.396)
+texture = ExtResource("1_t5px7")
+centered = false
+region_enabled = true
+region_rect = Rect2(-4567.6, 0, 4598.36, 1132.05)
 
 [connection signal="body_entered" from="Trigger" to="RichTextLabel3" method="_on_trigger_body_entered"]
 [connection signal="body_entered" from="FinishFlag" to="." method="_on_finish_flag_body_entered"]

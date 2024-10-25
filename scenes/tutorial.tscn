@@ -1,16 +1,26 @@
-[gd_scene load_steps=13 format=3 uid="uid://naq0iw5ucju8"]
+[gd_scene load_steps=23 format=3 uid="uid://naq0iw5ucju8"]
 
 [ext_resource type="Texture2D" uid="uid://cshf2fo6eg1mk" path="res://assets/blocks/grass_dirt.png" id="1_elb11"]
-[ext_resource type="Texture2D" uid="uid://dnd4hm520cijq" path="res://assets/graphics/MouseAndXButton.png" id="2_2pkgo"]
-[ext_resource type="Texture2D" uid="uid://cbh6loblpx8ux" path="res://assets/graphics/SpaceAndAButton.png" id="3_v1o40"]
+[ext_resource type="Texture2D" uid="uid://dqc5a3o4ccaef" path="res://assets/graphics/EorX.png" id="2_klswd"]
+[ext_resource type="Texture2D" uid="uid://derdreevieqlp" path="res://assets/graphics/SpaceOrA.png" id="3_g5m80"]
+[ext_resource type="Texture2D" uid="uid://dh15o2x3iqawf" path="res://assets/graphics/G or B.png" id="3_txy1f"]
 [ext_resource type="PackedScene" uid="uid://bxyoisbqmd8r8" path="res://scenes/MovingPlatform.tscn" id="4_3oj1u"]
 [ext_resource type="PackedScene" uid="uid://buv6650ugxxq5" path="res://scenes/finish_flag.tscn" id="5_65eei"]
+[ext_resource type="Texture2D" uid="uid://cceawfgtgknqd" path="res://assets/player/Dummy.png" id="6_x4cyu"]
+[ext_resource type="Texture2D" uid="uid://dnsiv7pbukk1a" path="res://assets/player/YisMan.jpg" id="7_32dv6"]
+[ext_resource type="Texture2D" uid="uid://cv682c76g4p5d" path="res://assets/blocks/Beam.png" id="9_w8f63"]
+[ext_resource type="Texture2D" uid="uid://65x1nrk8q4vo" path="res://assets/blocks/vine.png" id="10_d8uwt"]
 
 [sub_resource type="GDScript" id="GDScript_hiol0"]
 script/source = "extends Node2D
 
 signal nextLevel(level: int)
+signal spokenContinue
 var pressedOnce := false
+var hasSpoken: bool = false
+
+@onready var dummy: Area2D = $Test
+var rng: RandomNumberGenerator = RandomNumberGenerator.new()
 
 func nextScene() -> void:
 	nextLevel.emit(1)
@@ -24,10 +34,53 @@ func _on_button_button_down() -> void:
 	if not pressedOnce:
 		pressedOnce = true
 		nextLevel.emit(99999)
+
+var linesNormal: Array[String] = [
+	\"Hi\",
+	\"Thank you for speaking to me!\",
+	\"What a great day to be alive!\",
+	\"Have a great day!\"
+]
+
+var linesSus: Array[String] = [
+	\"Hi\",
+	\"Thank you for speaking to me!\",
+	\"What a great day to be alive!\",
+	\"Or is it...\",
+	\"Life is pointless.\",
+	\"Remember! Reality's an illusion, the universe is a hologram, buy gold!\"
+]
+
+var linesContinue: Array[String] = [
+	\"You may continue :)\"
+]
+
+@onready var speechSound := preload(\"res://assets/audio/NPC/DummySpeak.ogg\")
+
+func _process(delta: float) -> void:
+	var bodies: Array = $Test.get_overlapping_bodies()
+	for body: Node2D in bodies:
+		if body.name == \"Player\":
+			if Input.is_action_just_pressed(\"start_dialogue\") and not DialougeManager.isdialogueActive:
+				var realPos: Vector2 = dummy.global_position
+				realPos.y -= 70
+				if not hasSpoken:
+					hasSpoken = true
+					var randomNum := rng.randi_range(1,10)
+					if randomNum == 9:
+						DialougeManager.startDialogue(realPos,linesSus,speechSound, 10)
+					else:
+						DialougeManager.startDialogue(realPos,linesNormal,speechSound, 10)
+				else:
+					DialougeManager.startDialogue(realPos,linesContinue,speechSound, 10)
+					spokenContinue.emit()
 "
 
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_dkx8o"]
+size = Vector2(200.157, 24.6379)
+
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_ixbxt"]
-size = Vector2(200, 24.5)
+size = Vector2(105.189, 24.5)
 
 [sub_resource type="GDScript" id="GDScript_djako"]
 resource_name = "TweenText"
@@ -38,6 +91,8 @@ var tween: Tween
 var clickTimer := 0.0
 var doneJump := false
 var enteredOnce := false
+var rng: RandomNumberGenerator = RandomNumberGenerator.new()
+var checkSpeak: bool = false
 
 @onready var movingPlatform := $\"../MovingPlatform\"
 @onready var mouseClick := $\"../Mouse\"
@@ -50,6 +105,11 @@ func _ready() -> void:
 	state = 0
 
 func _process(delta: float) -> void:
+	if checkSpeak:
+		if Input.is_action_just_pressed(\"start_dialogue\"):
+			$\"../ChatAdvance\".visible=true
+			$\"../Chat\".visible=false
+			checkSpeak = false
 	if clickTimer < 20:
 		clickTimer += delta
 	if Input.is_action_just_pressed(\"click\") and clickTimer >=1:
@@ -90,10 +150,63 @@ func _process(delta: float) -> void:
 func _on_trigger_body_entered(body: Node2D) -> void:
 	if !enteredOnce:
 		enteredOnce = true
-		text = \"Jolly good! You've learnt the basics of the game.\"
+		text = \"Jolly good!\"
+		$\"../Barrier2/Sprite2D\".visible = true
+		$\"../Barrier1\".set_collision_layer_value(1, true)
+		$\"../Barrier2\".set_collision_layer_value(1, true)
+		$\"../Barrier2\".set_collision_mask_value(1, true)
+		$\"../Barrier1\".set_collision_mask_value(1, true)
+		tween = create_tween()
+		tween.tween_property(self, \"visible_ratio\", 1.0, 1).from(0.0)
+		position = Vector2(1310,394)
+		await get_tree().create_timer(2.5).timeout
+		text = \"In the game you may encounter NPCS.\"
+		tween = create_tween()
+		tween.tween_property(self, \"visible_ratio\", 1.0, 2).from(0.0)
+		await get_tree().create_timer(3).timeout
+		text = \"Try speaking to this one.\"
 		tween = create_tween()
 		tween.tween_property(self, \"visible_ratio\", 1.0, 1.8).from(0.0)
-		position = Vector2(1310,394)
+		await get_tree().create_timer(2.5).timeout
+		$\"../Test\".position = Vector2(1700,504)
+		text = \"When your done speak to him again and he'll let you through.\"
+		tween = create_tween()
+		tween.tween_property(self, \"visible_ratio\", 1.0, 3).from(0.0)
+		position.y -= 50
+		var randomNum := rng.randi_range(1,12)
+		$\"../Chat\".visible = true
+		checkSpeak=true
+		if randomNum == 11:
+			$\"../Test/YisMan\".visible=true
+
+func _on_tutorial_spoken_continue() -> void:
+		$\"../Barrier1\".set_collision_layer_value(1, false)
+		$\"../Barrier2\".set_collision_layer_value(1, false)
+		$\"../Barrier2\".set_collision_mask_value(1, false)
+		$\"../Barrier1\".set_collision_mask_value(1, false)
+		$\"../Barrier2/Sprite2D\".visible=false
+
+
+func _on_trigger_2_body_entered(body: Node2D) -> void:
+	if body.name == \"Player\":
+		position = Vector2(1641,312)
+		text = \"I think the final thing you need to know is...\"
+		tween = create_tween()
+		tween.tween_property(self, \"visible_ratio\", 1.0, 3).from(0.0)
+		await get_tree().create_timer(3.5).timeout
+		text = \"Is the vine object.\"
+		tween = create_tween()
+		tween.tween_property(self, \"visible_ratio\", 1.0, 1.2).from(0.0)
+		await get_tree().create_timer(1.8)
+		text = \"Try climb this vine.\"
+		tween = create_tween()
+		tween.tween_property(self, \"visible_ratio\", 1.0, 1.2).from(0.0)
+		$\"../Climbable/Sprite2D\".visible = true
+		$\"../Barrier3\".set_collision_layer_value(1, false)
+		$\"../Barrier3\".set_collision_mask_value(1, false)
+
+func _on_trigger_3_body_entered(body: Node2D) -> void:
+	pass # Replace with function body.
 "
 
 [sub_resource type="Animation" id="Animation_c1tuw"]
@@ -138,6 +251,18 @@ _data = {
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_d7ndh"]
 size = Vector2(11, 254)
 
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_sbcvy"]
+size = Vector2(77, 86)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_cme6s"]
+size = Vector2(12.3945, 356.49)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_6gibk"]
+size = Vector2(16.4926, 390.098)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_ip8v1"]
+size = Vector2(10.0475, 46.7805)
+
 [node name="Tutorial" type="Node2D"]
 scale = Vector2(1.6943, 1.6943)
 script = SubResource("GDScript_hiol0")
@@ -156,8 +281,8 @@ region_enabled = true
 region_rect = Rect2(-0.666664, 0, 536.044, 30)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Floor1"]
-position = Vector2(0, 0.25)
-shape = SubResource("RectangleShape2D_ixbxt")
+position = Vector2(0.323708, 0.293945)
+shape = SubResource("RectangleShape2D_dkx8o")
 
 [node name="Floor2" type="StaticBody2D" parent="."]
 position = Vector2(2065.16, 576.639)
@@ -170,18 +295,35 @@ scale = Vector2(0.2, 0.815)
 texture = ExtResource("1_elb11")
 centered = false
 region_enabled = true
-region_rect = Rect2(-303.438, 0, 999.618, 30)
+region_rect = Rect2(-303.438, 0, 526.809, 30)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Floor2"]
-position = Vector2(0, 0.250031)
+position = Vector2(-47.1348, 0.250031)
+shape = SubResource("RectangleShape2D_ixbxt")
+
+[node name="Floor3" type="StaticBody2D" parent="."]
+position = Vector2(2988.25, 306.321)
+scale = Vector2(7.80605, 2.3)
+
+[node name="Sprite2D" type="Sprite2D" parent="Floor3"]
+texture_repeat = 2
+position = Vector2(-99.7549, -12)
+scale = Vector2(0.2, 0.815)
+texture = ExtResource("1_elb11")
+centered = false
+region_enabled = true
+region_rect = Rect2(-303.438, 0, 526.809, 30)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Floor3"]
+position = Vector2(-47.0671, 0.250031)
 shape = SubResource("RectangleShape2D_ixbxt")
 
 [node name="RichTextLabel" type="RichTextLabel" parent="."]
-offset_top = 328.159
-offset_right = 9644.0
-offset_bottom = 4353.16
+offset_top = 335.242
+offset_right = 9643.97
+offset_bottom = 4360.24
 scale = Vector2(0.05, 0.05)
-theme_override_colors/default_color = Color(0, 0, 0, 1)
+theme_override_colors/default_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/normal_font_size = 700
 bbcode_enabled = true
 text = "Welcome to the game!"
@@ -190,13 +332,25 @@ script = SubResource("GDScript_djako")
 [node name="Mouse" type="Sprite2D" parent="."]
 position = Vector2(358, 485)
 scale = Vector2(3.35071, 4.76918)
-texture = ExtResource("2_2pkgo")
+texture = ExtResource("2_klswd")
+
+[node name="Chat" type="Sprite2D" parent="."]
+visible = false
+position = Vector2(1819.04, 331.11)
+scale = Vector2(3.35071, 4.76918)
+texture = ExtResource("3_txy1f")
+
+[node name="ChatAdvance" type="Sprite2D" parent="."]
+visible = false
+position = Vector2(1816.68, 331.11)
+scale = Vector2(3.35071, 4.76918)
+texture = ExtResource("2_klswd")
 
 [node name="Space" type="Sprite2D" parent="."]
 visible = false
 position = Vector2(496, 466)
 scale = Vector2(4.24399, 4.24399)
-texture = ExtResource("3_v1o40")
+texture = ExtResource("3_g5m80")
 
 [node name="MovingPlatform" parent="." instance=ExtResource("4_3oj1u")]
 position = Vector2(1186, 620)
@@ -213,11 +367,25 @@ autoplay = "move_loop"
 position = Vector2(1305.55, 360.621)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Trigger"]
-position = Vector2(-1.5, 60)
+position = Vector2(12.9886, 60)
+shape = SubResource("RectangleShape2D_d7ndh")
+
+[node name="Trigger2" type="Area2D" parent="."]
+position = Vector2(1942.4, 360.621)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Trigger2"]
+position = Vector2(12.9886, 60)
+shape = SubResource("RectangleShape2D_d7ndh")
+
+[node name="Trigger3" type="Area2D" parent="."]
+position = Vector2(2207.99, 89.7126)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Trigger3"]
+position = Vector2(12.9886, 60)
 shape = SubResource("RectangleShape2D_d7ndh")
 
 [node name="FinishFlag" parent="." instance=ExtResource("5_65eei")]
-position = Vector2(1971.32, 528.832)
+position = Vector2(3011.27, 257.924)
 
 [node name="Button" type="Button" parent="."]
 modulate = Color(1, 1, 1, 0.133333)
@@ -226,6 +394,76 @@ offset_top = 292.746
 offset_right = 139.028
 offset_bottom = 300.746
 
+[node name="Test" type="Area2D" parent="."]
+visible = false
+position = Vector2(1679.75, -5866.14)
+
+[node name="Sprite2D" type="Sprite2D" parent="Test"]
+scale = Vector2(1.998, 2.997)
+texture = ExtResource("6_x4cyu")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Test"]
+position = Vector2(1.5, 1)
+shape = SubResource("RectangleShape2D_sbcvy")
+
+[node name="YisMan" type="Sprite2D" parent="Test"]
+position = Vector2(-0.317565, -30.058)
+scale = Vector2(0.0192223, 0.016)
+texture = ExtResource("7_32dv6")
+
+[node name="Barrier1" type="StaticBody2D" parent="."]
+position = Vector2(1290.21, 371.835)
+collision_layer = 0
+collision_mask = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Barrier1"]
+position = Vector2(-8.26297, -1.77066)
+shape = SubResource("RectangleShape2D_cme6s")
+
+[node name="Barrier2" type="StaticBody2D" parent="."]
+position = Vector2(1921.15, 540.046)
+collision_layer = 0
+collision_mask = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Barrier2"]
+position = Vector2(-1.75378, -185.049)
+shape = SubResource("RectangleShape2D_6gibk")
+
+[node name="Sprite2D" type="Sprite2D" parent="Barrier2"]
+position = Vector2(-1.77335, -185.327)
+scale = Vector2(8.26297, 38.8361)
+texture = ExtResource("9_w8f63")
+
+[node name="Barrier3" type="StaticBody2D" parent="."]
+position = Vector2(2119.46, 373.606)
+collision_layer = 0
+collision_mask = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Barrier3"]
+position = Vector2(-8.26297, -1.77066)
+shape = SubResource("RectangleShape2D_cme6s")
+
+[node name="Climbable" type="StaticBody2D" parent="."]
+position = Vector2(2182.02, 512.306)
+scale = Vector2(5.58937, 5.58937)
+
+[node name="Sprite2D" type="Sprite2D" parent="Climbable"]
+visible = false
+texture_repeat = 2
+position = Vector2(4.96972, 4.96976)
+rotation = 3.14159
+texture = ExtResource("10_d8uwt")
+centered = false
+region_enabled = true
+region_rect = Rect2(0, -36.9468, 10, 46.9189)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Climbable"]
+position = Vector2(-0.0540161, -18.4205)
+shape = SubResource("RectangleShape2D_ip8v1")
+
+[connection signal="spokenContinue" from="." to="RichTextLabel" method="_on_tutorial_spoken_continue"]
 [connection signal="body_entered" from="Trigger" to="RichTextLabel" method="_on_trigger_body_entered"]
+[connection signal="body_entered" from="Trigger2" to="RichTextLabel" method="_on_trigger_2_body_entered"]
+[connection signal="body_entered" from="Trigger3" to="RichTextLabel" method="_on_trigger_3_body_entered"]
 [connection signal="body_entered" from="FinishFlag" to="." method="_on_finish_flag_body_entered"]
 [connection signal="button_down" from="Button" to="." method="_on_button_button_down"]

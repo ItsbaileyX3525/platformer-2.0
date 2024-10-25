@@ -18,6 +18,7 @@ const MAX_WIDTH := 256
 var text := \"\"
 var letterIndex := 0
 var isSpeech: bool
+var volume: int
 
 var letterTime := 0.09
 var spaceTime := 0.09
@@ -25,13 +26,15 @@ var puncTime := 0.2
 
 signal finishedDisplaying()
 
-func displayText(textToShow: String,speechSfx) -> void:
+func displayText(textToShow: String,speechSfx, sfxVolume = 0) -> void:
 	text = textToShow
+	volume = sfxVolume
 	label.text = textToShow
 	if typeof(speechSfx) == TYPE_BOOL:
 		isSpeech = false
 	else:
 		speak.stream = speechSfx
+		speak.volume_db = volume
 		isSpeech = true
 	await resized
 	custom_minimum_size.x = min(size.x, MAX_WIDTH)
